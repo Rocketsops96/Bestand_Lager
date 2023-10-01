@@ -162,6 +162,7 @@ class BestandLager(CTk.CTk):
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
+        print("сработало")
 
 
     def show_img_for_barcode(self, barcode):
