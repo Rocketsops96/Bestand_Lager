@@ -187,8 +187,32 @@ class BestandLager(CTk.CTk):
         self.sum = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Введите количество", width= 250)
         self.sum.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nsew",)
 
+        self.add_button = CTk.CTkButton(self.bau_button_frame, fg_color="transparent", border_width=2, 
+                                                     text_color=("gray10", "#DCE4EE"),
+                                                     text="Отправить", command=self.add_button_bau)
+        self.add_button.grid(row=3, column=0, padx=20, pady=10, sticky="nsew")
 
 
+
+
+
+        
+        self.item_table = ttk.Treeview(self.bau_item_frame, columns=("","VZ Nr.", "Bedeutung","Bestand"), style="Treeview", height=24)
+        self.item_table.grid(row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
+       
+        self.item_table.column("#0", width=0)
+        self.item_table.column("#1", width=150)
+        self.item_table.column("#2", width=250)
+        self.item_table.column("#3", width=150)
+        self.item_table.column("#4", width=0)
+       
+        # Добавляем заголовки столбцов
+        self.item_table.heading("#0", text="")
+        self.item_table.heading("#1", text="VZ Nr.")
+        self.item_table.heading("#2", text="Bedeutung")
+        self.item_table.heading("#3", text="Bestand")
+
+        self.after(100, lambda: self.bar_code.focus_set())
 
 
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ############## 
@@ -198,7 +222,7 @@ class BestandLager(CTk.CTk):
 
 
     
-
+        
         self.bar_code.bind("<KeyRelease>", self.check_vz_nr)
         self.vz_nr.bind("<KeyRelease>", self.check_barcode)
         self.table.bind("<<TreeviewSelect>>", self.on_item_select)
@@ -216,9 +240,67 @@ class BestandLager(CTk.CTk):
         self.show_all_data()
 
 
-   
+    def on_table_select(self, event):
+        selected_table = self.table_listbox.get(self.table_listbox.curselection())  # Получаем выбранную таблицу
+        self.selected_table = selected_table  # Сохраняем выбранную таблицу как атрибут объекта
         
+        # Очищаем таблицу программы перед добавлением новых данных
+        for row in self.item_table.get_children():
+            self.item_table.delete(row)
+        
+        # Загружаем данные из выбранной таблицы и выводим их в таблицу программы
+        with sqlite3.connect("bau.db") as conn_bau:
+            cursor_bau = conn_bau.cursor()
+            cursor_bau.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
+            data = cursor_bau.fetchall()
+            for item in data:
+                self.item_table.insert("", "end", values=item)
+        
+    def add_button_bau(self):
+        print(self.selected_table)
+        self.barcode = self.bar_code.get()
+        self.sum_value = self.sum.get()  # Сохраняем значение суммы как атрибут объекта
+        
+        # Создаем контекстные менеджеры для соединений, и здесь не нужно закрывать соединение с базой
+        with sqlite3.connect("bd.db") as conn_bd, sqlite3.connect("bau.db") as conn_bau:
+            cursor_bd = conn_bd.cursor()
+            cursor_bau = conn_bau.cursor()
 
+            # Выполняем операцию SELECT в базе данных "bd.db"
+            data = cursor_bd.execute("SELECT Bar_Code, VZ_Nr, Bedeutung, Aktueller_bestand FROM Lager_Bestand WHERE Bar_Code = ?", (self.barcode,)).fetchone()
+            bar = data[0]
+            vz = data[1]
+            bed = data[2]
+            akt = data[3]
+            
+            try:
+                # Проверяем наличие товара в таблице
+                cursor_bau.execute(f"SELECT * FROM {self.selected_table} WHERE Bar_Code = ?", (bar,))
+                existing_product = cursor_bau.fetchone()
+                
+                if existing_product:
+                    # Если товар уже существует, обновляем Bestand
+                    cursor_bau.execute(f"UPDATE {self.selected_table} SET Bestand = ? WHERE Bar_Code = ?", (self.sum_value, bar))
+                else:
+                    # Если товар не существует, добавляем новую запись
+                    cursor_bau.execute(f"INSERT INTO {self.selected_table} (Bar_Code, VZ_Nr, Bedeutung, Bestand) VALUES (?, ?, ?, ?)", (bar, vz, bed, self.sum_value))
+                
+                conn_bau.commit()
+                 # Очищаем таблицу программы перед добавлением новых данных
+                for row in self.item_table.get_children():
+                    self.item_table.delete(row)
+
+                # Загружаем все данные из выбранной таблицы и выводим их в таблицу программы
+                cursor_bau.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {self.selected_table}")
+                data = cursor_bau.fetchall()
+                for item in data:
+                    self.item_table.insert("", "end", values=item)
+                self.bar_code.delete(0, 'end')
+                self.sum.delete(0, 'end') 
+                
+                
+            except sqlite3.Error as e:
+                print("Ошибка SQLite:", e)
 
     def delete_table(self):
         selected_table = self.table_listbox.get(self.table_listbox.curselection())
@@ -246,7 +328,7 @@ class BestandLager(CTk.CTk):
 
         if text:
             # Создайте новую таблицу в базе данных
-            self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {text} (ID INTEGER PRIMARY KEY, Name TEXT, Value REAL);")
+            self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {text} (Bar_Code TEXT, VZ_Nr TEXT, Bedeutung TEXT, Bestand TEXT);")
             self.conn.commit()
 
             # Обновите список таблиц
@@ -270,7 +352,17 @@ class BestandLager(CTk.CTk):
                 self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text=f"Вы выбрали: {selected_table}", 
                                                                 font=customtkinter.CTkFont(size=15, weight="bold"))
                 self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
-    
+        # Очищаем таблицу программы перед добавлением новых данных
+        for row in self.item_table.get_children():
+            self.item_table.delete(row)
+        
+        # Загружаем данные из выбранной таблицы и выводим их в таблицу программы
+        with sqlite3.connect("bau.db") as conn_bau:
+            cursor_bau = conn_bau.cursor()
+            cursor_bau.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
+            data = cursor_bau.fetchall()
+            for item in data:
+                self.item_table.insert("", "end", values=item)
 
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
