@@ -6,15 +6,17 @@ from tkinter import *
 from tkinter import ttk
 import Autorisation
 import PIL.Image
-import dialog
-import CTkTable
+from CTkListbox import *
+from tkinter.simpledialog import askstring
+import tkinter.messagebox
+from CTkTable import *
 
 customtkinter.set_appearance_mode("dark")
 
 class BestandLager(CTk.CTk):
     def __init__(self): # После теста добавить аргумент login и не забыть убрать комментарий ниже!!!!
         super().__init__()
-
+        
         # Установите геометрию окна
         self.geometry("1280x720")
         self.iconbitmap(default=r"vvo.ico")
@@ -128,7 +130,65 @@ class BestandLager(CTk.CTk):
         self.show_all.grid(column = 0,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
 
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############        
+        self.conn = sqlite3.connect("bau.db")
+        self.cursor = self.conn.cursor()
         
+        self.bau_list_frame = customtkinter.CTkFrame(self.f2)
+        self.bau_list_frame.grid(row=0, column=0, padx=(10,10), sticky="nw")
+        self.bau_list_frame.grid_columnconfigure(0, weight=1)
+
+        self.bau_button_frame = customtkinter.CTkFrame(self.f2)
+        self.bau_button_frame.grid(row=0, column=1, padx=(10,10), sticky="nw")
+        self.bau_button_frame.grid_columnconfigure(0, weight=1)
+
+        self.bau_item_frame = customtkinter.CTkFrame(self.f2)
+        self.bau_item_frame.grid(row=0, column=2, padx=(10,10), sticky="ne")
+        self.bau_item_frame.grid_columnconfigure(1, weight=1)
+        
+        
+        
+        self.tables = self.get_table_list()
+
+        # Создайте список для отображения таблиц
+        self.table_listbox = CTkListbox(self.bau_list_frame,  height=10)
+        self.table_listbox.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+
+        # Заполните список таблицами
+        for table in self.tables:
+            self.table_listbox.insert(CTk.END, table)
+
+        # Создайте кнопку для выбора таблицы
+        self.select_button = CTk.CTkButton(self.bau_list_frame, fg_color="transparent", border_width=2, 
+                                                     text_color=("gray10", "#DCE4EE"),
+                                                     text="Выбрать", command=self.select_table)
+        self.select_button.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
+
+        # Создайте кнопку для создания новой таблицы
+        self.create_button = CTk.CTkButton(self.bau_list_frame, fg_color="transparent", border_width=2, 
+                                                     text_color=("gray10", "#DCE4EE"),
+                                                     text="Создать", command=self.create_table)
+        self.create_button.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
+
+        # Создайте кнопку для удаления таблицы
+        self.delete_button = CTk.CTkButton(self.bau_list_frame, fg_color="transparent", border_width=2, 
+                                                     text_color=("gray10", "#DCE4EE"),
+                                                     text="Удалить", command=self.delete_table)
+        self.delete_button.grid(row=3, column=0, padx=20, pady=10, sticky="nsew")
+
+        
+        self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text="", 
+                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
+
+        self.bar_code = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Bar Code:", width= 250)
+        self.bar_code.grid(column= 0, row=1, padx=(10, 10), pady=(10, 10), sticky="nsew",)
+        
+
+        self.sum = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Введите количество", width= 250)
+        self.sum.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nsew",)
+
+
+
 
 
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ############## 
@@ -137,8 +197,7 @@ class BestandLager(CTk.CTk):
 
 
 
-        
-        #Показываем всю таблицу 
+    
 
         self.bar_code.bind("<KeyRelease>", self.check_vz_nr)
         self.vz_nr.bind("<KeyRelease>", self.check_barcode)
@@ -154,16 +213,69 @@ class BestandLager(CTk.CTk):
         self.error_label= None
         
 
-
         self.show_all_data()
 
+
+   
+        
+
+
+    def delete_table(self):
+        selected_table = self.table_listbox.get(self.table_listbox.curselection())
+        if selected_table:
+            # Открываем диалоговое окно с вопросом
+            confirmation = tkinter.messagebox.askyesno("Подтверждение", f"Вы уверены что хотите удалить таблицу '{selected_table}'?")
+            
+            if confirmation:
+                # Удалите таблицу из базы данных
+                self.cursor.execute(f"DROP TABLE IF EXISTS {selected_table};")
+                self.conn.commit()
+
+                # Обновите список таблиц
+                self.tables = self.get_table_list()
+                self.table_listbox.delete(0, CTk.END)  # Очистите список
+                for table in self.tables:
+                    self.table_listbox.insert(CTk.END, table)
+
+    def create_table(self):
+        # Запросите имя новой таблицы с помощью диалогового окна
+
+        dialog = customtkinter.CTkInputDialog(text="Введите название стройки или номер", title="Baustelle")
+        dialog.geometry("300x200")
+        text = dialog.get_input()  # waits for input
+
+        if text:
+            # Создайте новую таблицу в базе данных
+            self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {text} (ID INTEGER PRIMARY KEY, Name TEXT, Value REAL);")
+            self.conn.commit()
+
+            # Обновите список таблиц
+            self.tables = self.get_table_list()
+            self.table_listbox.delete(0, CTk.END)  # Очистите список
+            for table in self.tables:
+                self.table_listbox.insert(CTk.END, table)
+
+    def get_table_list(self):
+        # Получите список таблиц из базы данных
+        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        table_list = self.cursor.fetchall()
+        return [table[0] for table in table_list]
+
+    def select_table(self):
+        selected_table = self.table_listbox.get(self.table_listbox.curselection())
+        if selected_table:
+            self.selected_table = selected_table  # Сохраняем имя выбранной таблицы
+            if self.selcted_bau_table_label:
+                self.selcted_bau_table_label.destroy()
+                self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text=f"Вы выбрали: {selected_table}", 
+                                                                font=customtkinter.CTkFont(size=15, weight="bold"))
+                self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
     
 
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
         print("сработало")
-
 
     def show_img_for_barcode(self, barcode):
         conn = sqlite3.connect("bd.db")
@@ -251,14 +363,12 @@ class BestandLager(CTk.CTk):
             # Если баркод не пустой, очищаем поле Vz Nr
             self.vz_nr.delete(0, 'end')
         
-
     def check_barcode(self, event):
         # Функция вызывается при изменении Vz Nr
         if self.vz_nr.get():
             # Если Vz Nr не пустой, очищаем поле баркода
             self.bar_code.delete(0, 'end')
         
-
     def show_all_data(self):
         conn = sqlite3.connect("bd.db")
         cursor = conn.cursor()
@@ -345,6 +455,7 @@ class BestandLager(CTk.CTk):
         new_window = Autorisation.App()
         new_window.mainloop()  # Запускаем главный цикл нового окна
    
+
 
 if __name__ == '__main__':
     app = BestandLager()
