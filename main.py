@@ -1,7 +1,6 @@
 import customtkinter
 import customtkinter as CTk
 import sqlite3
-from PIL import Image, ImageOps
 from tkinter import *
 from tkinter import ttk
 import Autorisation
@@ -10,22 +9,26 @@ from CTkListbox import *
 from tkinter.simpledialog import askstring
 import tkinter.messagebox
 from CTkTable import *
+import export_to_exel
+import os
+import localizations
+
+
 
 customtkinter.set_appearance_mode("dark")
 
 class BestandLager(CTk.CTk):
     def __init__(self): # После теста добавить аргумент login и не забыть убрать комментарий ниже!!!!
         super().__init__()
-        
+        self.language = self.load_language_from_file()  # Загружаем язык из файла
         # Установите геометрию окна
         self.geometry("1280x720")
         self.iconbitmap(default=r"vvo.ico")
         self.title("Bestand Lager")
         self.resizable(True, True)  # Запрещаем или разрешаем изменение размера окна
-
+        self.state("zoomed")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
-
         #Создаем навигационный фрейм
         self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
@@ -37,22 +40,31 @@ class BestandLager(CTk.CTk):
                                                               font=customtkinter.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
 
-        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
+        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home", font=("Arial", 14, "bold"),
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                     anchor="w", command=self.home_button_event)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
-        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 2",
+        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 2", font=("Arial", 14, "bold"),
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                        anchor="w", command=self.frame_2_button_event)
         self.frame_2_button.grid(row=2, column=0, sticky="ew")
 
-        self.frame_3_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 3",
+        self.frame_3_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 3", font=("Arial", 14, "bold"),
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                        anchor="w", command=self.frame_3_button_event)
         self.frame_3_button.grid(row=3, column=0, sticky="ew")
+        
+        self.language_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Русский","English","Deutsch"],
+                                                               fg_color="gray10", button_color="red",
+                                                               command=self.update_ui_language)
+        self.language_menu.grid(row=7, column=0, padx=20, pady=(10, 0), sticky= "s")
+        self.saved_language = self.load_language_from_file()
+        self.language_menu.set(self.saved_language)
 
-
+        # Вызовите update_ui_language с текущим языком
+        
+       
         self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["60%","70%","80%", "90%", "100%", "110%", "120%"],
                                                                fg_color="gray10", button_color="red",
                                                                command=self.change_scaling_event)
@@ -63,9 +75,14 @@ class BestandLager(CTk.CTk):
         #Создаем фреймы для каждого окна
         self.f1 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.f1.grid_columnconfigure(0, weight=1)
+        self.f1.grid_rowconfigure(0, weight=1)
+        self.f1.grid_rowconfigure(1, weight=0)
+     
 
         self.f2 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.f2.grid_columnconfigure(0, weight=1)
+        self.f2.grid_columnconfigure(0, weight=0)
+        self.f2.grid_columnconfigure(1, weight=0)
+        self.f2.grid_columnconfigure(2, weight=1)
 
         self.f3 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.f3.grid_columnconfigure(0, weight=1)
@@ -78,7 +95,7 @@ class BestandLager(CTk.CTk):
 ############## ############## ############## ############## #Настройка фрейма №1 ############## ############## ############## ############## ############## 
         
         table_style = ttk.Style()
-        table_style.configure("Treeview.Heading", font=("Arial", 14), background="black")  # Для заголовков столбцов
+        table_style.configure("Treeview.Heading", font=("Arial", 14, "bold"), background="black")  # Для заголовков столбцов 
         table_style.configure("Treeview", font=("Arial", 14), foreground="white")  # Для текста в ячейках
         table_style.configure("Treeview", background="#333333") 
         self.table = ttk.Treeview(self.f1, columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
@@ -86,13 +103,14 @@ class BestandLager(CTk.CTk):
        
         
         
-        self.table.column("#0", width=0)
-        self.table.column("#1", width=120)
-        self.table.column("#2", width=100)
-        self.table.column("#3", width=700)
-        self.table.column("#4", width=100)
-        self.table.column("#5", width=70)
-        self.table.column("#6", width=150)
+        self.table.column("#0", width=0, stretch=False)
+        self.table.column("#1", minwidth=120)
+        self.table.column("#2", minwidth=100)
+        self.table.column("#3", minwidth=700)
+        self.table.column("#4", minwidth=100)
+        self.table.column("#5", minwidth=70)
+        self.table.column("#6", minwidth=150)
+        self.table.column("#7", width=0, stretch=False)
         
         # Добавляем заголовки столбцов
         
@@ -104,12 +122,13 @@ class BestandLager(CTk.CTk):
         self.table.heading("#6", text="Aktueller")
 
 
-        self.home_frame1 = customtkinter.CTkFrame(self.f1)#self.f3.grid_columnconfigure(0, weight=1)
+        self.home_frame1 = customtkinter.CTkFrame(self.f1,fg_color="transparent")
         self.home_frame1.grid(row=1, column=0, padx=(0,10), sticky="nw")
         self.home_frame1.grid_columnconfigure(0, weight=1)
-        self.home_frame2 = customtkinter.CTkFrame(self.f1)
+        self.home_frame2 = customtkinter.CTkFrame(self.f1,fg_color="transparent")
         self.home_frame2.grid(row=1, column=1, padx=(10,10), sticky="ne")
-        self.home_frame2.grid_columnconfigure(0, weight=1)
+        self.home_frame2.grid_columnconfigure(1, weight=1)
+    
         
 
         self.bar_code = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Bar Code:", width= 250)
@@ -119,7 +138,7 @@ class BestandLager(CTk.CTk):
         self.vz_nr = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Vz Nr.:", width= 250)
         self.vz_nr.grid(column= 0, row=1, padx=(10, 10), pady=(0, 10), sticky="nw",)
 
-        self.plus = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=10, text="Suchen",
+        self.plus = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=10, text="Search",
                                                    fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.kol2)
         self.plus.grid(column = 0,row=2, padx=(10,10), pady=(0, 10), sticky="nw")
@@ -128,6 +147,11 @@ class BestandLager(CTk.CTk):
                                                    fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.show_all_data)
         self.show_all.grid(column = 0,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
+
+        self.export_to_exel_button = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=10, text="Export to Excel all",
+                                                   fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.export_to_excel_button_click)
+        self.export_to_exel_button.grid(column = 0,row=4, padx=(10,0), pady=(0, 10), sticky="nw")
 
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############        
         self.conn = sqlite3.connect("bau.db")
@@ -139,11 +163,11 @@ class BestandLager(CTk.CTk):
 
         self.bau_button_frame = customtkinter.CTkFrame(self.f2)
         self.bau_button_frame.grid(row=0, column=1, padx=(10,10), sticky="nw")
-        self.bau_button_frame.grid_columnconfigure(0, weight=1)
+        self.bau_button_frame.grid_columnconfigure(1, weight=1)
 
         self.bau_item_frame = customtkinter.CTkFrame(self.f2)
         self.bau_item_frame.grid(row=0, column=2, padx=(10,10), sticky="ne")
-        self.bau_item_frame.grid_columnconfigure(1, weight=1)
+        self.bau_item_frame.grid_columnconfigure(2, weight=1)
         
         
         
@@ -160,7 +184,7 @@ class BestandLager(CTk.CTk):
         # Создайте кнопку для выбора таблицы
         self.select_button = CTk.CTkButton(self.bau_list_frame, fg_color="transparent", border_width=2, 
                                                      text_color=("gray10", "#DCE4EE"),
-                                                     text="Выбрать", command=self.select_table)
+                                                     text="Выбрать", command=self.select_table_button)
         self.select_button.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
 
         # Создайте кнопку для создания новой таблицы
@@ -180,8 +204,8 @@ class BestandLager(CTk.CTk):
                                                               font=customtkinter.CTkFont(size=15, weight="bold"))
         self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
 
-        self.bar_code = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Bar Code:", width= 250)
-        self.bar_code.grid(column= 0, row=1, padx=(10, 10), pady=(10, 10), sticky="nsew",)
+        self.bar_code_f2 = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Bar Code:", width= 250)
+        self.bar_code_f2.grid(column= 0, row=1, padx=(10, 10), pady=(10, 10), sticky="nsew",)
         
 
         self.sum = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Введите количество", width= 250)
@@ -200,20 +224,20 @@ class BestandLager(CTk.CTk):
         self.item_table = ttk.Treeview(self.bau_item_frame, columns=("","VZ Nr.", "Bedeutung","Bestand"), style="Treeview", height=24)
         self.item_table.grid(row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
        
-        self.item_table.column("#0", width=0)
+        self.item_table.column("#0", width=0, stretch=False)
         self.item_table.column("#1", width=150)
         self.item_table.column("#2", width=250)
         self.item_table.column("#3", width=150)
-        self.item_table.column("#4", width=0)
+        self.item_table.column("#4", width=0, stretch=False)
        
         # Добавляем заголовки столбцов
-        self.item_table.heading("#0", text="")
+        
         self.item_table.heading("#1", text="VZ Nr.")
         self.item_table.heading("#2", text="Bedeutung")
         self.item_table.heading("#3", text="Bestand")
 
-        self.after(100, lambda: self.bar_code.focus_set())
-
+        self.after(100, lambda: self.bar_code_f2.focus_set())
+        self.add_button.bind('<Return>', lambda event=None: self.add_button_bau())
 
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ############## 
         
@@ -228,37 +252,35 @@ class BestandLager(CTk.CTk):
         self.table.bind("<<TreeviewSelect>>", self.on_item_select)
         self.bar_code.bind('<Return>', lambda event=None: self.kol2())
         self.vz_nr.bind('<Return>', lambda event=None: self.kol2())
-        self.after(100, lambda: self.bar_code.focus_set())
+        self.bar_code_f2.bind('<Return>', lambda event=None: self.add_button_bau())
+        self.sum.bind('<Return>', lambda event=None: self.add_button_bau())
+
+        self.update_ui_language(self.language)
         self.update()
 
 
-        #self.login = login
+        # self.login = login
         self.barcode = None
         self.error_label= None
         
 
         self.show_all_data()
+    
 
+    def export_to_excel_button_click(self):
+        try:
+            export_to_exel.export_to_excel()  # Вызываем функцию из другого файла
+            print("Файл Excel успешно создан.")
+        except Exception as e:
+            print("Произошла ошибка при создании файла Excel:", str(e))
 
-    def on_table_select(self, event):
-        selected_table = self.table_listbox.get(self.table_listbox.curselection())  # Получаем выбранную таблицу
-        self.selected_table = selected_table  # Сохраняем выбранную таблицу как атрибут объекта
-        
-        # Очищаем таблицу программы перед добавлением новых данных
-        for row in self.item_table.get_children():
-            self.item_table.delete(row)
-        
-        # Загружаем данные из выбранной таблицы и выводим их в таблицу программы
-        with sqlite3.connect("bau.db") as conn_bau:
-            cursor_bau = conn_bau.cursor()
-            cursor_bau.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
-            data = cursor_bau.fetchall()
-            for item in data:
-                self.item_table.insert("", "end", values=item)
+    # Проверяем наличие файла Excel
+        if os.path.exists("Bestand_Lager.xlsx"):
+            print("Файл Excel уже существует.")
         
     def add_button_bau(self):
         print(self.selected_table)
-        self.barcode = self.bar_code.get()
+        self.barcode_f2 = self.bar_code_f2.get()
         self.sum_value = self.sum.get()  # Сохраняем значение суммы как атрибут объекта
         
         # Создаем контекстные менеджеры для соединений, и здесь не нужно закрывать соединение с базой
@@ -267,7 +289,7 @@ class BestandLager(CTk.CTk):
             cursor_bau = conn_bau.cursor()
 
             # Выполняем операцию SELECT в базе данных "bd.db"
-            data = cursor_bd.execute("SELECT Bar_Code, VZ_Nr, Bedeutung, Aktueller_bestand FROM Lager_Bestand WHERE Bar_Code = ?", (self.barcode,)).fetchone()
+            data = cursor_bd.execute("SELECT Bar_Code, VZ_Nr, Bedeutung, Aktueller_bestand FROM Lager_Bestand WHERE Bar_Code = ?", (self.barcode_f2,)).fetchone()
             bar = data[0]
             vz = data[1]
             bed = data[2]
@@ -295,8 +317,9 @@ class BestandLager(CTk.CTk):
                 data = cursor_bau.fetchall()
                 for item in data:
                     self.item_table.insert("", "end", values=item)
-                self.bar_code.delete(0, 'end')
+                self.bar_code_f2.delete(0, 'end')
                 self.sum.delete(0, 'end') 
+                self.after(50, lambda: self.bar_code_f2.focus_set())
                 
                 
             except sqlite3.Error as e:
@@ -331,9 +354,10 @@ class BestandLager(CTk.CTk):
             self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {text} (Bar_Code TEXT, VZ_Nr TEXT, Bedeutung TEXT, Bestand TEXT);")
             self.conn.commit()
 
-            # Обновите список таблиц
+            if self.table_listbox.size() > 0:
+                self.table_listbox.delete(0, customtkinter.CTk.END)
+            # Обновляем список таблиц, вызывая функцию get_table_list()
             self.tables = self.get_table_list()
-            self.table_listbox.delete(0, CTk.END)  # Очистите список
             for table in self.tables:
                 self.table_listbox.insert(CTk.END, table)
 
@@ -343,7 +367,7 @@ class BestandLager(CTk.CTk):
         table_list = self.cursor.fetchall()
         return [table[0] for table in table_list]
 
-    def select_table(self):
+    def select_table_button(self):
         selected_table = self.table_listbox.get(self.table_listbox.curselection())
         if selected_table:
             self.selected_table = selected_table  # Сохраняем имя выбранной таблицы
@@ -367,7 +391,34 @@ class BestandLager(CTk.CTk):
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
+        font = ("Arial", int(14 * new_scaling_float))
+        style = ttk.Style()
+        style.configure("Treeview", font=font)
+
         print("сработало")
+
+
+    def update_ui_language(self, language):      
+        # Получите словарь с текстами для выбранного языка
+        texts = localizations.language_texts.get(language, {})
+        
+        # Обновите тексты для виджетов, кнопок, лейблов и других элементов
+        self.home_button.configure(text=texts.get("Home", "Home"))
+        self.plus.configure(text=texts.get("Search", "Search"))
+        self.show_all.configure(text=texts.get("Show all", "Show all"))
+        self.export_to_exel_button.configure(text=texts.get("Export to Excel", "Export to Excel"))
+        self.select_button.configure(text=texts.get("Choose", "Choose"))
+        self.create_button.configure(text=texts.get("Create a construction site", "Create a construction site"))
+        self.home_button.configure(text=texts.get("Home", "Default Text"))
+        self.home_button.configure(text=texts.get("Home", "Default Text"))
+        self.home_button.configure(text=texts.get("Home", "Default Text"))
+
+        selected_language = language
+        self.save_language_to_file(selected_language)
+
+
+
+
 
     def show_img_for_barcode(self, barcode):
         conn = sqlite3.connect("bd.db")
@@ -445,7 +496,8 @@ class BestandLager(CTk.CTk):
             self.result_show("Забыл ввести данные")
         else:
             self.result_show("Данных не найдено")
-        
+        self.bar_code.delete(0, 'end')
+        self.vz_nr.delete(0, 'end')
         cursor.close()
         conn.close()
 
@@ -467,7 +519,7 @@ class BestandLager(CTk.CTk):
         
         # Получаем все записи из таблицы "Lager_Bestand"
         data = cursor.execute("SELECT * FROM Lager_Bestand").fetchall()
-
+        
         # Очищаем текущие строки в таблице
         for row in self.table.get_children():
             self.table.delete(row)
@@ -478,8 +530,7 @@ class BestandLager(CTk.CTk):
         # Вставляем данные в таблицу
         for item in data:
             self.table.insert("", "end", values=item)
-        self.bar_code.delete(0, 'end')
-        self.vz_nr.delete(0, 'end')
+        
         cursor.close()
         conn.close()    
 
@@ -528,7 +579,7 @@ class BestandLager(CTk.CTk):
                     self.error_label.destroy()
 
                 self.image_label = CTk.CTkLabel(self.f1, image=ctk_image, text="")
-                self.image_label.grid(row=1, column=1, padx=(0, 0), pady=(0, 0), sticky="nsew")
+                self.image_label.grid(row=1, column=1, padx=(0, 10), pady=(0, 0), sticky="ne")
             except FileNotFoundError:
                 self.result_show("Изображение не найдено")
             except Exception as e:
@@ -547,6 +598,20 @@ class BestandLager(CTk.CTk):
         new_window = Autorisation.App()
         new_window.mainloop()  # Запускаем главный цикл нового окна
    
+    
+
+    def save_language_to_file(self, language):
+        with open("language.txt", "w") as file:
+            file.write(language)
+
+    # Функция для загрузки выбранного языка из файла
+    def load_language_from_file(self):
+        try:
+            with open("language.txt", "r") as file:
+                return file.read()
+        except FileNotFoundError:
+            # Если файл не найден, вернуть значение по умолчанию (например, "English")
+            return "English"
 
 
 if __name__ == '__main__':
