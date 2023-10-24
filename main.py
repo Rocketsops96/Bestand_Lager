@@ -18,8 +18,9 @@ import localizations
 customtkinter.set_appearance_mode("dark")
 
 class BestandLager(CTk.CTk):
-    def __init__(self): # После теста добавить аргумент login и не забыть убрать комментарий ниже!!!!
+    def __init__(self,login, role): # После теста добавить аргумент login и role  не забыть убрать комментарий ниже!!!!
         super().__init__()
+        self.role = role # Для полного функционала изменить 1 на role
         self.language = self.load_language_from_file()  # Загружаем язык из файла
         # Установите геометрию окна
         self.geometry("1280x720")
@@ -54,6 +55,8 @@ class BestandLager(CTk.CTk):
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                        anchor="w", command=self.frame_3_button_event)
         self.frame_3_button.grid(row=3, column=0, sticky="ew")
+
+        
         
         self.language_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Русский","English","Deutsch"],
                                                                fg_color="gray10", button_color="red",
@@ -71,6 +74,10 @@ class BestandLager(CTk.CTk):
         self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20), sticky= "s")
         self.scaling_optionemenu.set("100%")
 
+        self.logout_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Logout", font=("Arial", 14, "bold"),
+                                                      fg_color="gray10", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                        command=self.exit)
+        self.logout_button.grid(row=9, column=0,pady = (0,10), sticky="ew")
 
         #Создаем фреймы для каждого окна
         self.f1 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -100,7 +107,7 @@ class BestandLager(CTk.CTk):
         table_style.configure("Treeview", background="#333333") 
         self.table = ttk.Treeview(self.f1, columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
         self.table.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
-       
+    
         
         
         self.table.column("#0", width=0, stretch=False)
@@ -131,38 +138,42 @@ class BestandLager(CTk.CTk):
     
         
 
-        self.bar_code = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Bar Code:", width= 250)
-        self.bar_code.grid(column= 0, row=0, padx=(10, 10), pady=(10, 10), sticky="nw",)
+        self.bar_code = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
+        self.bar_code.grid(column= 0, row=0, padx=(10, 10), pady=(5, 10), sticky="nw",)
         
 
-        self.vz_nr = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Vz Nr.:", width= 250)
+        self.vz_nr = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Vz Nr.:", width= 250, corner_radius = 3)
         self.vz_nr.grid(column= 0, row=1, padx=(10, 10), pady=(0, 10), sticky="nw",)
 
-        self.plus = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=10, text="Search",
-                                                   fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+        self.plus = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=5, text="Search",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.kol2)
         self.plus.grid(column = 0,row=2, padx=(10,10), pady=(0, 10), sticky="nw")
 
-        self.show_all = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=10, text="Show all",
-                                                   fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+        self.show_all = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=5, text="Show all",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.show_all_data)
         self.show_all.grid(column = 0,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
-
-        self.export_to_exel_button = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=10, text="Export to Excel all",
-                                                   fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.export_to_excel_button_click)
-        self.export_to_exel_button.grid(column = 0,row=4, padx=(10,0), pady=(0, 10), sticky="nw")
+        if self.role == "1":
+            self.export_to_exel_button = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=5, text="Export to Excel all",
+                                                    fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                        anchor="center", command=self.export_to_excel_button_click)
+            self.export_to_exel_button.grid(column = 0,row=4, padx=(10,0), pady=(0, 10), sticky="nw")
+        else:
+            pass
+    
 
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############        
+        
         self.conn = sqlite3.connect("bau.db")
         self.cursor = self.conn.cursor()
         
-        self.bau_list_frame = customtkinter.CTkFrame(self.f2)
+        self.bau_list_frame = customtkinter.CTkFrame(self.f2, fg_color="transparent")
         self.bau_list_frame.grid(row=0, column=0, padx=(10,10), sticky="nw")
         self.bau_list_frame.grid_columnconfigure(0, weight=1)
 
-        self.bau_button_frame = customtkinter.CTkFrame(self.f2)
-        self.bau_button_frame.grid(row=0, column=1, padx=(10,10), sticky="nw")
+        self.bau_button_frame = customtkinter.CTkFrame(self.f2, fg_color="transparent")
+        self.bau_button_frame.grid(row=1, column=0, padx=(10,10), sticky="nw")
         self.bau_button_frame.grid_columnconfigure(1, weight=1)
 
         self.bau_item_frame = customtkinter.CTkFrame(self.f2)
@@ -174,7 +185,7 @@ class BestandLager(CTk.CTk):
         self.tables = self.get_table_list()
 
         # Создайте список для отображения таблиц
-        self.table_listbox = CTkListbox(self.bau_list_frame,  height=10)
+        self.table_listbox = CTkListbox(self.bau_list_frame,  height=10, corner_radius = 2)
         self.table_listbox.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
 
         # Заполните список таблицами
@@ -182,39 +193,44 @@ class BestandLager(CTk.CTk):
             self.table_listbox.insert(CTk.END, table)
 
         # Создайте кнопку для выбора таблицы
-        self.select_button = CTk.CTkButton(self.bau_list_frame, fg_color="transparent", border_width=2, 
-                                                     text_color=("gray10", "#DCE4EE"),
-                                                     text="Выбрать", command=self.select_table_button)
-        self.select_button.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
+        self.select_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center", text="Выбрать", command=self.select_table_button)
+        self.select_button.grid(row=1, column=0,  pady=10, sticky="nsew")
 
         # Создайте кнопку для создания новой таблицы
-        self.create_button = CTk.CTkButton(self.bau_list_frame, fg_color="transparent", border_width=2, 
-                                                     text_color=("gray10", "#DCE4EE"),
-                                                     text="Создать", command=self.create_table)
-        self.create_button.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
+        if self.role == "1":
+            self.create_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+                                                font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center", text="Создать", command=self.create_table)
+            self.create_button.grid(row=2, column=0, sticky="nsew")
 
         # Создайте кнопку для удаления таблицы
-        self.delete_button = CTk.CTkButton(self.bau_list_frame, fg_color="transparent", border_width=2, 
-                                                     text_color=("gray10", "#DCE4EE"),
-                                                     text="Удалить", command=self.delete_table)
-        self.delete_button.grid(row=3, column=0, padx=20, pady=10, sticky="nsew")
+            self.delete_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+                                                font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center", text="Удалить", command=self.delete_table)
+            self.delete_button.grid(row=3, column=0, pady=10, sticky="nsew")
 
         
         self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text="", 
-                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
+                                                            font=customtkinter.CTkFont(size=15, weight="bold"))
         self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
 
-        self.bar_code_f2 = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Bar Code:", width= 250)
-        self.bar_code_f2.grid(column= 0, row=1, padx=(10, 10), pady=(10, 10), sticky="nsew",)
+        self.bar_code_f2 = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
+        self.bar_code_f2.grid(column= 0, row=1,  pady=(10, 10), sticky="nsew",)
         
 
-        self.sum = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Введите количество", width= 250)
-        self.sum.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nsew",)
+        self.sum = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Введите количество", width= 250, corner_radius = 3)
+        self.sum.grid(column= 0, row=2, pady=(0, 0), sticky="nsew",)
 
-        self.add_button = CTk.CTkButton(self.bau_button_frame, fg_color="transparent", border_width=2, 
-                                                     text_color=("gray10", "#DCE4EE"),
-                                                     text="Отправить", command=self.add_button_bau)
-        self.add_button.grid(row=3, column=0, padx=20, pady=10, sticky="nsew")
+        self.add_button = CTk.CTkButton(self.bau_button_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+                                                font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center", text="Отправить", command=self.add_button_bau)
+        self.add_button.grid(row=3, column=0, pady=10, sticky="nsew")
 
 
 
@@ -223,13 +239,13 @@ class BestandLager(CTk.CTk):
         
         self.item_table = ttk.Treeview(self.bau_item_frame, columns=("","VZ Nr.", "Bedeutung","Bestand"), style="Treeview", height=24)
         self.item_table.grid(row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
-       
+    
         self.item_table.column("#0", width=0, stretch=False)
         self.item_table.column("#1", width=150)
         self.item_table.column("#2", width=250)
         self.item_table.column("#3", width=150)
         self.item_table.column("#4", width=0, stretch=False)
-       
+    
         # Добавляем заголовки столбцов
         
         self.item_table.heading("#1", text="VZ Nr.")
@@ -238,7 +254,7 @@ class BestandLager(CTk.CTk):
 
         self.after(100, lambda: self.bar_code_f2.focus_set())
         self.add_button.bind('<Return>', lambda event=None: self.add_button_bau())
-
+    
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ############## 
         
 
@@ -258,8 +274,8 @@ class BestandLager(CTk.CTk):
         self.update_ui_language(self.language)
         self.update()
 
-
-        # self.login = login
+        
+        self.login = login
         self.barcode = None
         self.error_label= None
         
@@ -345,7 +361,8 @@ class BestandLager(CTk.CTk):
     def create_table(self):
         # Запросите имя новой таблицы с помощью диалогового окна
 
-        dialog = customtkinter.CTkInputDialog(text="Введите название стройки или номер", title="Baustelle")
+        dialog = customtkinter.CTkInputDialog(text="Введите название стройки или номер", title="Baustelle", button_fg_color = "gray30",
+                                                                                        button_hover_color = "red")
         dialog.geometry("300x200")
         text = dialog.get_input()  # waits for input
 
@@ -397,7 +414,6 @@ class BestandLager(CTk.CTk):
 
         print("сработало")
 
-
     def update_ui_language(self, language):      
         # Получите словарь с текстами для выбранного языка
         texts = localizations.language_texts.get(language, {})
@@ -406,19 +422,16 @@ class BestandLager(CTk.CTk):
         self.home_button.configure(text=texts.get("Home", "Home"))
         self.plus.configure(text=texts.get("Search", "Search"))
         self.show_all.configure(text=texts.get("Show all", "Show all"))
-        self.export_to_exel_button.configure(text=texts.get("Export to Excel", "Export to Excel"))
+        if self.role == "1":
+            self.export_to_exel_button.configure(text=texts.get("Export to Excel", "Export to Excel"))
+            self.create_button.configure(text=texts.get("Create a construction site", "Create a construction site"))
+            self.delete_button.configure(text=texts.get("Delete a construction site", "Delete a construction site"))
         self.select_button.configure(text=texts.get("Choose", "Choose"))
-        self.create_button.configure(text=texts.get("Create a construction site", "Create a construction site"))
-        self.home_button.configure(text=texts.get("Home", "Default Text"))
-        self.home_button.configure(text=texts.get("Home", "Default Text"))
-        self.home_button.configure(text=texts.get("Home", "Default Text"))
+        self.logout_button.configure(text=texts.get("Logout", "Logout"))
+       
 
         selected_language = language
         self.save_language_to_file(selected_language)
-
-
-
-
 
     def show_img_for_barcode(self, barcode):
         conn = sqlite3.connect("bd.db")
