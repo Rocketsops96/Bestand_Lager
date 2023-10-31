@@ -12,6 +12,7 @@ from CTkTable import *
 import export_to_exel
 import os
 import localizations
+import logging
 
 
 
@@ -20,6 +21,11 @@ customtkinter.set_appearance_mode("dark")
 class BestandLager(CTk.CTk):
     def __init__(self,login, role): # После теста добавить аргумент login и role  не забыть убрать комментарий ниже!!!!
         super().__init__()
+         # Настройки логирования
+        logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+        # Создайте объект логгера для вашего класса или модуля
+        self.logger = logging.getLogger(__name__)
         self.role = role # Для полного функционала изменить 1 на role
         self.language = self.load_language_from_file()  # Загружаем язык из файла
         # Установите геометрию окна
@@ -33,7 +39,7 @@ class BestandLager(CTk.CTk):
         #Создаем навигационный фрейм
         self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-        self.navigation_frame.grid_rowconfigure(4, weight=1)
+        self.navigation_frame.grid_rowconfigure(6, weight=1)
 
 
         #Создаем текст вверху слева
@@ -41,27 +47,33 @@ class BestandLager(CTk.CTk):
                                                               font=customtkinter.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
 
-        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home", font=("Arial", 14, "bold"),
+        self.sign = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Road signs", font=("Arial", 14, "bold"),
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                     anchor="w", command=self.home_button_event)
-        self.home_button.grid(row=1, column=0, sticky="ew")
+        self.sign.grid(row=1, column=0, sticky="ew")
 
-        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 2", font=("Arial", 14, "bold"),
+        self.material_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Material", font=("Arial", 14, "bold"),
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                       anchor="w", command=self.frame_2_button_event)
-        self.frame_2_button.grid(row=2, column=0, sticky="ew")
+                                                       anchor="w", command=self.material_button_event)
+        self.material_frame.grid(row=2, column=0, sticky="ew")
+        
 
-        self.frame_3_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 3", font=("Arial", 14, "bold"),
+        self.bau_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Building", font=("Arial", 14, "bold"),
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                       anchor="w", command=self.frame_3_button_event)
-        self.frame_3_button.grid(row=3, column=0, sticky="ew")
+                                                       anchor="w", command=self.bau_button_event)
+        self.bau_frame.grid(row=3, column=0, sticky="ew")
+
+        self.log_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Logs", font=("Arial", 14, "bold"),
+                                                      fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                       anchor="w", command=self.log_button_event)
+        self.log_frame.grid(row=4, column=0, sticky="ew")
 
         
         
-        self.language_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Русский","English","Deutsch"],
+        self.language_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Russian","English","Deutsch"],
                                                                fg_color="gray10", button_color="red",
                                                                command=self.update_ui_language)
-        self.language_menu.grid(row=7, column=0, padx=20, pady=(10, 0), sticky= "s")
+        self.language_menu.grid(row=10, column=0, padx=20, pady=(10, 0), sticky= "s")
         self.saved_language = self.load_language_from_file()
         self.language_menu.set(self.saved_language)
 
@@ -71,13 +83,13 @@ class BestandLager(CTk.CTk):
         self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["60%","70%","80%", "90%", "100%", "110%", "120%"],
                                                                fg_color="gray10", button_color="red",
                                                                command=self.change_scaling_event)
-        self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20), sticky= "s")
+        self.scaling_optionemenu.grid(row=11, column=0, padx=20, pady=(10, 20), sticky= "s")
         self.scaling_optionemenu.set("100%")
 
         self.logout_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Logout", font=("Arial", 14, "bold"),
                                                       fg_color="gray10", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                         command=self.exit)
-        self.logout_button.grid(row=9, column=0,pady = (0,10), sticky="ew")
+        self.logout_button.grid(row=12, column=0,pady = (0,10), sticky="ew")
 
         #Создаем фреймы для каждого окна
         self.f1 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -87,12 +99,17 @@ class BestandLager(CTk.CTk):
      
 
         self.f2 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.f2.grid_columnconfigure(0, weight=0)
-        self.f2.grid_columnconfigure(1, weight=0)
-        self.f2.grid_columnconfigure(2, weight=1)
+        self.f2.grid_columnconfigure(0, weight=1)
+        self.f2.grid_rowconfigure(0, weight=1)
+        self.f2.grid_rowconfigure(1, weight=1)
 
         self.f3 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.f3.grid_columnconfigure(0, weight=1)
+        self.f3.grid_columnconfigure(0, weight=0)
+        self.f3.grid_columnconfigure(1, weight=0)
+        self.f3.grid_columnconfigure(2, weight=1)
+
+        self.f4 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.f4.grid_columnconfigure(0, weight=1)
 
         #Создаем дефолтный фрейм
         self.select_frame_by_name("home")
@@ -100,14 +117,25 @@ class BestandLager(CTk.CTk):
 
 
 ############## ############## ############## ############## #Настройка фрейма №1 ############## ############## ############## ############## ############## 
+       
+        self.tabview = customtkinter.CTkTabview(self.f1)
+        self.tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew")
+        self.tabview.add("View")
+        self.tabview.add("Editing")
+        self.tabview.tab("View").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
+        self.tabview.tab("Editing").grid_columnconfigure(0, weight=1)
+        self.tabview.configure(segmented_button_selected_color="red")
         
+
+
         table_style = ttk.Style()
         table_style.configure("Treeview.Heading", font=("Arial", 14, "bold"), background="black")  # Для заголовков столбцов 
-        table_style.configure("Treeview", font=("Arial", 14), foreground="white")  # Для текста в ячейках
+        table_style.configure("Treeview", font=("Arial", 14), foreground="white", rowheight=30)  # Для текста в ячейках
         table_style.configure("Treeview", background="#333333") 
-        self.table = ttk.Treeview(self.f1, columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
+        self.table = ttk.Treeview(self.tabview.tab("View"), columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
         self.table.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
-    
+        self.table_for_editing = ttk.Treeview(self.tabview.tab("Editing"), columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
+        self.table_for_editing.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
         
         
         self.table.column("#0", width=0, stretch=False)
@@ -129,54 +157,127 @@ class BestandLager(CTk.CTk):
         self.table.heading("#6", text="Aktueller")
 
 
-        self.home_frame1 = customtkinter.CTkFrame(self.f1,fg_color="transparent")
+        self.table_for_editing.column("#0", width=0, stretch=False)
+        self.table_for_editing.column("#1", minwidth=120)
+        self.table_for_editing.column("#2", minwidth=100)
+        self.table_for_editing.column("#3", minwidth=700)
+        self.table_for_editing.column("#4", minwidth=100)
+        self.table_for_editing.column("#5", minwidth=70)
+        self.table_for_editing.column("#6", minwidth=150)
+        self.table_for_editing.column("#7", width=0, stretch=False)
+        
+        # Добавляем заголовки столбцов
+        
+        self.table_for_editing.heading("#1", text="Bar Code")
+        self.table_for_editing.heading("#2", text="VZ Nr.")
+        self.table_for_editing.heading("#3", text="Bedeutung")
+        self.table_for_editing.heading("#4", text="Größe")
+        self.table_for_editing.heading("#5", text="Lager")
+        self.table_for_editing.heading("#6", text="Aktueller")
+
+        self.home_frame1 = customtkinter.CTkFrame(self.tabview.tab("View"),fg_color="transparent")
         self.home_frame1.grid(row=1, column=0, padx=(0,10), sticky="nw")
         self.home_frame1.grid_columnconfigure(0, weight=1)
-        self.home_frame2 = customtkinter.CTkFrame(self.f1,fg_color="transparent")
+        self.home_frame2 = customtkinter.CTkFrame(self.tabview.tab("View"),fg_color="transparent")
         self.home_frame2.grid(row=1, column=1, padx=(10,10), sticky="ne")
         self.home_frame2.grid_columnconfigure(1, weight=1)
-    
+
+        self.home_frame3 = customtkinter.CTkFrame(self.tabview.tab("Editing"),fg_color="transparent")
+        self.home_frame3.grid(row=1, column=0, padx=(0,10), sticky="nw")
+        self.home_frame3.grid_columnconfigure(0, weight=1)
+        self.home_frame4 = customtkinter.CTkFrame(self.tabview.tab("Editing"),fg_color="transparent")
+        self.home_frame4.grid(row=1, column=1, padx=(10,10), sticky="ne")
+        self.home_frame4.grid_columnconfigure(1, weight=1)
         
+        self.tab1_label_search = customtkinter.CTkLabel(self.home_frame1, text="Search", 
+                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.tab1_label_search.grid(row=0, column=0, padx=20)
 
         self.bar_code = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
-        self.bar_code.grid(column= 0, row=0, padx=(10, 10), pady=(5, 10), sticky="nw",)
+        self.bar_code.grid(column= 0, row=1, padx=(10, 10), pady=(5, 10), sticky="nw",)
         
 
         self.vz_nr = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Vz Nr.:", width= 250, corner_radius = 3)
-        self.vz_nr.grid(column= 0, row=1, padx=(10, 10), pady=(0, 10), sticky="nw",)
+        self.vz_nr.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw",)
 
         self.plus = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=5, text="Search",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.kol2)
-        self.plus.grid(column = 0,row=2, padx=(10,10), pady=(0, 10), sticky="nw")
+        self.plus.grid(column = 0,row=3, padx=(10,10), pady=(0, 10), sticky="nw")
 
         self.show_all = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=5, text="Show all",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.show_all_data)
-        self.show_all.grid(column = 0,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
+        self.show_all.grid(column = 0,row=4, padx=(10,0), pady=(0, 10), sticky="nw")
         if self.role == "1":
             self.export_to_exel_button = customtkinter.CTkButton(master=self.home_frame1, corner_radius=5, height=40, width=250, border_spacing=5, text="Export to Excel all",
                                                     fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                         anchor="center", command=self.export_to_excel_button_click)
-            self.export_to_exel_button.grid(column = 0,row=4, padx=(10,0), pady=(0, 10), sticky="nw")
+            self.export_to_exel_button.grid(column = 0,row=5, padx=(10,0), pady=(0, 10), sticky="nw")
         else:
             pass
-    
 
-############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############        
+
+        self.tab2_label_Add = customtkinter.CTkLabel(self.home_frame3, text="Add", 
+                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.tab2_label_Add.grid(row=0, column=0, padx=20)     
+        self.bar_code_for_change_table = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
+        self.bar_code_for_change_table.grid(column= 0, row=1, padx=(10, 10), pady=(5, 10), sticky="nw")
+        self.return_to_itemtable = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Введите количество", width= 250, corner_radius = 3)
+        self.return_to_itemtable.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.bar_code_for_change_table = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
+        self.bar_code_for_change_table.grid(column= 0, row=1, padx=(10, 10), pady=(5, 10), sticky="nw")
+        self.return_to_itemtable = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Введите количество", width= 250, corner_radius = 3)
+        self.return_to_itemtable.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+
+############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
+        self.material_table = ttk.Treeview(self.f2, columns=("","Bar Code", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
+        self.material_table.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
+    
+        
+        
+        self.material_table.column("#0", width=0, stretch=False)
+        self.material_table.column("#1", minwidth=50)
+        self.material_table.column("#2", minwidth=700)
+        self.material_table.column("#3", minwidth=100)
+        self.material_table.column("#4", minwidth=70)
+        self.material_table.column("#5", minwidth=150)
+        self.material_table.column("#6", width=0, stretch=False)
+        
+        # Добавляем заголовки столбцов
+        
+        self.material_table.heading("#1", text="Bar Code")
+        self.material_table.heading("#2", text="Bedeutung")
+        self.material_table.heading("#3", text="Größe")
+        self.material_table.heading("#4", text="Lager")
+        self.material_table.heading("#5", text="Aktueller")
+
+        # self.material_frame1 = customtkinter.CTkFrame(self.f2,fg_color="transparent")
+        # self.material_frame1.grid(row=1, column=0, padx=(0,10), sticky="nw")
+        # self.material_frame1.grid_columnconfigure(0, weight=1)
+        # self.material_frame2 = customtkinter.CTkFrame(self.f2,fg_color="transparent")
+        # self.material_frame2.grid(row=1, column=1, padx=(10,10), sticky="ne")
+        # self.material_frame2.grid_columnconfigure(1, weight=1)
+     
+    
+        
+
+        
+############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ##############        
         
         self.conn = sqlite3.connect("bau.db")
         self.cursor = self.conn.cursor()
         
-        self.bau_list_frame = customtkinter.CTkFrame(self.f2, fg_color="transparent")
-        self.bau_list_frame.grid(row=0, column=0, padx=(10,10), sticky="nw")
+        self.bau_list_frame = customtkinter.CTkFrame(self.f3, fg_color="transparent")
+        self.bau_list_frame.grid(row=0, column=0, padx=(10,10),pady=(5,0), sticky="nw")
         self.bau_list_frame.grid_columnconfigure(0, weight=1)
 
-        self.bau_button_frame = customtkinter.CTkFrame(self.f2, fg_color="transparent")
+        self.bau_button_frame = customtkinter.CTkFrame(self.f3, fg_color="transparent")
         self.bau_button_frame.grid(row=1, column=0, padx=(10,10), sticky="nw")
         self.bau_button_frame.grid_columnconfigure(1, weight=1)
 
-        self.bau_item_frame = customtkinter.CTkFrame(self.f2)
+        self.bau_item_frame = customtkinter.CTkFrame(self.f3)
         self.bau_item_frame.grid(row=0, column=2, padx=(10,10), sticky="ne")
         self.bau_item_frame.grid_columnconfigure(2, weight=1)
         
@@ -255,8 +356,23 @@ class BestandLager(CTk.CTk):
         self.after(100, lambda: self.bar_code_f2.focus_set())
         self.add_button.bind('<Return>', lambda event=None: self.add_button_bau())
     
-############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ############## 
-        
+############## ############## ############## ############## #Настройка фрейма №4 ############## ############## ############## ############## ############## 
+        self.log_view = customtkinter.CTkTextbox(master=self.f4, width=400, corner_radius=3)
+        self.log_view.grid(row=0, column=0, padx=(5,5), pady=(5,0), sticky="nsew")
+        self.clear_log_button = customtkinter.CTkButton(self.f4,  corner_radius=2, height=30, width=250, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+                                                font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center", text="Clear logs", command=self.clear_logs)
+        self.clear_log_button.grid(row=1, column=0, pady=5, sticky="nsew")
+
+
+
+
+
+
+
+
+############## ############## ############## ############## #Настройка фрейма №5 ############## ############## ############## ############## ##############         
 
 
 
@@ -279,9 +395,9 @@ class BestandLager(CTk.CTk):
         self.barcode = None
         self.error_label= None
         
-
+        self.show_logs()
         self.show_all_data()
-    
+        self.show_material_table()
 
     def export_to_excel_button_click(self):
         try:
@@ -357,6 +473,9 @@ class BestandLager(CTk.CTk):
                 self.table_listbox.delete(0, CTk.END)  # Очистите список
                 for table in self.tables:
                     self.table_listbox.insert(CTk.END, table)
+        user = self.login # имя кто сделал действие для лога
+        action = f"удалил таблицу под названием {selected_table}" # перменная для создания названия действия лога
+        self.user_action(user, action)
 
     def create_table(self):
         # Запросите имя новой таблицы с помощью диалогового окна
@@ -372,12 +491,15 @@ class BestandLager(CTk.CTk):
             self.conn.commit()
 
             if self.table_listbox.size() > 0:
-                self.table_listbox.delete(0, customtkinter.CTk.END)
+                self.table_listbox.delete(0, CTk.END)
             # Обновляем список таблиц, вызывая функцию get_table_list()
             self.tables = self.get_table_list()
             for table in self.tables:
                 self.table_listbox.insert(CTk.END, table)
-
+        user = self.login # имя кто сделал действие для лога
+        action = f"создал таблицу под названием {text}" # перменная для создания названия действия лога
+        self.user_action(user, action)
+   
     def get_table_list(self):
         # Получите список таблиц из базы данных
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -419,7 +541,7 @@ class BestandLager(CTk.CTk):
         texts = localizations.language_texts.get(language, {})
         
         # Обновите тексты для виджетов, кнопок, лейблов и других элементов
-        self.home_button.configure(text=texts.get("Home", "Home"))
+        self.sign.configure(text=texts.get("Road signs", "Road signs"))
         self.plus.configure(text=texts.get("Search", "Search"))
         self.show_all.configure(text=texts.get("Show all", "Show all"))
         if self.role == "1":
@@ -428,7 +550,13 @@ class BestandLager(CTk.CTk):
             self.delete_button.configure(text=texts.get("Delete a construction site", "Delete a construction site"))
         self.select_button.configure(text=texts.get("Choose", "Choose"))
         self.logout_button.configure(text=texts.get("Logout", "Logout"))
-       
+        self.bau_frame.configure(text=texts.get("Building", "Building"))
+        self.material_frame.configure(text=texts.get("Material", "Material"))
+        self.log_frame.configure(text=texts.get("Logs", "Logs"))
+        self.tab1_label_search.configure(text=texts.get("Search", "Search"))
+        self.tab2_label_Add.configure(text=texts.get("Add", "Add"))
+
+
 
         selected_language = language
         self.save_language_to_file(selected_language)
@@ -521,18 +649,41 @@ class BestandLager(CTk.CTk):
             self.vz_nr.delete(0, 'end')
         
     def check_barcode(self, event):
+
         # Функция вызывается при изменении Vz Nr
         if self.vz_nr.get():
             # Если Vz Nr не пустой, очищаем поле баркода
             self.bar_code.delete(0, 'end')
+
+
+    def show_material_table(self):
+        conn = sqlite3.connect("bd.db")
+        cursor = conn.cursor()
         
+        # Получаем все записи из таблицы "Lager_Bestand"
+        data = cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM Material_Lager").fetchall()
+        
+        # Очищаем текущие строки в таблице
+        for row in self.material_table.get_children():
+            self.material_table.delete(row)
+        # if hasattr(self, "image_label"):
+        #         self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
+        # if self.error_label:
+        #     self.error_label.destroy()
+        # Вставляем данные в таблицу
+        for item in data:
+            self.material_table.insert("", "end", values=item)
+        
+        cursor.close()
+        conn.close()   
+
     def show_all_data(self):
         conn = sqlite3.connect("bd.db")
         cursor = conn.cursor()
         
         # Получаем все записи из таблицы "Lager_Bestand"
         data = cursor.execute("SELECT * FROM Lager_Bestand").fetchall()
-        
+        S
         # Очищаем текущие строки в таблице
         for row in self.table.get_children():
             self.table.delete(row)
@@ -544,34 +695,55 @@ class BestandLager(CTk.CTk):
         for item in data:
             self.table.insert("", "end", values=item)
         
+
+        for row in self.table_for_editing.get_children():
+            self.table_for_editing.delete(row)
+        if hasattr(self, "image_label"):
+                self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
+        if self.error_label:
+            self.error_label.destroy()
+        # Вставляем данные в таблицу
+        for item in data:
+            self.table_for_editing.insert("", "end", values=item)
         cursor.close()
         conn.close()    
 
     def select_frame_by_name(self, name):
         # Ставим цвет для активной кнопки
-        self.home_button.configure(fg_color=("red") if name == "home" else "transparent")
-        self.frame_2_button.configure(fg_color=("red") if name == "frame_2" else "transparent")
-        self.frame_3_button.configure(fg_color=("red") if name == "frame_3" else "transparent")
+        self.sign.configure(fg_color=("red") if name == "home" else "transparent")
+        self.material_frame.configure(fg_color=("red") if name == "Material" else "transparent")
+        self.bau_frame.configure(fg_color=("red") if name == "Building" else "transparent")
+        self.log_frame.configure(fg_color=("red") if name == "Logs" else "transparent")
 
         # Показываем включенный фрейм
         if name == "home":
             self.f1.grid(row=0, column=1, sticky="nsew")
         else:
             self.f1.grid_forget()
-        if name == "frame_2":
+        if name == "Material":
             self.f2.grid(row=0, column=1, sticky="nsew")
         else:
             self.f2.grid_forget()
-        if name == "frame_3":
+        if name == "Building":
             self.f3.grid(row=0, column=1, sticky="nsew")
         else:
             self.f3.grid_forget()
+        if name == "Logs":
+            self.f4.grid(row=0, column=1, sticky="nsew")
+        else:
+            self.f4.grid_forget()
 
     def home_button_event(self):
         self.select_frame_by_name("home")
 
-    def frame_2_button_event(self):
-        self.select_frame_by_name("frame_2")
+    def material_button_event(self):
+        self.select_frame_by_name("Material")
+
+    def bau_button_event(self):
+        self.select_frame_by_name("Building")
+
+    def log_button_event(self):
+        self.select_frame_by_name("Logs")
 
     def frame_3_button_event(self):
         self.select_frame_by_name("frame_3")
@@ -591,7 +763,7 @@ class BestandLager(CTk.CTk):
                 if self.error_label:
                     self.error_label.destroy()
 
-                self.image_label = CTk.CTkLabel(self.f1, image=ctk_image, text="")
+                self.image_label = CTk.CTkLabel(self.tabview.tab("View"), image=ctk_image, text="")
                 self.image_label.grid(row=1, column=1, padx=(0, 10), pady=(0, 0), sticky="ne")
             except FileNotFoundError:
                 self.result_show("Изображение не найдено")
@@ -611,8 +783,24 @@ class BestandLager(CTk.CTk):
         new_window = Autorisation.App()
         new_window.mainloop()  # Запускаем главный цикл нового окна
    
-    
+    def show_logs(self):
+        self.log_view.configure(state="normal")
+        with open('app.log', 'r') as log_file:
+            log_contents = log_file.readlines()
 
+            # Очистите содержимое виджета текста (если нужно)
+            self.log_view.delete("1.0", "end")
+
+            # Добавьте содержимое лог-файла в виджет текста в обратном порядке
+            for log_entry in reversed(log_contents):
+                self.log_view.insert("end", log_entry)
+
+            # Прокрутите виджет текста в самый низ
+            self.log_view.see("1.0")
+
+        # Установите фокус на текстовом виджете
+            self.log_view.focus_set()
+            self.log_view.configure(state="disabled")
     def save_language_to_file(self, language):
         with open("language.txt", "w") as file:
             file.write(language)
@@ -626,7 +814,20 @@ class BestandLager(CTk.CTk):
             # Если файл не найден, вернуть значение по умолчанию (например, "English")
             return "English"
 
+    def user_action(self, user, action):
+        # Запись действия пользователя в лог
+        self.logger.info(f"Пользователь {user} выполнил действие: {action}")
+        self.show_logs()
 
+    def clear_logs(self):
+        self.log_view.configure(state="normal")
+        # Очистите содержимое виджета текста
+        self.log_view.delete("1.0", "end")
+
+        # Очистите содержимое файла app.log
+        with open('app.log', 'w'):
+            pass  # Просто открываем и сразу закрываем файл, что очищает его содержимое
+        self.log_view.configure(state="disabled")
 if __name__ == '__main__':
     app = BestandLager()
     app.mainloop()

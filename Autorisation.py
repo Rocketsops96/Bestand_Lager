@@ -29,11 +29,12 @@ class App(CTk.CTk): # Окно авторизации
         self.main_button_1 = customtkinter.CTkButton(master=self, corner_radius=2, height=30, width= 200, 
                                                 fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
                                                 font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center", text='Войти', command=self.getpass)
+                                                anchor="center", text='Log in', command=self.getpass)
         self.main_button_1.grid(row=6, column=1, padx=(550, 0), pady=(00, 20), sticky="nsew")
+        self.main_button_1.configure(text=self.get_button_text_for_language(self.language))
+        
 
-
-        self.language_menu = customtkinter.CTkOptionMenu(self, values=["Русский","English","Deutsch"],
+        self.language_menu = customtkinter.CTkOptionMenu(self, values=["Russian","English","Deutsch"],
                                                                fg_color="gray10", button_color="red",
                                                                command=self.update_ui_language)
         self.language_menu.grid(row=7, column=1, padx=(550, 0), pady=(00, 20), sticky= "s")
@@ -58,33 +59,43 @@ class App(CTk.CTk): # Окно авторизации
         self.password = None  # Создаем атрибут для хранения пароля
         self.error_label = None # Создаем атрибут для хранения вывода текста
         
-    
+    def get_button_text_for_language(self, language):
+        texts = localizations.language_texts.get(language, {})
+        return texts.get("Log in", "Log in")
 
     def getpass(self):
         self.login = self.entrylogin.get()
         self.password = self.entrypass.get()
         if not self.login or not self.password:
-            self.display_error("введите логин и пароль")
+            self.display_error("You did not enter your username \n or password")
             return  # Завершаем функцию, если поля пустые
 
         conn = sqlite3.connect("bd.db")
         cursor = conn.cursor()
         data = cursor.execute("SELECT * FROM users WHERE login = ? AND password = ?" , (self.login, self.password)).fetchone()
-        self.role = str(data[3])
+        if data is not None and len(data) > 3:
+            self.role = str(data[3])
+        else:
+            # Обработка случая, когда data равен None или длина меньше 4
+            # Может быть, вы хотите установить значение по умолчанию или выдать ошибку.
+            # Пример:
+            self.role = "Default Role"
+        
         print(self.role)
         if data is not None:
-            self.display_error("есть такая учетная запись")
+            self.display_error("Есть такая учетная запись")
             #self.withdraw()  # Сворачиваем окно
             self.destroy()
             new_window = main.BestandLager(self.login,self.role)
             new_window.mainloop()  # Запускаем главный цикл нового окна
             
         else:
-            self.display_error("Неверный пароль")
+            self.display_error("Wrong login or password")
             print(self.login, self.password)
             
         
         conn.close()
+   
     def update_ui_language(self, language):      
         # Получите словарь с текстами для выбранного языка
         texts = localizations.language_texts.get(language, {})
@@ -100,10 +111,10 @@ class App(CTk.CTk): # Окно авторизации
     def display_error(self, message):
         if self.error_label:
             self.error_label.destroy()  # Удаляем предыдущее сообщение об ошибке, если оно уже было
-
+        
         self.error_label = CTk.CTkLabel(self, text=message, text_color="gray") # создаем лейбл
-        self.error_label.grid(row=8, column=1, padx=(550, 0), pady=(0, 20), sticky="nsew") # положение вывода лейбла
-
+        self.error_label.grid(row=8, column=1, columnspan= 2, padx=(550, 0), pady=(0, 20), sticky="nsew") # положение вывода лейбла
+     
     def save_language_to_file(self, language):
         with open("language.txt", "w") as file:
             file.write(language)
@@ -116,7 +127,7 @@ class App(CTk.CTk): # Окно авторизации
         except FileNotFoundError:
             # Если файл не найден, вернуть значение по умолчанию (например, "English")
             return "English"
-
+    
 
 if __name__ == '__main__':
     app = App()
