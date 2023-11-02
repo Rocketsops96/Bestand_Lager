@@ -5,6 +5,8 @@ from tkinter import *
 import main
 import PIL.Image
 import localizations
+import psycopg2
+import regbase
 customtkinter.set_appearance_mode("dark")
 
 
@@ -70,11 +72,11 @@ class App(CTk.CTk): # Окно авторизации
             self.display_error("You did not enter your username \n or password")
             return  # Завершаем функцию, если поля пустые
 
-        conn = sqlite3.connect("bd.db")
         cursor = conn.cursor()
-        data = cursor.execute("SELECT * FROM users WHERE login = ? AND password = ?" , (self.login, self.password)).fetchone()
-        if data is not None and len(data) > 3:
-            self.role = str(data[3])
+        cursor.execute("SELECT * FROM users WHERE login = %s AND password = %s" , (self.login, self.password))
+        data = cursor.fetchone()
+        if data is not None and len(data) >= 2:
+            self.role = str(data[2])
         else:
             # Обработка случая, когда data равен None или длина меньше 4
             # Может быть, вы хотите установить значение по умолчанию или выдать ошибку.
@@ -86,15 +88,14 @@ class App(CTk.CTk): # Окно авторизации
             self.display_error("Есть такая учетная запись")
             #self.withdraw()  # Сворачиваем окно
             self.destroy()
-            new_window = main.BestandLager(self.login,self.role)
+            new_window = main.BestandLager(self.login,self.role, conn)
             new_window.mainloop()  # Запускаем главный цикл нового окна
             
         else:
             self.display_error("Wrong login or password")
             print(self.login, self.password)
             
-        
-        conn.close()
+     
    
     def update_ui_language(self, language):      
         # Получите словарь с текстами для выбранного языка
@@ -130,7 +131,9 @@ class App(CTk.CTk): # Окно авторизации
     
 
 if __name__ == '__main__':
+    
     app = App()
+    conn = regbase.create_conn()
     app.mainloop()
     
 

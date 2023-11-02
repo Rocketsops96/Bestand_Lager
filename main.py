@@ -1,6 +1,5 @@
 import customtkinter
 import customtkinter as CTk
-import sqlite3
 from tkinter import *
 from tkinter import ttk
 import Autorisation
@@ -13,13 +12,14 @@ import export_to_exel
 import os
 import localizations
 import logging
-
-
+import main_top_level
+import psycopg2
+import regbase
 
 customtkinter.set_appearance_mode("dark")
 
 class BestandLager(CTk.CTk):
-    def __init__(self,login, role): # После теста добавить аргумент login и role  не забыть убрать комментарий ниже!!!!
+    def __init__(self,login, role, conn): # После теста добавить аргумент login и role  не забыть убрать комментарий ниже!!!!
         super().__init__()
          # Настройки логирования
         logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -40,7 +40,7 @@ class BestandLager(CTk.CTk):
         self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(6, weight=1)
-
+        self.conn = conn
 
         #Создаем текст вверху слева
         self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="VVO Bestand Lager", 
@@ -217,19 +217,57 @@ class BestandLager(CTk.CTk):
         else:
             pass
 
-
-        self.tab2_label_Add = customtkinter.CTkLabel(self.home_frame3, text="Add", 
+        
+        self.tab2_label_Availability = customtkinter.CTkLabel(self.home_frame3, text="Availability", 
                                                               font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.tab2_label_Add.grid(row=0, column=0, padx=20)     
-        self.bar_code_for_change_table = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
-        self.bar_code_for_change_table.grid(column= 0, row=1, padx=(10, 10), pady=(5, 10), sticky="nw")
-        self.return_to_itemtable = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Введите количество", width= 250, corner_radius = 3)
-        self.return_to_itemtable.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
-        self.bar_code_for_change_table = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
-        self.bar_code_for_change_table.grid(column= 0, row=1, padx=(10, 10), pady=(5, 10), sticky="nw")
-        self.return_to_itemtable = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Введите количество", width= 250, corner_radius = 3)
-        self.return_to_itemtable.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.tab2_label_Availability.grid(row=0, column=0, padx=20)     
+    
 
+        self.add_availability_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Add",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.add_availability)
+        self.add_availability_button.grid(column = 0,row=1, padx=(10,0), pady=(0, 10), sticky="nw")
+
+        self.replacement_availability_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Replacement",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.replacement_availability)
+        self.replacement_availability_button.grid(column = 0,row=2, padx=(10,0), pady=(0, 10), sticky="nw")
+
+        self.addition_availability_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Minus",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.addition_availability)
+        self.addition_availability_button.grid(column = 0,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
+    
+
+
+        self.tab2_label_Current = customtkinter.CTkLabel(self.home_frame3, text="Current", 
+                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.tab2_label_Current.grid(row=0, column=1, padx=20)     
+
+        self.add_current_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Add",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.add_current)
+        self.add_current_button.grid(column = 1,row=1, padx=(10,0), pady=(0, 10), sticky="nw")
+
+        self.replacement_current_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Replacement",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.replacement_current)
+        self.replacement_current_button.grid(column = 1,row=2, padx=(10,0), pady=(0, 10), sticky="nw")
+
+        self.addition_current_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Minus",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.addition_current)
+        self.addition_current_button.grid(column = 1,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
+
+
+        self.tab2_label_Defect_button = customtkinter.CTkLabel(self.home_frame3, text="Defect", 
+                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.tab2_label_Defect_button.grid(row=0, column=2, padx=20)     
+
+        self.defect_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Defect",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                    anchor="center", command=self.defect)
+        self.defect_button.grid(column = 2,row=1, padx=(10,0), pady=(0, 10), sticky="nw")
 
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
         self.material_table = ttk.Treeview(self.f2, columns=("","Bar Code", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
@@ -252,21 +290,11 @@ class BestandLager(CTk.CTk):
         self.material_table.heading("#3", text="Größe")
         self.material_table.heading("#4", text="Lager")
         self.material_table.heading("#5", text="Aktueller")
-
-        # self.material_frame1 = customtkinter.CTkFrame(self.f2,fg_color="transparent")
-        # self.material_frame1.grid(row=1, column=0, padx=(0,10), sticky="nw")
-        # self.material_frame1.grid_columnconfigure(0, weight=1)
-        # self.material_frame2 = customtkinter.CTkFrame(self.f2,fg_color="transparent")
-        # self.material_frame2.grid(row=1, column=1, padx=(10,10), sticky="ne")
-        # self.material_frame2.grid_columnconfigure(1, weight=1)
-     
     
-        
-
+    
         
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ##############        
         
-        self.conn = sqlite3.connect("bau.db")
         self.cursor = self.conn.cursor()
         
         self.bau_list_frame = customtkinter.CTkFrame(self.f3, fg_color="transparent")
@@ -280,7 +308,6 @@ class BestandLager(CTk.CTk):
         self.bau_item_frame = customtkinter.CTkFrame(self.f3)
         self.bau_item_frame.grid(row=0, column=2, padx=(10,10), sticky="ne")
         self.bau_item_frame.grid_columnconfigure(2, weight=1)
-        
         
         
         self.tables = self.get_table_list()
@@ -399,6 +426,37 @@ class BestandLager(CTk.CTk):
         self.show_all_data()
         self.show_material_table()
 
+
+
+
+
+
+    # def add_to_table():
+    #     print ("Сработало")
+
+    def add_availability(self):
+        app = main_top_level.Top_Level_Window(action_handler=self.add_to_table)
+        app.mainloop()
+        
+    def replacement_availability(self):
+        pass
+
+    def addition_availability (self):
+        pass
+    
+    def add_current(self):
+        pass
+
+    def replacement_current(self):
+        pass
+
+    def addition_current(self):
+        pass
+    
+    def defect(self):
+        pass
+
+
     def export_to_excel_button_click(self):
         try:
             export_to_exel.export_to_excel()  # Вызываем функцию из другого файла
@@ -409,53 +467,55 @@ class BestandLager(CTk.CTk):
     # Проверяем наличие файла Excel
         if os.path.exists("Bestand_Lager.xlsx"):
             print("Файл Excel уже существует.")
-        
+    
     def add_button_bau(self):
         print(self.selected_table)
         self.barcode_f2 = self.bar_code_f2.get()
         self.sum_value = self.sum.get()  # Сохраняем значение суммы как атрибут объекта
         
         # Создаем контекстные менеджеры для соединений, и здесь не нужно закрывать соединение с базой
-        with sqlite3.connect("bd.db") as conn_bd, sqlite3.connect("bau.db") as conn_bau:
-            cursor_bd = conn_bd.cursor()
-            cursor_bau = conn_bau.cursor()
-
-            # Выполняем операцию SELECT в базе данных "bd.db"
-            data = cursor_bd.execute("SELECT Bar_Code, VZ_Nr, Bedeutung, Aktueller_bestand FROM Lager_Bestand WHERE Bar_Code = ?", (self.barcode_f2,)).fetchone()
-            bar = data[0]
-            vz = data[1]
-            bed = data[2]
-            akt = data[3]
+        cursor = self.conn.cursor()
+        print("0,5")
+        # Выполняем операцию SELECT в базе данных "bd.db"
+        cursor.execute("SELECT * FROM lager_bestand WHERE bar_code = %s",(self.barcode_f2,))
+        data = cursor.fetchone()
+        print(data)
+        bar = data[0]
+        vz = data[1]
+        bed = data[4]
+        akt = data[5]
+        print("1")
+        try:
+            # Проверяем наличие товара в таблице
+            cursor.execute(f"SELECT * FROM {self.selected_table} WHERE Bar_Code = %s",(bar,))
+            existing_product = cursor.fetchone()
+            print(self.selected_table)
+            print("2")
+            if existing_product:
+                # Если товар уже существует, обновляем Bestand
+                cursor.execute(f"UPDATE {self.selected_table} SET bestand = %s WHERE bar_code = %s",(self.sum_value,bar))
+                print("3")
+            else:
+                # Если товар не существует, добавляем новую запись
+                cursor.execute(f"INSERT INTO {self.selected_table} (bar_code, vz_nr, bedeutung, bestand) VALUES (%s, %s, %s, %s)",(bar,vz,bed,self.sum_value))
+                # Очищаем таблицу программы перед добавлением новых данных
+                print("4")
+            for row in self.item_table.get_children():
+                self.item_table.delete(row)
+                print("5")
+            # Загружаем все данные из выбранной таблицы и выводим их в таблицу программы
+            cursor.execute(f"SELECT vz_Nr, bedeutung, bestand FROM {self.selected_table}")
+            data = cursor.fetchall()
+            print("6")
+            for item in data:
+                self.item_table.insert("", "end", values=item)
+            self.bar_code_f2.delete(0, 'end')
+            self.sum.delete(0, 'end') 
+            self.after(50, lambda: self.bar_code_f2.focus_set())
             
-            try:
-                # Проверяем наличие товара в таблице
-                cursor_bau.execute(f"SELECT * FROM {self.selected_table} WHERE Bar_Code = ?", (bar,))
-                existing_product = cursor_bau.fetchone()
-                
-                if existing_product:
-                    # Если товар уже существует, обновляем Bestand
-                    cursor_bau.execute(f"UPDATE {self.selected_table} SET Bestand = ? WHERE Bar_Code = ?", (self.sum_value, bar))
-                else:
-                    # Если товар не существует, добавляем новую запись
-                    cursor_bau.execute(f"INSERT INTO {self.selected_table} (Bar_Code, VZ_Nr, Bedeutung, Bestand) VALUES (?, ?, ?, ?)", (bar, vz, bed, self.sum_value))
-                
-                conn_bau.commit()
-                 # Очищаем таблицу программы перед добавлением новых данных
-                for row in self.item_table.get_children():
-                    self.item_table.delete(row)
-
-                # Загружаем все данные из выбранной таблицы и выводим их в таблицу программы
-                cursor_bau.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {self.selected_table}")
-                data = cursor_bau.fetchall()
-                for item in data:
-                    self.item_table.insert("", "end", values=item)
-                self.bar_code_f2.delete(0, 'end')
-                self.sum.delete(0, 'end') 
-                self.after(50, lambda: self.bar_code_f2.focus_set())
-                
-                
-            except sqlite3.Error as e:
-                print("Ошибка SQLite:", e)
+            
+        except Exception as e:
+            print("Ошибка add_button_bau:", e)
 
     def delete_table(self):
         selected_table = self.table_listbox.get(self.table_listbox.curselection())
@@ -502,7 +562,7 @@ class BestandLager(CTk.CTk):
    
     def get_table_list(self):
         # Получите список таблиц из базы данных
-        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand');")
         table_list = self.cursor.fetchall()
         return [table[0] for table in table_list]
 
@@ -520,10 +580,9 @@ class BestandLager(CTk.CTk):
             self.item_table.delete(row)
         
         # Загружаем данные из выбранной таблицы и выводим их в таблицу программы
-        with sqlite3.connect("bau.db") as conn_bau:
-            cursor_bau = conn_bau.cursor()
-            cursor_bau.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
-            data = cursor_bau.fetchall()
+            cursor = self.conn.cursor()
+            cursor.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
+            data = cursor.fetchall()
             for item in data:
                 self.item_table.insert("", "end", values=item)
 
@@ -554,7 +613,7 @@ class BestandLager(CTk.CTk):
         self.material_frame.configure(text=texts.get("Material", "Material"))
         self.log_frame.configure(text=texts.get("Logs", "Logs"))
         self.tab1_label_search.configure(text=texts.get("Search", "Search"))
-        self.tab2_label_Add.configure(text=texts.get("Add", "Add"))
+        # self.tab2_label_Add.configure(text=texts.get("Add", "Add"))
 
 
 
@@ -562,9 +621,10 @@ class BestandLager(CTk.CTk):
         self.save_language_to_file(selected_language)
 
     def show_img_for_barcode(self, barcode):
-        conn = sqlite3.connect("bd.db")
-        cursor = conn.cursor()
-        data = cursor.execute("SELECT VZ_Nr FROM Lager_Bestand WHERE Bar_Code = ?", (barcode,)).fetchone()
+        
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT VZ_Nr FROM lager_bestand WHERE Bar_Code = %s", (barcode,))
+        data= cursor.fetchone()
         
         if data is not None:
             vznr = data[0]
@@ -585,13 +645,13 @@ class BestandLager(CTk.CTk):
                 print(f"Ошибка открытия изображения: {e}") # показывает какая ошибка в консоль! {e}
         
         cursor.close()
-        conn.close()
 
     def show_img_for_vz(self, vz):
         
-        conn = sqlite3.connect("bd.db")
-        cursor = conn.cursor()
-        data = cursor.execute("SELECT VZ_Nr FROM Lager_Bestand WHERE VZ_Nr = ?", (vz,)).fetchone()
+       
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT VZ_Nr FROM Lager_Bestand WHERE VZ_Nr = %s", (vz,))
+        data = cursor.fetchone()
 
         if data is not None:
             vznr = data[0]
@@ -611,16 +671,16 @@ class BestandLager(CTk.CTk):
             except Exception as e:
                 print(f"Ошибка открытия изображения: {e}")
         
-        cursor.close()
-        conn.close()   
+        cursor.close()  
 
     def kol2(self):
         self.barcode = self.bar_code.get()
         self.vz = self.vz_nr.get()
-        conn = sqlite3.connect("bd.db")
-        cursor = conn.cursor()
+        
+        cursor = self.conn.cursor()
         # Получаем данные из базы данных (замените на ваш SQL-запрос)
-        data = cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = ? OR VZ_Nr = ?", (self.barcode, self.vz)).fetchall()
+        cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s", (self.barcode, self.vz))
+        data = cursor.fetchall()
         
         # Очищаем текущие строки в таблице
         for row in self.table.get_children():
@@ -640,7 +700,6 @@ class BestandLager(CTk.CTk):
         self.bar_code.delete(0, 'end')
         self.vz_nr.delete(0, 'end')
         cursor.close()
-        conn.close()
 
     def check_vz_nr(self, event):
         # Функция вызывается при изменении баркода
@@ -655,35 +714,34 @@ class BestandLager(CTk.CTk):
             # Если Vz Nr не пустой, очищаем поле баркода
             self.bar_code.delete(0, 'end')
 
-
     def show_material_table(self):
-        conn = sqlite3.connect("bd.db")
-        cursor = conn.cursor()
+       pass
+        # cursor = self.conn.cursor()
         
-        # Получаем все записи из таблицы "Lager_Bestand"
-        data = cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM Material_Lager").fetchall()
+        # # Получаем все записи из таблицы "Lager_Bestand"
+        # cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM Material_Lager")
+        # data = cursor.fetchall()
         
-        # Очищаем текущие строки в таблице
-        for row in self.material_table.get_children():
-            self.material_table.delete(row)
-        # if hasattr(self, "image_label"):
-        #         self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
-        # if self.error_label:
-        #     self.error_label.destroy()
-        # Вставляем данные в таблицу
-        for item in data:
-            self.material_table.insert("", "end", values=item)
+        # # Очищаем текущие строки в таблице
+        # for row in self.material_table.get_children():
+        #     self.material_table.delete(row)
+        # # if hasattr(self, "image_label"):
+        # #         self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
+        # # if self.error_label:
+        # #     self.error_label.destroy()
+        # # Вставляем данные в таблицу
+        # for item in data:
+        #     self.material_table.insert("", "end", values=item)
         
-        cursor.close()
-        conn.close()   
+        # cursor.close()
 
     def show_all_data(self):
-        conn = sqlite3.connect("bd.db")
-        cursor = conn.cursor()
+       
+        cursor = self.conn.cursor()
         
         # Получаем все записи из таблицы "Lager_Bestand"
-        data = cursor.execute("SELECT * FROM Lager_Bestand").fetchall()
-        S
+        cursor.execute("SELECT * FROM lager_bestand")
+        data= cursor.fetchall()
         # Очищаем текущие строки в таблице
         for row in self.table.get_children():
             self.table.delete(row)
@@ -706,7 +764,7 @@ class BestandLager(CTk.CTk):
         for item in data:
             self.table_for_editing.insert("", "end", values=item)
         cursor.close()
-        conn.close()    
+         
 
     def select_frame_by_name(self, name):
         # Ставим цвет для активной кнопки
@@ -829,5 +887,6 @@ class BestandLager(CTk.CTk):
             pass  # Просто открываем и сразу закрываем файл, что очищает его содержимое
         self.log_view.configure(state="disabled")
 if __name__ == '__main__':
+    
     app = BestandLager()
     app.mainloop()
