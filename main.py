@@ -132,7 +132,7 @@ class BestandLager(CTk.CTk):
         table_style.configure("Treeview.Heading", font=("Arial", 14, "bold"), background="black")  # Для заголовков столбцов 
         table_style.configure("Treeview", font=("Arial", 14), foreground="white", rowheight=30)  # Для текста в ячейках
         table_style.configure("Treeview", background="#333333") 
-        self.table = ttk.Treeview(self.tabview.tab("View"), columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
+        self.table = ttk.Treeview(self.tabview.tab("View"), columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=21)
         self.table.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
         self.table_for_editing = ttk.Treeview(self.tabview.tab("Editing"), columns=("","Bar Code", "VZ Nr.", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
         self.table_for_editing.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
@@ -214,6 +214,7 @@ class BestandLager(CTk.CTk):
                                                     fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                         anchor="center", command=self.export_to_excel_button_click)
             self.export_to_exel_button.grid(column = 0,row=5, padx=(10,0), pady=(0, 10), sticky="nw")
+            self.export_to_exel_button.grid_rowconfigure(5, weight=1)
         else:
             pass
 
@@ -562,7 +563,7 @@ class BestandLager(CTk.CTk):
    
     def get_table_list(self):
         # Получите список таблиц из базы данных
-        self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand');")
+        self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand', 'app_logs');")
         table_list = self.cursor.fetchall()
         return [table[0] for table in table_list]
 
@@ -765,7 +766,6 @@ class BestandLager(CTk.CTk):
             self.table_for_editing.insert("", "end", values=item)
         cursor.close()
          
-
     def select_frame_by_name(self, name):
         # Ставим цвет для активной кнопки
         self.sign.configure(fg_color=("red") if name == "home" else "transparent")
@@ -842,23 +842,24 @@ class BestandLager(CTk.CTk):
         new_window.mainloop()  # Запускаем главный цикл нового окна
    
     def show_logs(self):
+        cursor = self.conn.cursor()
+        cursor.execute("CREATE TABLE IF NOT EXISTS app_logs (log_id SERIAL PRIMARY KEY,log_time TIMESTAMP,log_user VARCHAR(255),log_action VARCHAR(255));")
+    
         self.log_view.configure(state="normal")
-        with open('app.log', 'r') as log_file:
-            log_contents = log_file.readlines()
+        try:
+            cursor.execute("SELECT log_time, log_user,log_action FROM app_logs ORDER BY log_time DESC")
+            log_entries = cursor.fetchall()
 
-            # Очистите содержимое виджета текста (если нужно)
-            self.log_view.delete("1.0", "end")
+            self.log_view.delete("1.0", "end")  # Очистить содержимое
 
-            # Добавьте содержимое лог-файла в виджет текста в обратном порядке
-            for log_entry in reversed(log_contents):
-                self.log_view.insert("end", log_entry)
+            for entry in log_entries:
+                log_time, log_user, log_action = entry
+                log_text = f"{log_time} - Пользователь {log_user} выполнил действие: {log_action}\n"
+                self.log_view.insert("end", log_text)
 
-            # Прокрутите виджет текста в самый низ
-            self.log_view.see("1.0")
+        except Exception as e:
+            print(f"Ошибка при чтении логов из базы данных: {e}")
 
-        # Установите фокус на текстовом виджете
-            self.log_view.focus_set()
-            self.log_view.configure(state="disabled")
     def save_language_to_file(self, language):
         with open("language.txt", "w") as file:
             file.write(language)
@@ -874,18 +875,29 @@ class BestandLager(CTk.CTk):
 
     def user_action(self, user, action):
         # Запись действия пользователя в лог
+        
+        cursor = self.conn.cursor()
+        cursor.execute("INSERT INTO app_logs (log_time, log_user, log_action) VALUES (NOW(), %s, %s);",(user,action))
         self.logger.info(f"Пользователь {user} выполнил действие: {action}")
         self.show_logs()
 
     def clear_logs(self):
         self.log_view.configure(state="normal")
-        # Очистите содержимое виджета текста
-        self.log_view.delete("1.0", "end")
+        
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("DELETE FROM app_logs")  # Этот запрос удаляет все записи из таблицы
+            
+            # Очистите содержимое виджета текста
+            self.log_view.delete("1.0", "end")
+            
+            self.logger.info("Логи очищены")
+        except Exception as e:
+            print(f"Ошибка при удалении логов из базы данных: {e}")
 
-        # Очистите содержимое файла app.log
-        with open('app.log', 'w'):
-            pass  # Просто открываем и сразу закрываем файл, что очищает его содержимое
         self.log_view.configure(state="disabled")
+
+
 if __name__ == '__main__':
     
     app = BestandLager()
