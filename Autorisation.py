@@ -1,12 +1,13 @@
 import customtkinter
 import customtkinter as CTk
-import sqlite3
 from tkinter import *
 import main
 import PIL.Image
 import localizations
 import psycopg2
 import regbase
+
+
 customtkinter.set_appearance_mode("dark")
 
 
@@ -21,20 +22,28 @@ class App(CTk.CTk): # Окно авторизации
         self.title('Bestand Lager')
         self.resizable(False, False)
         self.language = self.load_language_from_file()
+       
+        
 
         self.entrylogin = CTk.CTkEntry(self, placeholder_text="Login:", corner_radius = 3)
         self.entrylogin.grid(row=3, column=1, columnspan=2, padx=(550, 0), pady=(100, 20), sticky="nsew") # Поле для ввода логина
         
         self.entrypass = customtkinter.CTkEntry(self, placeholder_text="Password:", show="*", corner_radius = 3)
-        self.entrypass.grid(row=5, column=1, columnspan=2, padx=(550, 0), pady=(00, 20), sticky="nsew") # Поле для ввода пароля
-
+        self.entrypass.grid(row=4, column=1, columnspan=2, padx=(550, 0), pady=(00, 20), sticky="nsew") # Поле для ввода пароля
+        login, password = self.load_saved_login_and_password()
+        if login:
+            self.entrylogin.insert('0', login)
+        if password:
+            self.entrypass.insert('0',password)
         self.main_button_1 = customtkinter.CTkButton(master=self, corner_radius=2, height=30, width= 200, 
                                                 fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
                                                 font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center", text='Log in', command=self.getpass)
-        self.main_button_1.grid(row=6, column=1, padx=(550, 0), pady=(00, 20), sticky="nsew")
+        self.main_button_1.grid(row=5, column=1, padx=(550, 0), pady=(00, 20), sticky="nsew")
         self.main_button_1.configure(text=self.get_button_text_for_language(self.language))
         
+        self.remember_me = customtkinter.CTkCheckBox(self, text="Remember me", border_width = 2, hover_color = "red", fg_color = "red", font=customtkinter.CTkFont(size=14, weight="bold"))
+        self.remember_me.grid(row=6, column=1, padx=(580, 0), pady=(0, 20), sticky="nsew")
 
         self.language_menu = customtkinter.CTkOptionMenu(self, values=["Russian","English","Deutsch"],
                                                                fg_color="gray10", button_color="red",
@@ -42,7 +51,7 @@ class App(CTk.CTk): # Окно авторизации
         self.language_menu.grid(row=7, column=1, padx=(550, 0), pady=(00, 20), sticky= "s")
         self.saved_language = self.load_language_from_file()
         self.language_menu.set(self.saved_language)
-
+        
 
         self.entrypass.bind('<Return>', lambda event=None: self.getpass()) # При нажатии на кнопку энетер нажимается кнопка Войти
         
@@ -52,7 +61,7 @@ class App(CTk.CTk): # Окно авторизации
         ctk_image = CTk.CTkImage(image, size=(90, 125))
         self.image_label = CTk.CTkLabel(self, image=ctk_image, text="")
         self.image_label.grid(row=0, column=3, padx=(425, 0), pady=(10, 0), sticky="nsew")
-
+        
 
         self.after(100, lambda: self.entrylogin.focus_set())
         self.update()
@@ -60,6 +69,8 @@ class App(CTk.CTk): # Окно авторизации
         self.login = None  # Создаем атрибут для хранения логина
         self.password = None  # Создаем атрибут для хранения пароля
         self.error_label = None # Создаем атрибут для хранения вывода текста
+
+
         
     def get_button_text_for_language(self, language):
         texts = localizations.language_texts.get(language, {})
@@ -77,6 +88,8 @@ class App(CTk.CTk): # Окно авторизации
         data = cursor.fetchone()
         if data is not None and len(data) >= 2:
             self.role = str(data[2])
+            if self.remember_me.get():  # Проверка, отмечен ли флажок "Запомнить меня"
+                self.save_login_and_password(self.login, self.password)
         else:
             # Обработка случая, когда data равен None или длина меньше 4
             # Может быть, вы хотите установить значение по умолчанию или выдать ошибку.
@@ -94,9 +107,7 @@ class App(CTk.CTk): # Окно авторизации
         else:
             self.display_error("Wrong login or password")
             print(self.login, self.password)
-            
-     
-   
+             
     def update_ui_language(self, language):      
         # Получите словарь с текстами для выбранного языка
         texts = localizations.language_texts.get(language, {})
@@ -107,7 +118,6 @@ class App(CTk.CTk): # Окно авторизации
 
         selected_language = language
         self.save_language_to_file(selected_language)
-
 
     def display_error(self, message):
         if self.error_label:
@@ -120,7 +130,6 @@ class App(CTk.CTk): # Окно авторизации
         with open("language.txt", "w") as file:
             file.write(language)
 
-    # Функция для загрузки выбранного языка из файла
     def load_language_from_file(self):
         try:
             with open("language.txt", "r") as file:
@@ -129,9 +138,22 @@ class App(CTk.CTk): # Окно авторизации
             # Если файл не найден, вернуть значение по умолчанию (например, "English")
             return "English"
     
+    def save_login_and_password(self, login, password):
+        with open("login_password.txt", "w") as file:
+            file.write(f"{login}\n{password}")
+
+    def load_saved_login_and_password(self):
+        try:
+            with open("login_password.txt", "r") as file:
+                login = file.readline().strip()
+                password = file.readline().strip()
+                return login, password
+        except FileNotFoundError:
+            return None, None
+
+
 
 if __name__ == '__main__':
-    
     app = App()
     conn = regbase.create_conn()
     app.mainloop()

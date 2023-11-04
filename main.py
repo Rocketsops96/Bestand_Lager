@@ -92,7 +92,7 @@ class BestandLager(CTk.CTk):
         self.logout_button.grid(row=12, column=0,pady = (0,10), sticky="ew")
 
         #Создаем фреймы для каждого окна
-        self.f1 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.f1 = customtkinter.CTkScrollableFrame(self, corner_radius=0, fg_color="transparent")
         self.f1.grid_columnconfigure(0, weight=1)
         self.f1.grid_rowconfigure(0, weight=1)
         self.f1.grid_rowconfigure(1, weight=0)
@@ -218,57 +218,38 @@ class BestandLager(CTk.CTk):
         else:
             pass
 
+    
+        self.reduction = customtkinter.CTkOptionMenu(self.home_frame3, values=["Current","Total on account","Defect"],
+                                                               fg_color="gray10", button_color="red",
+                                                               command=self.handle_reduction_change)
+        self.reduction.grid(row=0, column=0, padx=20, pady=(20, 0), sticky= "s")
+
+        self.selected_action = tkinter.StringVar()  # Создаем переменную для хранения выбранной радиокнопки
+
+        self.plus_to_table = customtkinter.CTkRadioButton(self.home_frame3, text="Add", variable=self.selected_action, value="Add", fg_color = "red", hover_color = "red",
+                                                          border_width_unchecked = 2, font=customtkinter.CTkFont(size=14, weight="bold"))
+        self.plus_to_table.grid(row=0, column=1, padx=(10, 10), pady=(20, 0), sticky="s")
+
+        self.minus_to_table = customtkinter.CTkRadioButton(self.home_frame3, text="Decrease", variable=self.selected_action, value="Decrease", fg_color = "red", hover_color = "red",
+                                                           border_width_unchecked = 2, font=customtkinter.CTkFont(size=14, weight="bold"))
+        self.minus_to_table.grid(row=1, column=1, padx=(10, 10), pady=(20, 0), sticky="s")
+
+        self.zamena_to_table = customtkinter.CTkRadioButton(self.home_frame3, text="Replace", variable=self.selected_action, value="Replace", fg_color = "red", hover_color = "red",
+                                                            border_width_unchecked = 2, font=customtkinter.CTkFont(size=14, weight="bold"))
+        self.zamena_to_table.grid(row=2, column=1, padx=(10, 10), pady=(20, 0), sticky="s")
+
+
+        self.bar_code_home_frame3 = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
+        self.bar_code_home_frame3.grid(column= 2, row=0,  pady=(20, 0),padx = 10, sticky="s",)
         
-        self.tab2_label_Availability = customtkinter.CTkLabel(self.home_frame3, text="Availability", 
-                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.tab2_label_Availability.grid(row=0, column=0, padx=20)     
-    
 
-        self.add_availability_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Add",
+        self.sum_home_frame3 = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Введите количество", width= 250, corner_radius = 3)
+        self.sum_home_frame3.grid(column= 2, row=1, pady=(10, 0),padx = 10, sticky="s",)
+
+        self.apply = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="apply",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.add_availability)
-        self.add_availability_button.grid(column = 0,row=1, padx=(10,0), pady=(0, 10), sticky="nw")
-
-        self.replacement_availability_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Replacement",
-                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.replacement_availability)
-        self.replacement_availability_button.grid(column = 0,row=2, padx=(10,0), pady=(0, 10), sticky="nw")
-
-        self.addition_availability_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Minus",
-                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.addition_availability)
-        self.addition_availability_button.grid(column = 0,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
-    
-
-
-        self.tab2_label_Current = customtkinter.CTkLabel(self.home_frame3, text="Current", 
-                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.tab2_label_Current.grid(row=0, column=1, padx=20)     
-
-        self.add_current_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Add",
-                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.add_current)
-        self.add_current_button.grid(column = 1,row=1, padx=(10,0), pady=(0, 10), sticky="nw")
-
-        self.replacement_current_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Replacement",
-                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.replacement_current)
-        self.replacement_current_button.grid(column = 1,row=2, padx=(10,0), pady=(0, 10), sticky="nw")
-
-        self.addition_current_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Minus",
-                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.addition_current)
-        self.addition_current_button.grid(column = 1,row=3, padx=(10,0), pady=(0, 10), sticky="nw")
-
-
-        self.tab2_label_Defect_button = customtkinter.CTkLabel(self.home_frame3, text="Defect", 
-                                                              font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.tab2_label_Defect_button.grid(row=0, column=2, padx=20)     
-
-        self.defect_button = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Defect",
-                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                    anchor="center", command=self.defect)
-        self.defect_button.grid(column = 2,row=1, padx=(10,0), pady=(0, 10), sticky="nw")
+                                                    anchor="center", command=self.reduction_main_table)
+        self.apply.grid(column = 2,row=2, padx=10, pady=20, sticky="nw")
 
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
         self.material_table = ttk.Treeview(self.f2, columns=("","Bar Code", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
@@ -292,7 +273,8 @@ class BestandLager(CTk.CTk):
         self.material_table.heading("#4", text="Lager")
         self.material_table.heading("#5", text="Aktueller")
     
-    
+      
+        
         
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ##############        
         
@@ -382,6 +364,7 @@ class BestandLager(CTk.CTk):
         self.item_table.heading("#3", text="Bestand")
 
         self.after(100, lambda: self.bar_code_f2.focus_set())
+        self.after(100, lambda: self.bar_code_home_frame3.focus_set())
         self.add_button.bind('<Return>', lambda event=None: self.add_button_bau())
     
 ############## ############## ############## ############## #Настройка фрейма №4 ############## ############## ############## ############## ############## 
@@ -428,35 +411,98 @@ class BestandLager(CTk.CTk):
         self.show_material_table()
 
 
+    def handle_reduction_change(self, event):
+        selected_reduction = self.reduction.get()  # Получаем выбранный параметр
+        if selected_reduction == "Defect":
+            self.minus_to_table.configure(state="disabled")
+            self.zamena_to_table.configure(state="disabled")
+        else: 
+            self.plus_to_table.configure(state="normal")
+            self.minus_to_table.configure(state="normal")
+            self.zamena_to_table.configure(state="normal")
+
+    def reduction_main_table(self):
+        selected_reduction = self.reduction.get()
+        selected_action = self.selected_action.get()
+        bar_code = self.bar_code_home_frame3.get()
+        sum_value = self.sum_home_frame3.get()
+        cursor = self.conn.cursor()
+        if selected_reduction == "Current":
+            if selected_action == "Add":
+                cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                data = cursor.fetchall()
+                new_data = data[0][0]  # Получаем значение из кортежа
+                if new_data is None: 
+                    new_data = 0
+                new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
+                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
+                self.show_all_data()
+
+            elif selected_action == "Decrease":
+                cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                data = cursor.fetchall()
+                new_data = data[0][0]  # Получаем значение из кортежа
+                if new_data is None: 
+                    new_data = 0
+                new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
+                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
+                self.show_all_data()
+
+            elif selected_action == "Replace":
+                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (sum_value, bar_code))
+                self.show_all_data()
+
+        if selected_reduction == "Total on account":
+            if selected_action == "Add":
+                cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                data = cursor.fetchall()
+                new_data = data[0][0]  # Получаем значение из кортежа
+                if new_data is None: 
+                    new_data = 0
+                new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
+                cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
+                self.show_all_data()
+
+            elif selected_action == "Decrease":
+                cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                data = cursor.fetchall()
+                new_data = data[0][0]  # Получаем значение из кортежа
+                if new_data is None: 
+                    new_data = 0
+                new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
+                cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
+                self.show_all_data()
+
+            elif selected_action == "Replace":
+                cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (sum_value, bar_code))
+                self.show_all_data()
+
+        if selected_reduction == "Defect":
+            if selected_action == "Add":
+                cursor.execute("SELECT * FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                data = cursor.fetchone()
+                new_data = data[5]
+                new_data2 = data[4]
+                if new_data is None: 
+                    new_data = 0
+                new_value = new_data - int(sum_value) 
+                new_value2 = new_data2 - int(sum_value)
+                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s, bestand_lager = %s  WHERE bar_Code = %s", (new_value, new_value2, bar_code))
+                if data:
+                    # Если данные были найдены, извлекаем нужные значения
+                    (bar_code, vz_nr, bedeutung, größe, bestand_lager, aktueller_bestand) = data
+                    cursor.execute("SELECT * FROM Defekt WHERE bar_code = %s", (bar_code,))
+                    existing_defekt_data = cursor.fetchone()
+                    # Выполняем запрос на вставку данных в Defekt
+                    if existing_defekt_data:
+                        rest_data = existing_defekt_data[4] + int(sum_value)
+                        cursor.execute("UPDATE Defekt SET bestand = %s WHERE bar_code = %s",(rest_data, bar_code))
+                    else:
+                        cursor.execute("INSERT INTO Defekt (bar_code, vz_nr, bedeutung, größe, bestand) VALUES (%s, %s, %s, %s, %s)", (bar_code, vz_nr, bedeutung, größe, sum_value))
+                self.show_all_data()
 
 
-
-
-    # def add_to_table():
-    #     print ("Сработало")
-
-    def add_availability(self):
-        app = main_top_level.Top_Level_Window(action_handler=self.add_to_table)
-        app.mainloop()
-        
-    def replacement_availability(self):
-        pass
-
-    def addition_availability (self):
-        pass
-    
-    def add_current(self):
-        pass
-
-    def replacement_current(self):
-        pass
-
-    def addition_current(self):
-        pass
-    
-    def defect(self):
-        pass
-
+            
 
     def export_to_excel_button_click(self):
         try:
@@ -741,7 +787,9 @@ class BestandLager(CTk.CTk):
         cursor = self.conn.cursor()
         
         # Получаем все записи из таблицы "Lager_Bestand"
-        cursor.execute("SELECT * FROM lager_bestand")
+        # Выполните SQL-запрос с сортировкой по столбцу vz_nr
+        cursor.execute("SELECT * FROM lager_bestand ORDER BY CAST(SUBSTRING(vz_nr FROM '^[0-9]+') AS INTEGER), CAST(SUBSTRING(vz_nr FROM '[0-9]+$') AS INTEGER)")
+
         data= cursor.fetchall()
         # Очищаем текущие строки в таблице
         for row in self.table.get_children():
