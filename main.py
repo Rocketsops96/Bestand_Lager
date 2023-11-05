@@ -122,8 +122,10 @@ class BestandLager(CTk.CTk):
         self.tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew")
         self.tabview.add("View")
         self.tabview.add("Editing")
+        self.tabview.add("Material")
         self.tabview.tab("View").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
         self.tabview.tab("Editing").grid_columnconfigure(0, weight=1)
+        self.tabview.tab("Material").grid_columnconfigure(0, weight=1)
         self.tabview.configure(segmented_button_selected_color="red")
         
 
@@ -188,6 +190,13 @@ class BestandLager(CTk.CTk):
         self.home_frame4 = customtkinter.CTkFrame(self.tabview.tab("Editing"),fg_color="transparent")
         self.home_frame4.grid(row=1, column=1, padx=(10,10), sticky="ne")
         self.home_frame4.grid_columnconfigure(1, weight=1)
+
+        self.home_frame5 = customtkinter.CTkFrame(self.tabview.tab("Material"),fg_color="transparent")
+        self.home_frame5.grid(row=1, column=0, padx=(0,10), sticky="nw")
+        self.home_frame5.grid_columnconfigure(0, weight=1)
+        self.home_frame6 = customtkinter.CTkFrame(self.tabview.tab("Material"),fg_color="transparent")
+        self.home_frame6.grid(row=1, column=1, padx=(10,10), sticky="ne")
+        self.home_frame6.grid_columnconfigure(1, weight=1)
         
         self.tab1_label_search = customtkinter.CTkLabel(self.home_frame1, text="Search", 
                                                               font=customtkinter.CTkFont(size=15, weight="bold"))
@@ -251,8 +260,9 @@ class BestandLager(CTk.CTk):
                                                     anchor="center", command=self.reduction_main_table)
         self.apply.grid(column = 2,row=2, padx=10, pady=20, sticky="nw")
 
-############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
-        self.material_table = ttk.Treeview(self.f2, columns=("","Bar Code", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
+
+
+        self.material_table = ttk.Treeview(self.tabview.tab("Material"), columns=("","Bar Code", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
         self.material_table.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
     
         
@@ -272,6 +282,8 @@ class BestandLager(CTk.CTk):
         self.material_table.heading("#3", text="Größe")
         self.material_table.heading("#4", text="Lager")
         self.material_table.heading("#5", text="Aktueller")
+############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
+        
     
       
         

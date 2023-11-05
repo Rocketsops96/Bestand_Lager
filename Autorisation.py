@@ -62,6 +62,11 @@ class App(CTk.CTk): # Окно авторизации
         self.image_label = CTk.CTkLabel(self, image=ctk_image, text="")
         self.image_label.grid(row=0, column=3, padx=(425, 0), pady=(10, 0), sticky="nsew")
         
+        # loading_image = f"gif2.gif" 
+        # image = PIL.Image.open(loading_image)
+        # loading_ctk_image = CTk.CTkImage(image, size=(50, 50))
+        # self.image_label = CTk.CTkLabel(self, image=loading_ctk_image, text="")
+        # self.image_label.grid(row=2, column=3, padx=(425, 0), pady=(10, 0), sticky="nsew")
 
         self.after(100, lambda: self.entrylogin.focus_set())
         self.update()
