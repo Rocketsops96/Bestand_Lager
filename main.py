@@ -409,7 +409,7 @@ class BestandLager(CTk.CTk):
         self.vz_nr.bind('<Return>', lambda event=None: self.kol2())
         self.bar_code_f2.bind('<Return>', lambda event=None: self.add_button_bau())
         self.sum.bind('<Return>', lambda event=None: self.add_button_bau())
-
+        self.sum_home_frame3.bind('<Return>', lambda event=None: self.reduction_main_table())
         self.update_ui_language(self.language)
         self.update()
 
@@ -434,85 +434,92 @@ class BestandLager(CTk.CTk):
             self.zamena_to_table.configure(state="normal")
 
     def reduction_main_table(self):
+        
         selected_reduction = self.reduction.get()
         selected_action = self.selected_action.get()
         bar_code = self.bar_code_home_frame3.get()
         sum_value = self.sum_home_frame3.get()
         cursor = self.conn.cursor()
-        if selected_reduction == "Current":
-            if selected_action == "Add":
-                cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
-                data = cursor.fetchall()
-                new_data = data[0][0]  # Получаем значение из кортежа
-                if new_data is None: 
-                    new_data = 0
-                new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
-                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
-                self.show_all_data()
+        try:
+            if selected_reduction == "Current":
+                if selected_action == "Add":
+                    cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    data = cursor.fetchall()
+                    new_data = data[0][0]  # Получаем значение из кортежа
+                    if new_data is None: 
+                        new_data = 0
+                    new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    self.show_all_data()
 
-            elif selected_action == "Decrease":
-                cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
-                data = cursor.fetchall()
-                new_data = data[0][0]  # Получаем значение из кортежа
-                if new_data is None: 
-                    new_data = 0
-                new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
-                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
-                self.show_all_data()
+                elif selected_action == "Decrease":
+                    cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    data = cursor.fetchall()
+                    new_data = data[0][0]  # Получаем значение из кортежа
+                    if new_data is None: 
+                        new_data = 0
+                    new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    self.show_all_data()
 
-            elif selected_action == "Replace":
-                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (sum_value, bar_code))
-                self.show_all_data()
+                elif selected_action == "Replace":
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (sum_value, bar_code))
+                    self.show_all_data()
 
-        if selected_reduction == "Total on account":
-            if selected_action == "Add":
-                cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
-                data = cursor.fetchall()
-                new_data = data[0][0]  # Получаем значение из кортежа
-                if new_data is None: 
-                    new_data = 0
-                new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
-                cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
-                self.show_all_data()
+            if selected_reduction == "Total on account":
+                if selected_action == "Add":
+                    cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    data = cursor.fetchall()
+                    new_data = data[0][0]  # Получаем значение из кортежа
+                    if new_data is None: 
+                        new_data = 0
+                    new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
+                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    self.show_all_data()
 
-            elif selected_action == "Decrease":
-                cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
-                data = cursor.fetchall()
-                new_data = data[0][0]  # Получаем значение из кортежа
-                if new_data is None: 
-                    new_data = 0
-                new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
-                cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
-                self.show_all_data()
+                elif selected_action == "Decrease":
+                    cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    data = cursor.fetchall()
+                    new_data = data[0][0]  # Получаем значение из кортежа
+                    if new_data is None: 
+                        new_data = 0
+                    new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
+                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    self.show_all_data()
 
-            elif selected_action == "Replace":
-                cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (sum_value, bar_code))
-                self.show_all_data()
+                elif selected_action == "Replace":
+                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (sum_value, bar_code))
+                    self.show_all_data()
 
-        if selected_reduction == "Defect":
-            if selected_action == "Add":
-                cursor.execute("SELECT * FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
-                data = cursor.fetchone()
-                new_data = data[5]
-                new_data2 = data[4]
-                if new_data is None: 
-                    new_data = 0
-                new_value = new_data - int(sum_value) 
-                new_value2 = new_data2 - int(sum_value)
-                cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s, bestand_lager = %s  WHERE bar_Code = %s", (new_value, new_value2, bar_code))
-                if data:
-                    # Если данные были найдены, извлекаем нужные значения
-                    (bar_code, vz_nr, bedeutung, größe, bestand_lager, aktueller_bestand) = data
-                    cursor.execute("SELECT * FROM Defekt WHERE bar_code = %s", (bar_code,))
-                    existing_defekt_data = cursor.fetchone()
-                    # Выполняем запрос на вставку данных в Defekt
-                    if existing_defekt_data:
-                        rest_data = existing_defekt_data[4] + int(sum_value)
-                        cursor.execute("UPDATE Defekt SET bestand = %s WHERE bar_code = %s",(rest_data, bar_code))
-                    else:
-                        cursor.execute("INSERT INTO Defekt (bar_code, vz_nr, bedeutung, größe, bestand) VALUES (%s, %s, %s, %s, %s)", (bar_code, vz_nr, bedeutung, größe, sum_value))
-                self.show_all_data()
-
+            if selected_reduction == "Defect":
+                if selected_action == "Add":
+                    cursor.execute("SELECT * FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    data = cursor.fetchone()
+                    new_data = data[5]
+                    new_data2 = data[4]
+                    if new_data is None: 
+                        new_data = 0
+                    new_value = new_data - int(sum_value) 
+                    new_value2 = new_data2 - int(sum_value)
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s, bestand_lager = %s  WHERE bar_Code = %s", (new_value, new_value2, bar_code))
+                    if data:
+                        # Если данные были найдены, извлекаем нужные значения
+                        (bar_code, vz_nr, bedeutung, größe, bestand_lager, aktueller_bestand) = data
+                        cursor.execute("SELECT * FROM Defekt WHERE bar_code = %s", (bar_code,))
+                        existing_defekt_data = cursor.fetchone()
+                        # Выполняем запрос на вставку данных в Defekt
+                        if existing_defekt_data:
+                            rest_data = existing_defekt_data[4] + int(sum_value)
+                            cursor.execute("UPDATE Defekt SET bestand = %s WHERE bar_code = %s",(rest_data, bar_code))
+                        else:
+                            cursor.execute("INSERT INTO Defekt (bar_code, vz_nr, bedeutung, größe, bestand) VALUES (%s, %s, %s, %s, %s)", (bar_code, vz_nr, bedeutung, größe, sum_value))
+        except Exception as e:
+            # Обработка ошибок, например, вывод сообщения
+            print(f"Ошибка: {e}")
+            self.show_all_data()
+        self.bar_code_home_frame3.delete(0, 'end')
+        self.sum_home_frame3.delete(0, 'end')
+        self.after(100, lambda: self.bar_code_home_frame3.focus_set())
 
             
 
