@@ -12,8 +12,6 @@ import export_to_exel
 import os
 import localizations
 import logging
-import main_top_level
-import psycopg2
 import regbase
 
 customtkinter.set_appearance_mode("dark")
@@ -43,7 +41,8 @@ class BestandLager(CTk.CTk):
         self.conn = conn
 
         #Создаем текст вверху слева
-        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="VVO Bestand Lager", 
+        text = f"VVO\nWillkommen {login}"
+        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text=text, 
                                                               font=customtkinter.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
 
@@ -628,7 +627,7 @@ class BestandLager(CTk.CTk):
    
     def get_table_list(self):
         # Получите список таблиц из базы данных
-        self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand', 'app_logs');")
+        self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand', 'app_logs', 'defekt', 'material_lager');")
         table_list = self.cursor.fetchall()
         return [table[0] for table in table_list]
 
@@ -781,25 +780,24 @@ class BestandLager(CTk.CTk):
             self.bar_code.delete(0, 'end')
 
     def show_material_table(self):
-       pass
-        # cursor = self.conn.cursor()
+        cursor = self.conn.cursor()
         
-        # # Получаем все записи из таблицы "Lager_Bestand"
-        # cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM Material_Lager")
-        # data = cursor.fetchall()
+        # Получаем все записи из таблицы "Lager_Bestand"
+        cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM material_lager")
+        data = cursor.fetchall()
         
-        # # Очищаем текущие строки в таблице
-        # for row in self.material_table.get_children():
-        #     self.material_table.delete(row)
-        # # if hasattr(self, "image_label"):
-        # #         self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
-        # # if self.error_label:
-        # #     self.error_label.destroy()
-        # # Вставляем данные в таблицу
-        # for item in data:
-        #     self.material_table.insert("", "end", values=item)
+        # Очищаем текущие строки в таблице
+        for row in self.material_table.get_children():
+            self.material_table.delete(row)
+        # if hasattr(self, "image_label"):
+        #         self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
+        # if self.error_label:
+        #     self.error_label.destroy()
+        # Вставляем данные в таблицу
+        for item in data:
+            self.material_table.insert("", "end", values=item)
         
-        # cursor.close()
+        cursor.close()
 
     def show_all_data(self):
        
@@ -968,4 +966,5 @@ class BestandLager(CTk.CTk):
 if __name__ == '__main__':
     
     app = BestandLager()
+    conn = regbase.create_conn()
     app.mainloop()

@@ -6,7 +6,8 @@ import PIL.Image
 import localizations
 import psycopg2
 import regbase
-
+import socket
+import time
 
 customtkinter.set_appearance_mode("dark")
 
@@ -18,18 +19,24 @@ class App(CTk.CTk): # Окно авторизации
     def __init__(self):
         super().__init__()
         self.iconbitmap(default=r"vvo.ico")
-        self.geometry('1280x720+300+300')
+        self.geometry('1280x720+300+180')
         self.title('Bestand Lager')
         self.resizable(False, False)
         self.language = self.load_language_from_file()
-       
-        
+        self.conn = regbase.create_conn()
+        self.image_frame= customtkinter.CTkFrame(self, height=20, width= 1280, fg_color="transparent")
+        self.image_frame.pack(side = "top")
+        image_path = f"vvo_label.png" 
+        image = PIL.Image.open(image_path)
+        ctk_image = CTk.CTkImage(image, size=(90, 125))
+        self.image_label = CTk.CTkLabel(self.image_frame, image=ctk_image, text="")
+        self.image_label.grid(padx = (1170,0),pady = 10)
 
-        self.entrylogin = CTk.CTkEntry(self, placeholder_text="Login:", corner_radius = 3)
-        self.entrylogin.grid(row=3, column=1, columnspan=2, padx=(550, 0), pady=(100, 20), sticky="nsew") # Поле для ввода логина
+        self.entrylogin = CTk.CTkEntry(self, placeholder_text="Login:", corner_radius = 3, width= 200)
+        self.entrylogin.pack(pady=(110,10)) # Поле для ввода логина
         
-        self.entrypass = customtkinter.CTkEntry(self, placeholder_text="Password:", show="*", corner_radius = 3)
-        self.entrypass.grid(row=4, column=1, columnspan=2, padx=(550, 0), pady=(00, 20), sticky="nsew") # Поле для ввода пароля
+        self.entrypass = customtkinter.CTkEntry(self, placeholder_text="Password:", show="*", corner_radius = 3, width= 200)
+        self.entrypass.pack(pady=(0,10)) # Поле для ввода пароля
         login, password = self.load_saved_login_and_password()
         if login:
             self.entrylogin.insert('0', login)
@@ -39,44 +46,63 @@ class App(CTk.CTk): # Окно авторизации
                                                 fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
                                                 font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center", text='Log in', command=self.getpass)
-        self.main_button_1.grid(row=5, column=1, padx=(550, 0), pady=(00, 20), sticky="nsew")
+        self.main_button_1.pack(pady=(0,10))
         self.main_button_1.configure(text=self.get_button_text_for_language(self.language))
         
         self.remember_me = customtkinter.CTkCheckBox(self, text="Remember me", border_width = 2, hover_color = "red", fg_color = "red", font=customtkinter.CTkFont(size=14, weight="bold"))
-        self.remember_me.grid(row=6, column=1, padx=(580, 0), pady=(0, 20), sticky="nsew")
+        self.remember_me.pack(pady=(0,10))
 
         self.language_menu = customtkinter.CTkOptionMenu(self, values=["Russian","English","Deutsch"],
                                                                fg_color="gray10", button_color="red",
                                                                command=self.update_ui_language)
-        self.language_menu.grid(row=7, column=1, padx=(550, 0), pady=(00, 20), sticky= "s")
+        self.language_menu.pack(pady=(0,10))
         self.saved_language = self.load_language_from_file()
         self.language_menu.set(self.saved_language)
+        
+        self.statusbar_connection= customtkinter.CTkFrame(self, height=20, width= 1280)
+        self.statusbar_connection.pack(side = "bottom")
         
 
         self.entrypass.bind('<Return>', lambda event=None: self.getpass()) # При нажатии на кнопку энетер нажимается кнопка Войти
         
         
-        image_path = f"vvo_label.png" 
-        image = PIL.Image.open(image_path)
-        ctk_image = CTk.CTkImage(image, size=(90, 125))
-        self.image_label = CTk.CTkLabel(self, image=ctk_image, text="")
-        self.image_label.grid(row=0, column=3, padx=(425, 0), pady=(10, 0), sticky="nsew")
         
-        # loading_image = f"gif2.gif" 
-        # image = PIL.Image.open(loading_image)
-        # loading_ctk_image = CTk.CTkImage(image, size=(50, 50))
-        # self.image_label = CTk.CTkLabel(self, image=loading_ctk_image, text="")
-        # self.image_label.grid(row=2, column=3, padx=(425, 0), pady=(10, 0), sticky="nsew")
 
-        self.after(100, lambda: self.entrylogin.focus_set())
+        self.after(1000, lambda: self.entrylogin.focus_set())
         self.update()
 
         self.login = None  # Создаем атрибут для хранения логина
         self.password = None  # Создаем атрибут для хранения пароля
         self.error_label = None # Создаем атрибут для хранения вывода текста
-
-
+        self.status_label = None
         
+        
+        self.after(100, self.updata_action)
+        
+       
+
+    def updata_action(self):
+        if self.status_label is not None:
+                self.status_label.destroy()
+        try:
+            socket.create_connection(("www.google.com", 80), timeout=10)
+            if not self.conn:
+                # Если соединение с базой данных отсутствует, пробуем его восстановить
+                self.conn = regbase.create_conn()
+                print("Database connection re-established")
+            self.connected_status_label("Connected")
+            print("connected")
+        except (socket.timeout, socket.error):
+            self.connected_status_label("Connection error")
+            print("Nihuya")
+            if self.conn:
+                # Если есть соединение с базой данных, закрываем его
+                self.conn.close()
+                self.conn = None
+                print("Database connection closed")
+        self.after(1000, self.updata_action)
+
+
     def get_button_text_for_language(self, language):
         texts = localizations.language_texts.get(language, {})
         return texts.get("Log in", "Log in")
@@ -88,7 +114,7 @@ class App(CTk.CTk): # Окно авторизации
             self.display_error("You did not enter your username \n or password")
             return  # Завершаем функцию, если поля пустые
 
-        cursor = conn.cursor()
+        cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM users WHERE login = %s AND password = %s" , (self.login, self.password))
         data = cursor.fetchone()
         if data is not None and len(data) >= 2:
@@ -106,7 +132,7 @@ class App(CTk.CTk): # Окно авторизации
             self.display_error("Есть такая учетная запись")
             #self.withdraw()  # Сворачиваем окно
             self.destroy()
-            new_window = main.BestandLager(self.login,self.role, conn)
+            new_window = main.BestandLager(self.login,self.role, self.conn)
             new_window.mainloop()  # Запускаем главный цикл нового окна
             
         else:
@@ -127,10 +153,16 @@ class App(CTk.CTk): # Окно авторизации
     def display_error(self, message):
         if self.error_label:
             self.error_label.destroy()  # Удаляем предыдущее сообщение об ошибке, если оно уже было
-        
+    
+    
         self.error_label = CTk.CTkLabel(self, text=message, text_color="gray") # создаем лейбл
-        self.error_label.grid(row=8, column=1, columnspan= 2, padx=(550, 0), pady=(0, 20), sticky="nsew") # положение вывода лейбла
-     
+        self.error_label.pack(pady=(0, 10)) # положение вывода лейбла
+    
+    def connected_status_label(self, message):
+            self.status_label = customtkinter.CTkLabel(self.statusbar_connection, text=message, text_color="gray", height= 20)
+            self.status_label.grid(sticky = 'nsew', padx = (0,1280))
+            
+        
     def save_language_to_file(self, language):
         with open("language.txt", "w") as file:
             file.write(language)
@@ -160,7 +192,7 @@ class App(CTk.CTk): # Окно авторизации
 
 if __name__ == '__main__':
     app = App()
-    conn = regbase.create_conn()
+    
     app.mainloop()
     
 
