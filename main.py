@@ -13,6 +13,8 @@ import os
 import localizations
 import logging
 import regbase
+import pysftp
+from tkinter import filedialog
 
 customtkinter.set_appearance_mode("dark")
 
@@ -98,9 +100,10 @@ class BestandLager(CTk.CTk):
      
 
         self.f2 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.f2.grid_columnconfigure(0, weight=1)
-        self.f2.grid_rowconfigure(0, weight=1)
-        self.f2.grid_rowconfigure(1, weight=1)
+        self.f2.grid_columnconfigure(0, weight=0)
+        self.f2.grid_rowconfigure(0, weight=0)
+        self.f2.grid_rowconfigure(1, weight=0)
+        
 
         self.f3 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.f3.grid_columnconfigure(0, weight=0)
@@ -283,8 +286,45 @@ class BestandLager(CTk.CTk):
         self.material_table.heading("#5", text="Aktueller")
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
         
-    
-      
+        self.kostenstelle_vvo = customtkinter.CTkEntry(self.f2, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
+        self.kostenstelle_vvo.grid(column= 0, row=0, padx=(10, 10), pady=(10, 10), sticky="nw")
+
+        self.bauvorhaben = customtkinter.CTkEntry(self.f2, placeholder_text="Bauvorhaben:", width= 250, corner_radius = 3)
+        self.bauvorhaben.grid(column= 0, row=1, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.strasse_ort = customtkinter.CTkEntry(self.f2, placeholder_text="Strasse_ort:", width= 250, corner_radius = 3)
+        self.strasse_ort.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ausfurung_von = customtkinter.CTkEntry(self.f2, placeholder_text="Ausfurung von:", width= 250, corner_radius = 3)
+        self.ausfurung_von.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ausfurung_bis = customtkinter.CTkEntry(self.f2, placeholder_text="Ausfurung bis:", width= 250, corner_radius = 3)
+        self.ausfurung_bis.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.vz_plan = customtkinter.CTkEntry(self.f2, placeholder_text="VZ-Plan:", width= 250, corner_radius = 3)
+        self.vz_plan.grid(column= 0, row=5, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.datum = customtkinter.CTkEntry(self.f2, placeholder_text="Verkehrs.Anordnung Datum:", width= 250, corner_radius = 3)
+        self.datum.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ansprechpartner = customtkinter.CTkEntry(self.f2, placeholder_text="Ansprechpartner:", width= 250, corner_radius = 3)
+        self.ansprechpartner.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.select_plan_pdf = customtkinter.CTkButton(master=self.f2, corner_radius=5, height=30, width=250, border_spacing=5, text="Open VZP...",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
+                                                    anchor="center", command=self.select_images)
+        self.select_plan_pdf.grid(column = 0,row=8, padx=(10,0), pady=(0, 10), sticky="nw")
+
+        self.selcteded_pdf_files = customtkinter.CTkLabel(self.f2, text="dsfsd", 
+                                                            font=customtkinter.CTkFont(size=11), text_color=("gray30"))
+        self.selcteded_pdf_files.grid(row=8, column=1, padx=10, pady=(0,10))
+
+        self.create_bau = customtkinter.CTkButton(master=self.f2, corner_radius=5, height=30, width=250, border_spacing=5, text="Upload",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
+                                                    anchor="center", command=self.upload_images)
+        self.create_bau.grid(column = 0,row=9, padx=(10,0), pady=(0, 10), sticky="nw")
+
+
         
         
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ##############        
@@ -421,6 +461,93 @@ class BestandLager(CTk.CTk):
         self.show_all_data()
         self.show_material_table()
 
+
+
+    def upload_images(self):
+        kostenstelle_vvo = self.kostenstelle_vvo.get()
+        bauvorhaben = self.bauvorhaben.get()
+        strasse_ort = self.strasse_ort.get()
+        ausfurung_von = self.ausfurung_von.get()
+        ausfurung_bis = self.ausfurung_bis.get()
+        vz_plan = self.vz_plan.get()
+        datum = self.datum.get()
+        ansprechpartner = self.ansprechpartner.get()
+        # Создаем название таблицы на основе strasse_ort
+        table_name = f"_{kostenstelle_vvo.lower().replace(' ', '_')}_{strasse_ort.lower().replace(' ', '_')}"
+
+        # Создаем SQL-запрос для создания таблицы
+        cursor = self.conn.cursor()
+        cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id SERIAL PRIMARY KEY,kostenstelle_vvo text,bauvorhaben text,strasse_ort text,ausfurung_von text,ausfurung_bis text,vz_plan text,datum text,ansprechpartner text)")
+   
+        cursor.execute(f"INSERT INTO {table_name} (kostenstelle_vvo, bauvorhaben, strasse_ort, ausfurung_von, ausfurung_bis, vz_plan, datum, ansprechpartner) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",(kostenstelle_vvo, bauvorhaben, strasse_ort, ausfurung_von, ausfurung_bis, vz_plan, datum, ansprechpartner))
+
+        
+        host = "45.82.70.15"
+        username = "root"
+        password = "D5v7O1n5M8"
+        port = 58374
+        base_remote_path = "/VVO/"  # Основной путь на сервере
+
+        # Создаем комбинацию имен для создания папки
+        folder_name = f"{kostenstelle_vvo}_{bauvorhaben}"
+
+        # Путь к основной папке с учетом комбинации имен
+        remote_path = base_remote_path + folder_name + "/"
+
+        # Подпапки, которые нужно создать
+        subfolders = ["VZP", "Photo"]
+
+        # Устанавливаем соединение по SFTP
+        cnopts = pysftp.CnOpts()
+        cnopts.hostkeys = None  # Отключаем проверку ключей хоста
+
+        with pysftp.Connection(host, username=username, password=password, port=port, cnopts=cnopts) as sftp:
+            # Создаем основную папку, если она еще не существует
+            try:
+                sftp.mkdir(base_remote_path + folder_name)
+                print(f"Основная папка {folder_name} успешно создана.")
+            except Exception as e:
+                print(f"Папка {folder_name} уже существует или произошла ошибка: {e}")
+
+            # Создаем подпапки внутри основной папки
+            for subfolder in subfolders:
+                try:
+                    sftp.mkdir(remote_path + subfolder)
+                    print(f"Папка {subfolder} успешно создана.")
+                except Exception as e:
+                    print(f"Папка {subfolder} уже существует или произошла ошибка: {e}")
+
+            # Переходим в папку VZP, если она уже существует
+            try:
+                sftp.chdir(remote_path + "VZP")
+            except Exception as e:
+                print(f"Папка VZP не существует или произошла ошибка: {e}")
+
+            # Загружаем изображения на сервер
+            for local_path, file_name in zip(self.selected_file_paths, self.selected_file_names):
+                sftp.put(local_path, file_name)
+                print(f"Файл успешно загружен на сервер: {remote_path}VZP/{file_name}")
+
+
+
+    def select_images(self):
+        # Открываем проводник для выбора файлов
+        file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
+
+        # Проверяем, были ли выбраны файлы
+        if file_paths:
+            # Получаем имена файлов
+            file_names = [file_path.split("/")[-1] for file_path in file_paths]
+
+            # Отображаем информацию о файлах
+            self.selcteded_pdf_files.configure(text=f"{', '.join(file_names)}")
+
+            # Активируем кнопку загрузки
+            #self.upload_button.config(state=tk.NORMAL)
+
+            # Сохраняем пути к файлам и их имена
+            self.selected_file_paths = file_paths
+            self.selected_file_names = file_names
 
     def handle_reduction_change(self, event):
         selected_reduction = self.reduction.get()  # Получаем выбранный параметр
