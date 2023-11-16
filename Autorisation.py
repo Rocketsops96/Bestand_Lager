@@ -8,6 +8,12 @@ import psycopg2
 import regbase
 import socket
 import time
+import os
+import requests
+import tkinter.messagebox
+import multiprocessing
+import subprocess
+import threading
 
 customtkinter.set_appearance_mode("dark")
 
@@ -20,7 +26,7 @@ class App(CTk.CTk): # Окно авторизации
         super().__init__()
         self.iconbitmap(default=r"vvo.ico")
         self.geometry('1280x720+300+180')
-        self.title('Bestand Lager')
+        self.title('VVO')
         self.resizable(False, False)
         self.language = self.load_language_from_file()
         self.conn = regbase.create_conn()
@@ -59,7 +65,7 @@ class App(CTk.CTk): # Окно авторизации
         self.saved_language = self.load_language_from_file()
         self.language_menu.set(self.saved_language)
         
-        self.statusbar_connection= customtkinter.CTkFrame(self, height=20, width= 1280)
+        self.statusbar_connection= customtkinter.CTkFrame(self, height=20, width= 1280, corner_radius= 1)
         self.statusbar_connection.pack(side = "bottom")
         
 
@@ -78,8 +84,43 @@ class App(CTk.CTk): # Окно авторизации
         
         
         self.after(100, self.updata_action)
+        self.check_update()
         
-       
+    def check_update(self):
+        github_api_url = 'https://api.github.com/repos/Rocketsops96/Bestand_Lager/releases/latest'
+        # Загрузите информацию о последнем релизе с GitHub API
+        response = requests.get(github_api_url)
+        if response.status_code == 200:
+            release_info = response.json()
+            assets = release_info.get('assets', [])
+
+            # Проверяем, есть ли какие-то ассеты (архивы) в релизе
+            if assets:
+                download_url = assets[0].get('browser_download_url', '')
+
+                # Получите текущую версию
+                current_version_path = 'version.txt'
+                if os.path.exists(current_version_path):
+                    with open(current_version_path, 'r') as current_version_file:
+                        current_version = current_version_file.read().strip()
+                        self.latest_current_version = current_version
+                        if current_version != release_info['tag_name']:
+                            confirmation = tkinter.messagebox.askyesno("Подтверждение", f"Вы уверены что хотите обновить?")
+                         
+                            if confirmation:
+                                    threading.Thread(target=self.start_update_process).start()
+                            else:
+                                print("no")
+                else:
+                    current_version = 'v0.0.0.0'
+        
+
+    def start_update_process(self):
+        
+        subprocess.Popen(["cmd", "/c", "start", "update.bat"])
+        exit = App()
+        exit.destroy()
+        
 
     def updata_action(self):
         if self.status_label is not None:
@@ -90,7 +131,7 @@ class App(CTk.CTk): # Окно авторизации
                 # Если соединение с базой данных отсутствует, пробуем его восстановить
                 self.conn = regbase.create_conn()
                 print("Database connection re-established")
-            self.connected_status_label("Connected")
+            self.connected_status_label(f"  Connected {self.latest_current_version}")
             print("connected")
         except (socket.timeout, socket.error):
             self.connected_status_label("Connection error")
@@ -188,7 +229,9 @@ class App(CTk.CTk): # Окно авторизации
         except FileNotFoundError:
             return None, None
 
-
+def run_update_process():
+    exe_path = r'update.exe'
+    subprocess.run(exe_path, shell=True, check=True)
 
 if __name__ == '__main__':
     app = App()
