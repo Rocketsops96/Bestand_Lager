@@ -13,8 +13,12 @@ import os
 import localizations
 import logging
 import regbase
-import pysftp
 from tkinter import filedialog
+import base64
+import test_map
+import base64
+from PIL import Image
+from io import BytesIO
 
 customtkinter.set_appearance_mode("dark")
 
@@ -53,7 +57,7 @@ class BestandLager(CTk.CTk):
                                                     anchor="w", command=self.home_button_event)
         self.sign.grid(row=1, column=0, sticky="ew")
 
-        self.material_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Material", font=("Arial", 14, "bold"),
+        self.material_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Traffic safety", font=("Arial", 14, "bold"),
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                        anchor="w", command=self.material_button_event)
         self.material_frame.grid(row=2, column=0, sticky="ew")
@@ -100,9 +104,9 @@ class BestandLager(CTk.CTk):
      
 
         self.f2 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.f2.grid_columnconfigure(0, weight=0)
-        self.f2.grid_rowconfigure(0, weight=0)
-        self.f2.grid_rowconfigure(1, weight=0)
+        self.f2.grid_columnconfigure(0, weight=1)
+        self.f2.grid_rowconfigure(0, weight=1)
+      
         
 
         self.f3 = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -231,8 +235,7 @@ class BestandLager(CTk.CTk):
 
     
         self.reduction = customtkinter.CTkOptionMenu(self.home_frame3, values=["Current","Total on account","Defect"],
-                                                               fg_color="gray10", button_color="red",
-                                                               command=self.handle_reduction_change)
+                                                               fg_color="gray10", button_color="red", command= self.handle_reduction_change)
         self.reduction.grid(row=0, column=0, padx=20, pady=(20, 0), sticky= "s")
 
         self.selected_action = tkinter.StringVar()  # Создаем переменную для хранения выбранной радиокнопки
@@ -257,7 +260,7 @@ class BestandLager(CTk.CTk):
         self.sum_home_frame3 = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Введите количество", width= 250, corner_radius = 3)
         self.sum_home_frame3.grid(column= 2, row=1, pady=(10, 0),padx = 10, sticky="s",)
 
-        self.apply = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="apply",
+        self.apply = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Apply",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.reduction_main_table)
         self.apply.grid(column = 2,row=2, padx=10, pady=20, sticky="nw")
@@ -285,138 +288,185 @@ class BestandLager(CTk.CTk):
         self.material_table.heading("#4", text="Lager")
         self.material_table.heading("#5", text="Aktueller")
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
+       
+        self.tabview_baustellen = customtkinter.CTkTabview(self.f2)
+        self.tabview_baustellen.grid(row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew")
+        self.tabview_baustellen.add("Erstellen")
+        self.tabview_baustellen.add("Bearbeitung")
+        self.tabview_baustellen.add("Inaktiv")
+        self.tabview_baustellen.tab("Erstellen").grid_columnconfigure(0, weight=1)
+        self.tabview_baustellen.tab("Bearbeitung").grid_columnconfigure(0, weight=1)
+        self.tabview_baustellen.tab("Inaktiv").grid_columnconfigure(0, weight=1)
+        self.tabview_baustellen.configure(segmented_button_selected_color="red")
+
+
+        self.bau_frame1 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Erstellen"),fg_color="transparent")
+        self.bau_frame1.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame1.grid_columnconfigure(0, weight=0)
         
-        self.kostenstelle_vvo = customtkinter.CTkEntry(self.f2, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
-        self.kostenstelle_vvo.grid(column= 0, row=0, padx=(10, 10), pady=(10, 10), sticky="nw")
+        
 
-        self.bauvorhaben = customtkinter.CTkEntry(self.f2, placeholder_text="Bauvorhaben:", width= 250, corner_radius = 3)
-        self.bauvorhaben.grid(column= 0, row=1, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.bau_frame2 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
+        self.bau_frame2.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame2.grid_columnconfigure(0, weight=1)
+      
+        
+        self.bau_frame3 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Inaktiv"),fg_color="transparent")
+        self.bau_frame3.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame3.grid_columnconfigure(0, weight=1)
+       
+        
+       
+        self.status_bau = customtkinter.CTkOptionMenu(self.bau_frame1, values=["Aktiv","Geschlossen"],
+                                                               fg_color="gray10", button_color="red",width= 220)
+        self.status_bau.grid(row=0, column=0, padx=20, pady=(20, 0), sticky= "nw")
+        
+        self.name_bau = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Name:", width= 250, corner_radius = 3)
+        self.name_bau.grid(column= 0, row=1, padx=(10, 10), pady=(10, 10), sticky="nw")
 
-        self.strasse_ort = customtkinter.CTkEntry(self.f2, placeholder_text="Strasse_ort:", width= 250, corner_radius = 3)
-        self.strasse_ort.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.kostenstelle_vvo = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
+        self.kostenstelle_vvo.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.ausfurung_von = customtkinter.CTkEntry(self.f2, placeholder_text="Ausfurung von:", width= 250, corner_radius = 3)
-        self.ausfurung_von.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.bauvorhaben = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Bauvorhaben:", width= 250, corner_radius = 3)
+        self.bauvorhaben.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.ausfurung_bis = customtkinter.CTkEntry(self.f2, placeholder_text="Ausfurung bis:", width= 250, corner_radius = 3)
-        self.ausfurung_bis.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.ort = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ort:", width= 250, corner_radius = 3)
+        self.ort.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.vz_plan = customtkinter.CTkEntry(self.f2, placeholder_text="VZ-Plan:", width= 250, corner_radius = 3)
-        self.vz_plan.grid(column= 0, row=5, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.strasse = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Strasse:", width= 250, corner_radius = 3)
+        self.strasse.grid(column= 0, row=5, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.datum = customtkinter.CTkEntry(self.f2, placeholder_text="Verkehrs.Anordnung Datum:", width= 250, corner_radius = 3)
-        self.datum.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.ausfurung_von = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ausfurung von:", width= 250, corner_radius = 3)
+        self.ausfurung_von.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.ansprechpartner = customtkinter.CTkEntry(self.f2, placeholder_text="Ansprechpartner:", width= 250, corner_radius = 3)
-        self.ansprechpartner.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.ausfurung_bis = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ausfurung bis:", width= 250, corner_radius = 3)
+        self.ausfurung_bis.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.select_plan_pdf = customtkinter.CTkButton(master=self.f2, corner_radius=5, height=30, width=250, border_spacing=5, text="Open VZP...",
+        self.datum = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Verkehrs.Anordnung Datum:", width= 250, corner_radius = 3)
+        self.datum.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ansprechpartner = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ansprechpartner:", width= 250, corner_radius = 3)
+        self.ansprechpartner.grid(column= 0, row=9, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.uber = customtkinter.CTkSwitch(self.bau_frame1, text="Uberwachung", font=customtkinter.CTkFont(size=14, weight="bold"), button_color= ("white"), progress_color = ("red"), button_hover_color = ("red"))
+        self.uber.grid(column = 0, row = 10, padx=(10, 10), pady=(0, 10), sticky="nw")
+        
+        self.map_data = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Open VZP...",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
+                                                    anchor="center", command=self.map)
+        self.map_data.grid(column = 0,row=11, padx=(10,0), pady=(0, 10), sticky="nw")
+
+        self.select_plan_pdf = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Open VZP...",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.select_images)
-        self.select_plan_pdf.grid(column = 0,row=8, padx=(10,0), pady=(0, 10), sticky="nw")
+        self.select_plan_pdf.grid(column = 0,row=12, padx=(10,0), pady=(0, 10), sticky="nw")
 
-        self.selcteded_pdf_files = customtkinter.CTkLabel(self.f2, text="dsfsd", 
+        self.selcteded_pdf_files = customtkinter.CTkLabel(self.bau_frame1, text="dsfsd", 
                                                             font=customtkinter.CTkFont(size=11), text_color=("gray30"))
-        self.selcteded_pdf_files.grid(row=8, column=1, padx=10, pady=(0,10))
+        self.selcteded_pdf_files.grid(row=12, column=1, padx=10, pady=(0,10), sticky = "e")
 
-        self.create_bau = customtkinter.CTkButton(master=self.f2, corner_radius=5, height=30, width=250, border_spacing=5, text="Upload",
+        self.create_bau = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Upload",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.upload_images)
-        self.create_bau.grid(column = 0,row=9, padx=(10,0), pady=(0, 10), sticky="nw")
+        self.create_bau.grid(column = 0,row=13, padx=(10,0), pady=(0, 10), sticky="nw")
+
+
+############################
+
 
 
         
         
 ############## ############## ############## ############## #Настройка фрейма №3 ############## ############## ############## ############## ##############        
         
-        self.cursor = self.conn.cursor()
+        # self.cursor = self.conn.cursor()
         
-        self.bau_list_frame = customtkinter.CTkFrame(self.f3, fg_color="transparent")
-        self.bau_list_frame.grid(row=0, column=0, padx=(10,10),pady=(5,0), sticky="nw")
-        self.bau_list_frame.grid_columnconfigure(0, weight=1)
+        # self.bau_list_frame = customtkinter.CTkFrame(self.f3, fg_color="transparent")
+        # self.bau_list_frame.grid(row=0, column=0, padx=(10,10),pady=(5,0), sticky="nw")
+        # self.bau_list_frame.grid_columnconfigure(0, weight=1)
 
-        self.bau_button_frame = customtkinter.CTkFrame(self.f3, fg_color="transparent")
-        self.bau_button_frame.grid(row=1, column=0, padx=(10,10), sticky="nw")
-        self.bau_button_frame.grid_columnconfigure(1, weight=1)
+        # self.bau_button_frame = customtkinter.CTkFrame(self.f3, fg_color="transparent")
+        # self.bau_button_frame.grid(row=1, column=0, padx=(10,10), sticky="nw")
+        # self.bau_button_frame.grid_columnconfigure(1, weight=1)
 
-        self.bau_item_frame = customtkinter.CTkFrame(self.f3)
-        self.bau_item_frame.grid(row=0, column=2, padx=(10,10), sticky="ne")
-        self.bau_item_frame.grid_columnconfigure(2, weight=1)
+        # self.bau_item_frame = customtkinter.CTkFrame(self.f3)
+        # self.bau_item_frame.grid(row=0, column=2, padx=(10,10), sticky="ne")
+        # self.bau_item_frame.grid_columnconfigure(2, weight=1)
         
         
-        self.tables = self.get_table_list()
+        # self.tables = self.get_table_list()
 
-        # Создайте список для отображения таблиц
-        self.table_listbox = CTkListbox(self.bau_list_frame,  height=10, corner_radius = 2)
-        self.table_listbox.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+        # # Создайте список для отображения таблиц
+        # self.table_listbox = CTkListbox(self.bau_list_frame,  height=10, corner_radius = 2)
+        # self.table_listbox.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
 
-        # Заполните список таблицами
-        for table in self.tables:
-            self.table_listbox.insert(CTk.END, table)
+        # # Заполните список таблицами
+        # for table in self.tables:
+        #     self.table_listbox.insert(CTk.END, table)
 
-        # Создайте кнопку для выбора таблицы
-        self.select_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center", text="Выбрать", command=self.select_table_button)
-        self.select_button.grid(row=1, column=0,  pady=10, sticky="nsew")
+        # # Создайте кнопку для выбора таблицы
+        # self.select_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+        #                                         fg_color=("gray30"), text_color=("gray90"),
+        #                                         hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+        #                                         anchor="center", text="Выбрать", command=self.select_table_button)
+        # self.select_button.grid(row=1, column=0,  pady=10, sticky="nsew")
 
-        # Создайте кнопку для создания новой таблицы
-        if self.role == "1":
-            self.create_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
-                                                font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center", text="Создать", command=self.create_table)
-            self.create_button.grid(row=2, column=0, sticky="nsew")
+        # # Создайте кнопку для создания новой таблицы
+        # if self.role == "1":
+        #     self.create_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+        #                                         fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+        #                                         font=customtkinter.CTkFont(size=15, weight="bold"),
+        #                                         anchor="center", text="Создать", command=self.create_table)
+        #     self.create_button.grid(row=2, column=0, sticky="nsew")
 
-        # Создайте кнопку для удаления таблицы
-            self.delete_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
-                                                font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center", text="Удалить", command=self.delete_table)
-            self.delete_button.grid(row=3, column=0, pady=10, sticky="nsew")
-
-        
-        self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text="", 
-                                                            font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
-
-        self.bar_code_f2 = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
-        self.bar_code_f2.grid(column= 0, row=1,  pady=(10, 10), sticky="nsew",)
-        
-
-        self.sum = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Введите количество", width= 250, corner_radius = 3)
-        self.sum.grid(column= 0, row=2, pady=(0, 0), sticky="nsew",)
-
-        self.add_button = CTk.CTkButton(self.bau_button_frame, corner_radius=2, height=30, width=250, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
-                                                font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center", text="Отправить", command=self.add_button_bau)
-        self.add_button.grid(row=3, column=0, pady=10, sticky="nsew")
-
-
-
-
+        # # Создайте кнопку для удаления таблицы
+        #     self.delete_button = CTk.CTkButton(self.bau_list_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+        #                                         fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+        #                                         font=customtkinter.CTkFont(size=15, weight="bold"),
+        #                                         anchor="center", text="Удалить", command=self.delete_table)
+        #     self.delete_button.grid(row=3, column=0, pady=10, sticky="nsew")
 
         
-        self.item_table = ttk.Treeview(self.bau_item_frame, columns=("","VZ Nr.", "Bedeutung","Bestand"), style="Treeview", height=24)
-        self.item_table.grid(row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
+        # self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text="", 
+        #                                                     font=customtkinter.CTkFont(size=15, weight="bold"))
+        # self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
+
+        # self.bar_code_f2 = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
+        # self.bar_code_f2.grid(column= 0, row=1,  pady=(10, 10), sticky="nsew",)
+        
+
+        # self.sum = customtkinter.CTkEntry(self.bau_button_frame, placeholder_text="Введите количество", width= 250, corner_radius = 3)
+        # self.sum.grid(column= 0, row=2, pady=(0, 0), sticky="nsew",)
+
+        # self.add_button = CTk.CTkButton(self.bau_button_frame, corner_radius=2, height=30, width=250, border_spacing=5,
+        #                                         fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+        #                                         font=customtkinter.CTkFont(size=15, weight="bold"),
+        #                                         anchor="center", text="Отправить", command=self.add_button_bau)
+        # self.add_button.grid(row=3, column=0, pady=10, sticky="nsew")
+
+
+
+
+
+        
+        # self.item_table = ttk.Treeview(self.bau_item_frame, columns=("","VZ Nr.", "Bedeutung","Bestand"), style="Treeview", height=24)
+        # self.item_table.grid(row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
     
-        self.item_table.column("#0", width=0, stretch=False)
-        self.item_table.column("#1", width=150)
-        self.item_table.column("#2", width=250)
-        self.item_table.column("#3", width=150)
-        self.item_table.column("#4", width=0, stretch=False)
+        # self.item_table.column("#0", width=0, stretch=False)
+        # self.item_table.column("#1", width=150)
+        # self.item_table.column("#2", width=250)
+        # self.item_table.column("#3", width=150)
+        # self.item_table.column("#4", width=0, stretch=False)
     
-        # Добавляем заголовки столбцов
+        # # Добавляем заголовки столбцов
         
-        self.item_table.heading("#1", text="VZ Nr.")
-        self.item_table.heading("#2", text="Bedeutung")
-        self.item_table.heading("#3", text="Bestand")
+        # self.item_table.heading("#1", text="VZ Nr.")
+        # self.item_table.heading("#2", text="Bedeutung")
+        # self.item_table.heading("#3", text="Bestand")
 
-        self.after(100, lambda: self.bar_code_f2.focus_set())
-        self.after(100, lambda: self.bar_code_home_frame3.focus_set())
-        self.add_button.bind('<Return>', lambda event=None: self.add_button_bau())
+        # self.after(100, lambda: self.bar_code_f2.focus_set())
+        # self.after(100, lambda: self.bar_code_home_frame3.focus_set())
+        # self.add_button.bind('<Return>', lambda event=None: self.add_button_bau())
     
 ############## ############## ############## ############## #Настройка фрейма №4 ############## ############## ############## ############## ############## 
         self.log_view = customtkinter.CTkTextbox(master=self.f4, width=400, corner_radius=3)
@@ -446,8 +496,8 @@ class BestandLager(CTk.CTk):
         self.table.bind("<<TreeviewSelect>>", self.on_item_select)
         self.bar_code.bind('<Return>', lambda event=None: self.kol2())
         self.vz_nr.bind('<Return>', lambda event=None: self.kol2())
-        self.bar_code_f2.bind('<Return>', lambda event=None: self.add_button_bau())
-        self.sum.bind('<Return>', lambda event=None: self.add_button_bau())
+        # self.bar_code_f2.bind('<Return>', lambda event=None: self.add_button_bau())
+        # self.sum.bind('<Return>', lambda event=None: self.add_button_bau())
         self.sum_home_frame3.bind('<Return>', lambda event=None: self.reduction_main_table())
         self.update_ui_language(self.language)
         self.update()
@@ -461,93 +511,157 @@ class BestandLager(CTk.CTk):
         self.show_all_data()
         self.show_material_table()
 
+        self.create_widgets()
 
+    def create_widgets(self):
+        self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
+        self.product_frame.pack(fill='both', expand=True)
+        self.display_existing_products()
+        print("create_widgets")
+
+    def display_existing_products(self):
+        # Получаем товары из базы данных
+        products = self.get_products_from_database()
+
+        # Создаем фреймы для каждого товара
+        for product in products:
+            self.create_product_frame(product)
+        print("display_existing_products")
+
+
+    def get_products_from_database(self):
+        # Открываете курсор для выполнения SQL-запроса
+        cursor = self.conn.cursor()
+        
+            # Выполняете SQL-запрос для получения товаров
+        cursor.execute("SELECT id,name_bau,kostenstelle_vvo,bauvorhaben FROM bau")
+            # Получаете результат запроса
+        products = cursor.fetchall()
+        print(products)
+        # Преобразовываем кортежи в словари
+        product_dicts = []
+        for product_tuple in products:
+            product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauervorhaben': product_tuple[3]}
+            product_dicts.append(product_dict)
+
+        # Возвращаем список словарей товаров
+        return product_dicts
+    
+
+    def create_product_frame(self, product):
+        self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
+        self.product_frame.pack(fill='x', pady=5)
+        action_button = customtkinter.CTkButton(self.product_frame, text="Действие", command=lambda p=product['id']: self.perform_action(p))
+        action_button.pack(side='left', padx=5)
+        # Создаем поле с данными о товаре
+        label = customtkinter.CTkLabel(self.product_frame, text=f"{product['name']} - {product['kostenstelle']} - {product['bauervorhaben']}")
+        label.pack(side='left', padx=5)
+
+        # Кнопка для выполнения действия с товаром
+        
+        print("create_product_frame")
+
+
+    def perform_action(self, product_id):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT image_data,kostenstelle_vvo FROM bau WHERE id = %s", (product_id,))
+        row = cursor.fetchone()
+        data1 = row[1]
+
+        # Определяем путь к рабочему столу пользователя
+        desktop_path = os.path.join(os.path.expanduser("~"), "OneDrive", "Рабочий стол")
+        # Создаем папку для сохранения изображений
+        folder_name = f"{data1}"
+        folder_path = os.path.join(desktop_path, folder_name)
+
+        # Проверяем, существует ли папка, и создаем, если нет
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT image_data,kostenstelle_vvo FROM bau WHERE id = %s", (product_id,))
+        
+        # Извлечение строки
+        
+        if row is not None:
+            # Проверяем, что данные не являются None
+            if row[0] is not None:
+                # Преобразование объекта memoryview в строку
+                image_data_array = bytes(row[0]).decode('utf-8').split(',')
+
+                # Декодирование и сохранение каждого изображения
+                for i, image_data in enumerate(image_data_array):
+                    try:
+                        # Декодирование из формата base64
+                        image_data_decoded = base64.b64decode(image_data)
+                        
+                        # Создание объекта изображения
+                        image = Image.open(BytesIO(image_data_decoded))
+                        if hasattr(image, '_getexif'):  # проверка на наличие данных ориентации
+                            exif = image._getexif()
+                            if exif is not None:
+                                orientation = exif.get(0x0112)
+                                if orientation is not None:
+                                    if orientation == 3:
+                                        image = image.rotate(180, expand=True)
+                                    elif orientation == 6:
+                                        image = image.rotate(270, expand=True)
+                                    elif orientation == 8:
+                                        image = image.rotate(90, expand=True)
+                        # Сохранение изображения в созданную папку на рабочем столе
+                        image.save(os.path.join(folder_path, f"{data1}_{i+1}.jpeg"), "JPEG", quality=20)
+                    except Exception as e:
+                        print(f"Error processing image {i+1}: {e}")
+        else:
+            print(f"No data found for id = {product_id}")
+            
+
+
+    def map(self):
+        new_window = test_map.App()
+        new_window.mainloop()  # Запускаем главный цикл нового окна
 
     def upload_images(self):
+        name = self.name_bau.get()
+        status = self.status_bau.get()
         kostenstelle_vvo = self.kostenstelle_vvo.get()
         bauvorhaben = self.bauvorhaben.get()
-        strasse_ort = self.strasse_ort.get()
+        strasse = self.strasse.get()
+        ort = self.ort.get()
         ausfurung_von = self.ausfurung_von.get()
         ausfurung_bis = self.ausfurung_bis.get()
-        vz_plan = self.vz_plan.get()
         datum = self.datum.get()
+        uberwacht = self.uber.get()
         ansprechpartner = self.ansprechpartner.get()
-        # Создаем название таблицы на основе strasse_ort
-        table_name = f"_{kostenstelle_vvo.lower().replace(' ', '_')}_{strasse_ort.lower().replace(' ', '_')}"
-
         # Создаем SQL-запрос для создания таблицы
         cursor = self.conn.cursor()
-        cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id SERIAL PRIMARY KEY,kostenstelle_vvo text,bauvorhaben text,strasse_ort text,ausfurung_von text,ausfurung_bis text,vz_plan text,datum text,ansprechpartner text)")
-   
-        cursor.execute(f"INSERT INTO {table_name} (kostenstelle_vvo, bauvorhaben, strasse_ort, ausfurung_von, ausfurung_bis, vz_plan, datum, ansprechpartner) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",(kostenstelle_vvo, bauvorhaben, strasse_ort, ausfurung_von, ausfurung_bis, vz_plan, datum, ansprechpartner))
+        cursor.execute(f"CREATE TABLE IF NOT EXISTS Bau (id SERIAL PRIMARY KEY,name_bau text, kostenstelle_vvo text,bauvorhaben text,ort text, strasse text,ausfurung_von text,ausfurung_bis text,datum text,ansprechpartner text, status text, image_data BYTEA, pdf_data BYTEA, meta_data text, uberwachung text)")
 
+        meta_data = None
         
-        host = "45.82.70.15"
-        username = "root"
-        password = "D5v7O1n5M8"
-        port = 58374
-        base_remote_path = "/VVO/"  # Основной путь на сервере
-
-        # Создаем комбинацию имен для создания папки
-        folder_name = f"{kostenstelle_vvo}_{bauvorhaben}"
-
-        # Путь к основной папке с учетом комбинации имен
-        remote_path = base_remote_path + folder_name + "/"
-
-        # Подпапки, которые нужно создать
-        subfolders = ["VZP", "Photo"]
-
-        # Устанавливаем соединение по SFTP
-        cnopts = pysftp.CnOpts()
-        cnopts.hostkeys = None  # Отключаем проверку ключей хоста
-
-        with pysftp.Connection(host, username=username, password=password, port=port, cnopts=cnopts) as sftp:
-            # Создаем основную папку, если она еще не существует
-            try:
-                sftp.mkdir(base_remote_path + folder_name)
-                print(f"Основная папка {folder_name} успешно создана.")
-            except Exception as e:
-                print(f"Папка {folder_name} уже существует или произошла ошибка: {e}")
-
-            # Создаем подпапки внутри основной папки
-            for subfolder in subfolders:
-                try:
-                    sftp.mkdir(remote_path + subfolder)
-                    print(f"Папка {subfolder} успешно создана.")
-                except Exception as e:
-                    print(f"Папка {subfolder} уже существует или произошла ошибка: {e}")
-
-            # Переходим в папку VZP, если она уже существует
-            try:
-                sftp.chdir(remote_path + "VZP")
-            except Exception as e:
-                print(f"Папка VZP не существует или произошла ошибка: {e}")
-
-            # Загружаем изображения на сервер
-            for local_path, file_name in zip(self.selected_file_paths, self.selected_file_names):
-                sftp.put(local_path, file_name)
-                print(f"Файл успешно загружен на сервер: {remote_path}VZP/{file_name}")
-
+        cursor.execute(f"INSERT INTO Bau (name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status, pdf_data, meta_data , uberwachung) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis,datum, ansprechpartner, status, self.pdf_data, meta_data, uberwacht))
 
 
     def select_images(self):
-        # Открываем проводник для выбора файлов
-        file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
+        pdf_file_paths = filedialog.askopenfilenames(title="Выберите PDF файлы", filetypes=[("PDF files", "*.pdf")])
+        def encode_pdf_to_base64(pdf_file_path):
+            with open(pdf_file_path, 'rb') as pdf_file:
+                pdf_content = pdf_file.read()
+                encoded_pdf = base64.b64encode(pdf_content).decode('utf-8')
+            return encoded_pdf
+        # Если файлы не выбраны, выход из программы
+        if not pdf_file_paths:
+            print("No PDF files selected. Exiting.")
+            exit()
 
-        # Проверяем, были ли выбраны файлы
-        if file_paths:
-            # Получаем имена файлов
-            file_names = [file_path.split("/")[-1] for file_path in file_paths]
+        # Кодируем PDF-файлы в base64 и добавляем их в список pdf_files_base64
+        pdf_files_base64 = []
+        for pdf_file_path in pdf_file_paths:
+            pdf_files_base64.append(encode_pdf_to_base64(pdf_file_path))
 
-            # Отображаем информацию о файлах
-            self.selcteded_pdf_files.configure(text=f"{', '.join(file_names)}")
-
-            # Активируем кнопку загрузки
-            #self.upload_button.config(state=tk.NORMAL)
-
-            # Сохраняем пути к файлам и их имена
-            self.selected_file_paths = file_paths
-            self.selected_file_names = file_names
+            # Преобразование списка в строку с разделителем запятой
+        self.pdf_data = ','.join(pdf_files_base64)
+        
 
     def handle_reduction_change(self, event):
         selected_reduction = self.reduction.get()  # Получаем выбранный параметр
@@ -647,8 +761,6 @@ class BestandLager(CTk.CTk):
         self.sum_home_frame3.delete(0, 'end')
         self.after(100, lambda: self.bar_code_home_frame3.focus_set())
 
-            
-
     def export_to_excel_button_click(self):
         try:
             export_to_exel.export_to_excel()  # Вызываем функцию из другого файла
@@ -660,123 +772,123 @@ class BestandLager(CTk.CTk):
         if os.path.exists("Bestand_Lager.xlsx"):
             print("Файл Excel уже существует.")
     
-    def add_button_bau(self):
-        print(self.selected_table)
-        self.barcode_f2 = self.bar_code_f2.get()
-        self.sum_value = self.sum.get()  # Сохраняем значение суммы как атрибут объекта
+    # def add_button_bau(self):
+    #     print(self.selected_table)
+    #     self.barcode_f2 = self.bar_code_f2.get()
+    #     self.sum_value = self.sum.get()  # Сохраняем значение суммы как атрибут объекта
         
-        # Создаем контекстные менеджеры для соединений, и здесь не нужно закрывать соединение с базой
-        cursor = self.conn.cursor()
-        print("0,5")
-        # Выполняем операцию SELECT в базе данных "bd.db"
-        cursor.execute("SELECT * FROM lager_bestand WHERE bar_code = %s",(self.barcode_f2,))
-        data = cursor.fetchone()
-        print(data)
-        bar = data[0]
-        vz = data[1]
-        bed = data[4]
-        akt = data[5]
-        print("1")
-        try:
-            # Проверяем наличие товара в таблице
-            cursor.execute(f"SELECT * FROM {self.selected_table} WHERE Bar_Code = %s",(bar,))
-            existing_product = cursor.fetchone()
-            print(self.selected_table)
-            print("2")
-            if existing_product:
-                # Если товар уже существует, обновляем Bestand
-                cursor.execute(f"UPDATE {self.selected_table} SET bestand = %s WHERE bar_code = %s",(self.sum_value,bar))
-                print("3")
-            else:
-                # Если товар не существует, добавляем новую запись
-                cursor.execute(f"INSERT INTO {self.selected_table} (bar_code, vz_nr, bedeutung, bestand) VALUES (%s, %s, %s, %s)",(bar,vz,bed,self.sum_value))
-                # Очищаем таблицу программы перед добавлением новых данных
-                print("4")
-            for row in self.item_table.get_children():
-                self.item_table.delete(row)
-                print("5")
-            # Загружаем все данные из выбранной таблицы и выводим их в таблицу программы
-            cursor.execute(f"SELECT vz_Nr, bedeutung, bestand FROM {self.selected_table}")
-            data = cursor.fetchall()
-            print("6")
-            for item in data:
-                self.item_table.insert("", "end", values=item)
-            self.bar_code_f2.delete(0, 'end')
-            self.sum.delete(0, 'end') 
-            self.after(50, lambda: self.bar_code_f2.focus_set())
+    #     # Создаем контекстные менеджеры для соединений, и здесь не нужно закрывать соединение с базой
+    #     cursor = self.conn.cursor()
+    #     print("0,5")
+    #     # Выполняем операцию SELECT в базе данных "bd.db"
+    #     cursor.execute("SELECT * FROM lager_bestand WHERE bar_code = %s",(self.barcode_f2,))
+    #     data = cursor.fetchone()
+    #     print(data)
+    #     bar = data[0]
+    #     vz = data[1]
+    #     bed = data[4]
+    #     akt = data[5]
+    #     print("1")
+    #     try:
+    #         # Проверяем наличие товара в таблице
+    #         cursor.execute(f"SELECT * FROM {self.selected_table} WHERE Bar_Code = %s",(bar,))
+    #         existing_product = cursor.fetchone()
+    #         print(self.selected_table)
+    #         print("2")
+    #         if existing_product:
+    #             # Если товар уже существует, обновляем Bestand
+    #             cursor.execute(f"UPDATE {self.selected_table} SET bestand = %s WHERE bar_code = %s",(self.sum_value,bar))
+    #             print("3")
+    #         else:
+    #             # Если товар не существует, добавляем новую запись
+    #             cursor.execute(f"INSERT INTO {self.selected_table} (bar_code, vz_nr, bedeutung, bestand) VALUES (%s, %s, %s, %s)",(bar,vz,bed,self.sum_value))
+    #             # Очищаем таблицу программы перед добавлением новых данных
+    #             print("4")
+    #         for row in self.item_table.get_children():
+    #             self.item_table.delete(row)
+    #             print("5")
+    #         # Загружаем все данные из выбранной таблицы и выводим их в таблицу программы
+    #         cursor.execute(f"SELECT vz_Nr, bedeutung, bestand FROM {self.selected_table}")
+    #         data = cursor.fetchall()
+    #         print("6")
+    #         for item in data:
+    #             self.item_table.insert("", "end", values=item)
+    #         self.bar_code_f2.delete(0, 'end')
+    #         self.sum.delete(0, 'end') 
+    #         self.after(50, lambda: self.bar_code_f2.focus_set())
             
             
-        except Exception as e:
-            print("Ошибка add_button_bau:", e)
+    #     except Exception as e:
+    #         print("Ошибка add_button_bau:", e)
 
-    def delete_table(self):
-        selected_table = self.table_listbox.get(self.table_listbox.curselection())
-        if selected_table:
-            # Открываем диалоговое окно с вопросом
-            confirmation = tkinter.messagebox.askyesno("Подтверждение", f"Вы уверены что хотите удалить таблицу '{selected_table}'?")
+    # def delete_table(self):
+    #     selected_table = self.table_listbox.get(self.table_listbox.curselection())
+    #     if selected_table:
+    #         # Открываем диалоговое окно с вопросом
+    #         confirmation = tkinter.messagebox.askyesno("Подтверждение", f"Вы уверены что хотите удалить таблицу '{selected_table}'?")
             
-            if confirmation:
-                # Удалите таблицу из базы данных
-                self.cursor.execute(f"DROP TABLE IF EXISTS {selected_table};")
-                self.conn.commit()
+    #         if confirmation:
+    #             # Удалите таблицу из базы данных
+    #             self.cursor.execute(f"DROP TABLE IF EXISTS {selected_table};")
+    #             self.conn.commit()
 
-                # Обновите список таблиц
-                self.tables = self.get_table_list()
-                self.table_listbox.delete(0, CTk.END)  # Очистите список
-                for table in self.tables:
-                    self.table_listbox.insert(CTk.END, table)
-        user = self.login # имя кто сделал действие для лога
-        action = f"удалил таблицу под названием {selected_table}" # перменная для создания названия действия лога
-        self.user_action(user, action)
+    #             # Обновите список таблиц
+    #             self.tables = self.get_table_list()
+    #             self.table_listbox.delete(0, CTk.END)  # Очистите список
+    #             for table in self.tables:
+    #                 self.table_listbox.insert(CTk.END, table)
+    #     user = self.login # имя кто сделал действие для лога
+    #     action = f"удалил таблицу под названием {selected_table}" # перменная для создания названия действия лога
+    #     self.user_action(user, action)
 
-    def create_table(self):
-        # Запросите имя новой таблицы с помощью диалогового окна
+    # def create_table(self):
+    #     # Запросите имя новой таблицы с помощью диалогового окна
 
-        dialog = customtkinter.CTkInputDialog(text="Введите название стройки или номер", title="Baustelle", button_fg_color = "gray30",
-                                                                                        button_hover_color = "red")
-        dialog.geometry("300x200")
-        text = dialog.get_input()  # waits for input
+    #     dialog = customtkinter.CTkInputDialog(text="Введите название стройки или номер", title="Baustelle", button_fg_color = "gray30",
+    #                                                                                     button_hover_color = "red")
+    #     dialog.geometry("300x200")
+    #     text = dialog.get_input()  # waits for input
 
-        if text:
-            # Создайте новую таблицу в базе данных
-            self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {text} (Bar_Code TEXT, VZ_Nr TEXT, Bedeutung TEXT, Bestand TEXT);")
-            self.conn.commit()
+    #     if text:
+    #         # Создайте новую таблицу в базе данных
+    #         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {text} (Bar_Code TEXT, VZ_Nr TEXT, Bedeutung TEXT, Bestand TEXT);")
+    #         self.conn.commit()
 
-            if self.table_listbox.size() > 0:
-                self.table_listbox.delete(0, CTk.END)
-            # Обновляем список таблиц, вызывая функцию get_table_list()
-            self.tables = self.get_table_list()
-            for table in self.tables:
-                self.table_listbox.insert(CTk.END, table)
-        user = self.login # имя кто сделал действие для лога
-        action = f"создал таблицу под названием {text}" # перменная для создания названия действия лога
-        self.user_action(user, action)
+    #         if self.table_listbox.size() > 0:
+    #             self.table_listbox.delete(0, CTk.END)
+    #         # Обновляем список таблиц, вызывая функцию get_table_list()
+    #         self.tables = self.get_table_list()
+    #         for table in self.tables:
+    #             self.table_listbox.insert(CTk.END, table)
+    #     user = self.login # имя кто сделал действие для лога
+    #     action = f"создал таблицу под названием {text}" # перменная для создания названия действия лога
+    #     self.user_action(user, action)
    
-    def get_table_list(self):
-        # Получите список таблиц из базы данных
-        self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand', 'app_logs', 'defekt', 'material_lager');")
-        table_list = self.cursor.fetchall()
-        return [table[0] for table in table_list]
+    # def get_table_list(self):
+    #     # Получите список таблиц из базы данных
+    #     self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand', 'app_logs', 'defekt', 'material_lager');")
+    #     table_list = self.cursor.fetchall()
+    #     return [table[0] for table in table_list]
 
-    def select_table_button(self):
-        selected_table = self.table_listbox.get(self.table_listbox.curselection())
-        if selected_table:
-            self.selected_table = selected_table  # Сохраняем имя выбранной таблицы
-            if self.selcted_bau_table_label:
-                self.selcted_bau_table_label.destroy()
-                self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text=f"Вы выбрали: {selected_table}", 
-                                                                font=customtkinter.CTkFont(size=15, weight="bold"))
-                self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
-        # Очищаем таблицу программы перед добавлением новых данных
-        for row in self.item_table.get_children():
-            self.item_table.delete(row)
+    # def select_table_button(self):
+    #     selected_table = self.table_listbox.get(self.table_listbox.curselection())
+    #     if selected_table:
+    #         self.selected_table = selected_table  # Сохраняем имя выбранной таблицы
+    #         if self.selcted_bau_table_label:
+    #             self.selcted_bau_table_label.destroy()
+    #             self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text=f"Вы выбрали: {selected_table}", 
+    #                                                             font=customtkinter.CTkFont(size=15, weight="bold"))
+    #             self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
+    #     # Очищаем таблицу программы перед добавлением новых данных
+    #     for row in self.item_table.get_children():
+    #         self.item_table.delete(row)
         
-        # Загружаем данные из выбранной таблицы и выводим их в таблицу программы
-            cursor = self.conn.cursor()
-            cursor.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
-            data = cursor.fetchall()
-            for item in data:
-                self.item_table.insert("", "end", values=item)
+    #     # Загружаем данные из выбранной таблицы и выводим их в таблицу программы
+    #         cursor = self.conn.cursor()
+    #         cursor.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
+    #         data = cursor.fetchall()
+    #         for item in data:
+    #             self.item_table.insert("", "end", values=item)
 
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
@@ -797,20 +909,32 @@ class BestandLager(CTk.CTk):
         self.show_all.configure(text=texts.get("Show all", "Show all"))
         if self.role == "1":
             self.export_to_exel_button.configure(text=texts.get("Export to Excel", "Export to Excel"))
-            self.create_button.configure(text=texts.get("Create a construction site", "Create a construction site"))
-            self.delete_button.configure(text=texts.get("Delete a construction site", "Delete a construction site"))
-        self.select_button.configure(text=texts.get("Choose", "Choose"))
+        #     self.create_button.configure(text=texts.get("Create a construction site", "Create a construction site"))
+        #     self.delete_button.configure(text=texts.get("Delete a construction site", "Delete a construction site"))
+        # self.select_button.configure(text=texts.get("Choose", "Choose"))
         self.logout_button.configure(text=texts.get("Logout", "Logout"))
         self.bau_frame.configure(text=texts.get("Building", "Building"))
-        self.material_frame.configure(text=texts.get("Material", "Material"))
+        self.material_frame.configure(text=texts.get("Traffic safety", "Traffic safety"))
         self.log_frame.configure(text=texts.get("Logs", "Logs"))
         self.tab1_label_search.configure(text=texts.get("Search", "Search"))
+        self.plus_to_table.configure(text = texts.get("Add", "Add"))
+        self.minus_to_table.configure(text = texts.get("Decrease", "Decrease"))
+        self.zamena_to_table.configure(text = texts.get("Replace", "Replace"))
+        self.apply.configure(text = texts.get("Apply", "Apply"))
+        
         # self.tab2_label_Add.configure(text=texts.get("Add", "Add"))
 
 
 
         selected_language = language
         self.save_language_to_file(selected_language)
+
+
+ 
+
+
+
+
 
     def show_img_for_barcode(self, barcode):
         
@@ -961,7 +1085,7 @@ class BestandLager(CTk.CTk):
     def select_frame_by_name(self, name):
         # Ставим цвет для активной кнопки
         self.sign.configure(fg_color=("red") if name == "home" else "transparent")
-        self.material_frame.configure(fg_color=("red") if name == "Material" else "transparent")
+        self.material_frame.configure(fg_color=("red") if name == "Traffic safety" else "transparent")
         self.bau_frame.configure(fg_color=("red") if name == "Building" else "transparent")
         self.log_frame.configure(fg_color=("red") if name == "Logs" else "transparent")
 
@@ -970,7 +1094,7 @@ class BestandLager(CTk.CTk):
             self.f1.grid(row=0, column=1, sticky="nsew")
         else:
             self.f1.grid_forget()
-        if name == "Material":
+        if name == "Traffic safety":
             self.f2.grid(row=0, column=1, sticky="nsew")
         else:
             self.f2.grid_forget()
@@ -987,7 +1111,7 @@ class BestandLager(CTk.CTk):
         self.select_frame_by_name("home")
 
     def material_button_event(self):
-        self.select_frame_by_name("Material")
+        self.select_frame_by_name("Traffic safety")
 
     def bau_button_event(self):
         self.select_frame_by_name("Building")

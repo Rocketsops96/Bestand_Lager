@@ -12,7 +12,12 @@ language_texts = {
         "Building": "Стройки",
         "Material": "Материал",
         "Logs": "Логи",
-        "Add": "Добавить"
+        "Add": "Добавить",
+        "Traffic safety": "Безопасность движения",
+        "Add": "Добавить",
+        "Decrease": "Убрать",
+        "Replace": "Заменить",
+        "Apply": "Применить"
         # Другие тексты для русского языка
     },
     
@@ -29,7 +34,11 @@ language_texts = {
         "Building": "Baustellen",
         "Material": "Material",
         "Logs": "Protokolle",
-        "Add": "Hinzufügen"
+        "Add": "Hinzufügen",
+        "Traffic safety": "Verkehrssicherung",
+        "Decrease": "Entfernen",
+        "Replace": "Ersetzen",
+        "Apply": "Speichern"
         # Другие тексты для немецкого языка
     }
 }
