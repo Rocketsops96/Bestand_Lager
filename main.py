@@ -705,6 +705,7 @@ class BestandLager(CTk.CTk):
     def show_notification(self, title, message):
         toaster = ToastNotifier()
         toaster.show_toast(title, message, duration=5)  # duration указывает время отображения в секундах
+        toaster = None
 
     def map(self):
         # new_window = test_map.App()
@@ -751,6 +752,7 @@ class BestandLager(CTk.CTk):
 
             # Преобразование списка в строку с разделителем запятой
         self.pdf_data = ','.join(pdf_files_base64)
+        threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
         
 
     def handle_reduction_change(self, event):
