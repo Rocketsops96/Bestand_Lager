@@ -23,6 +23,8 @@ from tkcalendar import DateEntry
 import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
+import threading
+from win10toast import ToastNotifier
 
 customtkinter.set_appearance_mode("dark")
 
@@ -529,7 +531,6 @@ class BestandLager(CTk.CTk):
         self.show_logs()
         self.show_all_data()
         self.show_material_table()
-     
         self.display_existing_products()
         
 
@@ -556,7 +557,6 @@ class BestandLager(CTk.CTk):
                             'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'datum': product_tuple[8],
                             'ansprechpartner': product_tuple[9], 'status': product_tuple[10]}
             product_dicts.append(product_dict)
-
         return product_dicts
 
     def get_products_from_database(self, status = 'Aktiv'):
@@ -572,8 +572,8 @@ class BestandLager(CTk.CTk):
             product_dicts.append(product_dict)
 
         return product_dicts
+    
     def create_inaktiv_frame(self, inaktiv_product):
-        
         self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3)
         self.inaktiv_frame.pack(fill='x', pady=5, anchor="nw")
         photo_button = customtkinter.CTkButton(self.inaktiv_frame, text="Photo", command=lambda p=inaktiv_product['id']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
@@ -592,7 +592,6 @@ class BestandLager(CTk.CTk):
 
         
     def create_product_frame(self, product):
-        
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
         self.product_frame.pack(fill='x', pady=5, anchor="nw")
         photo_button = customtkinter.CTkButton(self.product_frame, text="Photo", command=lambda p=product['id']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
@@ -605,26 +604,23 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         deactive_button.pack(side='left', padx=5, anchor="nw")
+        status_vorbereitunng = customtkinter.CTkButton(self.product_frame, text="", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=2, height=30, width=30, border_spacing=5,
+                                                fg_color=("white"), hover_color=("white"), font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center" )
+        status_vorbereitunng.pack(side='left', padx=5, anchor="nw")
+
         # Создаем поле с данными о товаре
         label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['name']} - {product['kostenstelle']} - {product['bauvorhaben']} - {product['strasse']} - {product['ort']} - {product['ausfurung_von']} - {product['ausfurung_bis']} - {product['datum']} - {product['bauvorhaben']} - {product['ansprechpartner']} - {product['status']} ")
         label.pack(side='left', padx=5, anchor="nw")
-
         current_date = datetime.now().date()
-
         # Преобразуем строку даты из базы данных в объект datetime
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
-
         # Вычисляем разницу в днях между текущей датой и датой в товаре
         days_until_due = (product_date - current_date).days
-        
         # Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if days_until_due <= 7:
             label.configure(fg_color="#8a0707")
         if 8 <= days_until_due <= 10:
             label.configure(fg_color="#e6e220", text_color = "black")
-
-
-        
 
     def deactive_bau(self, product_id):
         cursor = self.conn.cursor()
@@ -646,61 +642,70 @@ class BestandLager(CTk.CTk):
 
         self.display_existing_products()
 
-
     def download_photo(self, product_id):
+        thread = threading.Thread(target=self.download_photo_in_thread, args=(product_id,))
+        thread.start()
+
+    def download_photo_in_thread(self, product_id):
+        folder_path = filedialog.askdirectory(title="Select Folder to Save Images")
         cursor = self.conn.cursor()
-        cursor.execute("SELECT image_data,kostenstelle_vvo FROM bau WHERE id = %s", (product_id,))
+        cursor.execute("SELECT image_data, kostenstelle_vvo FROM bau WHERE id = %s", (product_id,))
         row = cursor.fetchone()
         data1 = row[1]
+        if folder_path:
+            # Создаем папку для сохранения изображений
+            folder_name = f"{data1}"
+            folder_path = os.path.join(folder_path, folder_name)
 
-        # Определяем путь к рабочему столу пользователя
-        network_path = r"\\FILESRV1\Abteilungen\VVO\Schilder\test"
-        desktop_path = os.path.join(network_path, "YourSubfolder")
-        # Создаем папку для сохранения изображений
-        folder_name = f"{data1}"
-        folder_path = os.path.join(desktop_path, folder_name)
+            # Проверяем, существует ли папка, и создаем, если нет
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
 
-        # Проверяем, существует ли папка, и создаем, если нет
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+            # Извлечение строки
+            if row is not None:
+                # Проверяем, что данные не являются None
+                if row[0] is not None:
+                    # Преобразование объекта memoryview в строку
+                    image_data_array = bytes(row[0]).decode('utf-8').split(',')
 
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT image_data,kostenstelle_vvo FROM bau WHERE id = %s", (product_id,))
-        
-        # Извлечение строки
-        
-        if row is not None:
-            # Проверяем, что данные не являются None
-            if row[0] is not None:
-                # Преобразование объекта memoryview в строку
-                image_data_array = bytes(row[0]).decode('utf-8').split(',')
+                    # Декодирование и сохранение каждого изображения
+                    for i, image_data in enumerate(image_data_array):
+                        try:
+                            # Декодирование из формата base64
+                            image_data_decoded = base64.b64decode(image_data)
 
-                # Декодирование и сохранение каждого изображения
-                for i, image_data in enumerate(image_data_array):
-                    try:
-                        # Декодирование из формата base64
-                        image_data_decoded = base64.b64decode(image_data)
-                        
-                        # Создание объекта изображения
-                        image = Image.open(BytesIO(image_data_decoded))
-                        if hasattr(image, '_getexif'):  # проверка на наличие данных ориентации
-                            exif = image._getexif()
-                            if exif is not None:
-                                orientation = exif.get(0x0112)
-                                if orientation is not None:
-                                    if orientation == 3:
-                                        image = image.rotate(180, expand=True)
-                                    elif orientation == 6:
-                                        image = image.rotate(270, expand=True)
-                                    elif orientation == 8:
-                                        image = image.rotate(90, expand=True)
-                        # Сохранение изображения в созданную папку на рабочем столе
-                        image.save(os.path.join(folder_path, f"{data1}_{i+1}.jpeg"), "JPEG", quality=20)
-                    except Exception as e:
-                        print(f"Error processing image {i+1}: {e}")
-        else:
-            print(f"No data found for id = {product_id}")
-     
+                            # Создание объекта изображения
+                            image = Image.open(BytesIO(image_data_decoded))
+                            if hasattr(image, '_getexif'):  # проверка на наличие данных ориентации
+                                exif = image._getexif()
+                                if exif is not None:
+                                    orientation = exif.get(0x0112)
+                                    if orientation is not None:
+                                        if orientation == 3:
+                                            image = image.rotate(180, expand=True)
+                                        elif orientation == 6:
+                                            image = image.rotate(270, expand=True)
+                                        elif orientation == 8:
+                                            image = image.rotate(90, expand=True)
+
+                            # Путь для сохранения изображения
+                            image_path = os.path.join(folder_path, f"{data1}_{i+1}.jpeg")
+
+                            # Проверка наличия файла перед сохранением
+                            if not os.path.exists(image_path):
+                                # Сохранение изображения
+                                image.save(image_path, "JPEG", quality=20)
+                            else:
+                                print(f"File {image_path} already exists, skipping.")
+                        except Exception as e:
+                            print(f"Error processing image {i+1}: {e}")
+                else:
+                    print(f"No data found for id = {product_id}")
+            self.show_notification("Уведомление", "Изображения успешно загружены!")
+    def show_notification(self, title, message):
+        toaster = ToastNotifier()
+        toaster.show_toast(title, message, duration=5)  # duration указывает время отображения в секундах
+
     def map(self):
         # new_window = test_map.App()
         # new_window.mainloop()  # Запускаем главный цикл нового окна
