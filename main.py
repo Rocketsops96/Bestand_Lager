@@ -573,28 +573,7 @@ class BestandLager(CTk.CTk):
 
         # Вычисляем разницу в днях между текущей датой и датой в товаре
         days_until_due = (product_date - current_date).days
-
-        if days_until_due < 3:
-    # Отправляем сообщение по электронной почте
-            subject = "Внимание! Осталось 3 дня до даты выполнения"
-            body = f"Продукт {product['name']} требует вашего внимания. Осталось всего 3 дня до даты выполнения."
-            sender_email = "mrdmitrey1996@gmail.com"  # Замените на ваш электронный адрес
-            receiver_email = "d.dobin@vvo-gmbh.de"  # Замените на адрес получателя
-            password = "Slimshow96?"  # Замените на ваш пароль
-
-            msg = MIMEText(body)
-            msg["Subject"] = subject
-            msg["From"] = sender_email
-            msg["To"] = receiver_email
-
-            try:
-                with smtplib.SMTP("smtp.gmail.com", 587) as server:
-                    server.starttls()
-                    server.login(sender_email, password)
-                    server.sendmail(sender_email, receiver_email, msg.as_string())
-                print("Сообщение успешно отправлено")
-            except Exception as e:
-                print(f"Ошибка при отправке сообщения: {e}")
+        
         # Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if days_until_due <= 7:
             label.configure(fg_color="#8a0707")
