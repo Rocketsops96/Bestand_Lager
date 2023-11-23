@@ -15,10 +15,14 @@ import logging
 import regbase
 from tkinter import filedialog
 import base64
-import test_map
+# import test_map
 import base64
 from PIL import Image
 from io import BytesIO
+from tkcalendar import DateEntry
+import smtplib
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
 
 customtkinter.set_appearance_mode("dark")
 
@@ -303,13 +307,16 @@ class BestandLager(CTk.CTk):
         self.bau_frame1 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Erstellen"),fg_color="transparent")
         self.bau_frame1.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
         self.bau_frame1.grid_columnconfigure(0, weight=0)
+      
         
         
 
         self.bau_frame2 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
         self.bau_frame2.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
         self.bau_frame2.grid_columnconfigure(0, weight=1)
-      
+        self.bau_frame2_2 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
+        self.bau_frame2_2.grid(row=1, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame2_2.grid_columnconfigure(0, weight=1)
         
         self.bau_frame3 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Inaktiv"),fg_color="transparent")
         self.bau_frame3.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
@@ -336,11 +343,13 @@ class BestandLager(CTk.CTk):
         self.strasse = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Strasse:", width= 250, corner_radius = 3)
         self.strasse.grid(column= 0, row=5, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.ausfurung_von = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ausfurung von:", width= 250, corner_radius = 3)
+        self.ausfurung_von = DateEntry(self.bau_frame1, width=12, background='dark',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
         self.ausfurung_von.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="nw")
-
-        self.ausfurung_bis = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ausfurung bis:", width= 250, corner_radius = 3)
-        self.ausfurung_bis.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="nw")
+  
+        self.ausfurung_bis = DateEntry(self.bau_frame1, width=12, background='dark',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.ausfurung_bis.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="ne")
 
         self.datum = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Verkehrs.Anordnung Datum:", width= 250, corner_radius = 3)
         self.datum.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="nw")
@@ -510,14 +519,9 @@ class BestandLager(CTk.CTk):
         self.show_logs()
         self.show_all_data()
         self.show_material_table()
-
-        self.create_widgets()
-
-    def create_widgets(self):
-        self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
-        self.product_frame.pack(fill='both', expand=True)
+     
         self.display_existing_products()
-        print("create_widgets")
+
 
     def display_existing_products(self):
         # Получаем товары из базы данных
@@ -526,50 +530,106 @@ class BestandLager(CTk.CTk):
         # Создаем фреймы для каждого товара
         for product in products:
             self.create_product_frame(product)
-        print("display_existing_products")
+
 
 
     def get_products_from_database(self):
         # Открываете курсор для выполнения SQL-запроса
         cursor = self.conn.cursor()
-        
-            # Выполняете SQL-запрос для получения товаров
-        cursor.execute("SELECT id,name_bau,kostenstelle_vvo,bauvorhaben FROM bau")
-            # Получаете результат запроса
+        cursor.execute("SELECT id,name_bau,kostenstelle_vvo,bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status FROM bau")
         products = cursor.fetchall()
-        print(products)
-        # Преобразовываем кортежи в словари
         product_dicts = []
         for product_tuple in products:
-            product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauervorhaben': product_tuple[3]}
+            product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
+                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'datum': product_tuple[8],
+                            'ansprechpartner': product_tuple[9], 'status': product_tuple[10]}
             product_dicts.append(product_dict)
 
-        # Возвращаем список словарей товаров
         return product_dicts
     
 
     def create_product_frame(self, product):
-        self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
-        self.product_frame.pack(fill='x', pady=5)
-        action_button = customtkinter.CTkButton(self.product_frame, text="Действие", command=lambda p=product['id']: self.perform_action(p))
-        action_button.pack(side='left', padx=5)
-        # Создаем поле с данными о товаре
-        label = customtkinter.CTkLabel(self.product_frame, text=f"{product['name']} - {product['kostenstelle']} - {product['bauervorhaben']}")
-        label.pack(side='left', padx=5)
-
-        # Кнопка для выполнения действия с товаром
         
-        print("create_product_frame")
+        self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
+        self.product_frame.pack(fill='x', pady=5, anchor="nw")
+        photo_button = customtkinter.CTkButton(self.product_frame, text="Photo", command=lambda p=product['id']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        photo_button.pack(side='left', padx=5, anchor=NW)
+        deactive_button = customtkinter.CTkButton(self.product_frame, text="Delete", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=2, height=30, width=60, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        deactive_button.pack(side='left', padx=5, anchor="nw")
+        # Создаем поле с данными о товаре
+        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['name']} - {product['kostenstelle']} - {product['bauvorhaben']} - {product['strasse']} - {product['ort']} - {product['ausfurung_von']} - {product['ausfurung_bis']} - {product['datum']} - {product['bauvorhaben']} - {product['ansprechpartner']} - {product['status']} ")
+        label.pack(side='left', padx=5, anchor="nw")
+
+        current_date = datetime.now().date()
+
+        # Преобразуем строку даты из базы данных в объект datetime
+        product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
+
+        # Вычисляем разницу в днях между текущей датой и датой в товаре
+        days_until_due = (product_date - current_date).days
+
+        if days_until_due < 3:
+    # Отправляем сообщение по электронной почте
+            subject = "Внимание! Осталось 3 дня до даты выполнения"
+            body = f"Продукт {product['name']} требует вашего внимания. Осталось всего 3 дня до даты выполнения."
+            sender_email = "mrdmitrey1996@gmail.com"  # Замените на ваш электронный адрес
+            receiver_email = "d.dobin@vvo-gmbh.de"  # Замените на адрес получателя
+            password = "Slimshow96?"  # Замените на ваш пароль
+
+            msg = MIMEText(body)
+            msg["Subject"] = subject
+            msg["From"] = sender_email
+            msg["To"] = receiver_email
+
+            try:
+                with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                    server.starttls()
+                    server.login(sender_email, password)
+                    server.sendmail(sender_email, receiver_email, msg.as_string())
+                print("Сообщение успешно отправлено")
+            except Exception as e:
+                print(f"Ошибка при отправке сообщения: {e}")
+        # Если остается 7 дней или менее до даты, устанавливаем красный цвет
+        if days_until_due <= 7:
+            label.configure(fg_color="#8a0707")
+        if 8 <= days_until_due <= 10:
+            label.configure(fg_color="#e6e220", text_color = "black")
 
 
-    def perform_action(self, product_id):
+        
+
+    def deactive_bau(self, product_id):
+        cursor = self.conn.cursor()
+        
+            # Выполняете SQL-запрос для получения товаров
+        cursor.execute("DELETE FROM bau WHERE id = %s", (product_id,))
+
+        self.update_product_list()
+    
+    def update_product_list(self):
+        # Очищаем фрейм с товарами
+        for widget in self.bau_frame2.winfo_children():
+            widget.destroy()
+
+        # Отображаем обновленный список товаров
+        self.display_existing_products()
+
+
+    def download_photo(self, product_id):
         cursor = self.conn.cursor()
         cursor.execute("SELECT image_data,kostenstelle_vvo FROM bau WHERE id = %s", (product_id,))
         row = cursor.fetchone()
         data1 = row[1]
 
         # Определяем путь к рабочему столу пользователя
-        desktop_path = os.path.join(os.path.expanduser("~"), "OneDrive", "Рабочий стол")
+        network_path = r"\\FILESRV1\Abteilungen\VVO\Schilder\test"
+        desktop_path = os.path.join(network_path, "YourSubfolder")
         # Создаем папку для сохранения изображений
         folder_name = f"{data1}"
         folder_path = os.path.join(desktop_path, folder_name)
@@ -614,12 +674,11 @@ class BestandLager(CTk.CTk):
                         print(f"Error processing image {i+1}: {e}")
         else:
             print(f"No data found for id = {product_id}")
-            
-
-
+     
     def map(self):
-        new_window = test_map.App()
-        new_window.mainloop()  # Запускаем главный цикл нового окна
+        # new_window = test_map.App()
+        # new_window.mainloop()  # Запускаем главный цикл нового окна
+        pass
 
     def upload_images(self):
         name = self.name_bau.get()
@@ -640,7 +699,7 @@ class BestandLager(CTk.CTk):
         meta_data = None
         
         cursor.execute(f"INSERT INTO Bau (name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status, pdf_data, meta_data , uberwachung) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis,datum, ansprechpartner, status, self.pdf_data, meta_data, uberwacht))
-
+        self.update_product_list()
 
     def select_images(self):
         pdf_file_paths = filedialog.askopenfilenames(title="Выберите PDF файлы", filetypes=[("PDF files", "*.pdf")])
@@ -928,13 +987,6 @@ class BestandLager(CTk.CTk):
 
         selected_language = language
         self.save_language_to_file(selected_language)
-
-
- 
-
-
-
-
 
     def show_img_for_barcode(self, barcode):
         
