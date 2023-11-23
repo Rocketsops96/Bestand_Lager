@@ -308,9 +308,6 @@ class BestandLager(CTk.CTk):
         self.bau_frame1.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
         self.bau_frame1.grid_columnconfigure(0, weight=0)
       
-        
-        
-
         self.bau_frame2 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
         self.bau_frame2.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
         self.bau_frame2.grid_columnconfigure(0, weight=1)
@@ -343,16 +340,29 @@ class BestandLager(CTk.CTk):
         self.strasse = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Strasse:", width= 250, corner_radius = 3)
         self.strasse.grid(column= 0, row=5, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.ausfurung_von = DateEntry(self.bau_frame1, width=12, background='dark',
-                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
-        self.ausfurung_von.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="nw")
-  
-        self.ausfurung_bis = DateEntry(self.bau_frame1, width=12, background='dark',
-                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
-        self.ausfurung_bis.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="ne")
+        self.ausfurung_von_label = customtkinter.CTkLabel(self.bau_frame1, text="Ausfurung von:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.ausfurung_von_label.grid(row=6, column=0, padx=10, pady=(0,10), sticky = "nw")
 
-        self.datum = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Verkehrs.Anordnung Datum:", width= 250, corner_radius = 3)
-        self.datum.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.ausfurung_von = DateEntry(self.bau_frame1, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.ausfurung_von.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.ausfurung_bis_label = customtkinter.CTkLabel(self.bau_frame1, text="Ausfurung bis:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.ausfurung_bis_label.grid(row=7, column=0, padx=10, pady=(0,10), sticky = "nw")
+  
+        self.ausfurung_bis = DateEntry(self.bau_frame1, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.ausfurung_bis.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.datum_label = customtkinter.CTkLabel(self.bau_frame1, text="VA. Datum:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.datum_label.grid(row=8, column=0, padx=10, pady=(0,10), sticky = "nw")
+
+        self.datum = DateEntry(self.bau_frame1, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.datum.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="ne")
 
         self.ansprechpartner = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ansprechpartner:", width= 250, corner_radius = 3)
         self.ansprechpartner.grid(column= 0, row=9, padx=(10, 10), pady=(0, 10), sticky="nw")
@@ -360,7 +370,7 @@ class BestandLager(CTk.CTk):
         self.uber = customtkinter.CTkSwitch(self.bau_frame1, text="Uberwachung", font=customtkinter.CTkFont(size=14, weight="bold"), button_color= ("white"), progress_color = ("red"), button_hover_color = ("red"))
         self.uber.grid(column = 0, row = 10, padx=(10, 10), pady=(0, 10), sticky="nw")
         
-        self.map_data = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Open VZP...",
+        self.map_data = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Map",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.map)
         self.map_data.grid(column = 0,row=11, padx=(10,0), pady=(0, 10), sticky="nw")
@@ -521,22 +531,24 @@ class BestandLager(CTk.CTk):
         self.show_material_table()
      
         self.display_existing_products()
+        
+
 
 
     def display_existing_products(self):
         # Получаем товары из базы данных
         products = self.get_products_from_database()
-
+        inaktiv_products = self.get_inaktiv_from_database()
         # Создаем фреймы для каждого товара
         for product in products:
             self.create_product_frame(product)
+        for inaktiv_product in inaktiv_products:
+            self.create_inaktiv_frame(inaktiv_product)
 
-
-
-    def get_products_from_database(self):
+    def get_inaktiv_from_database(self, status = 'Inaktiv'):
         # Открываете курсор для выполнения SQL-запроса
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id,name_bau,kostenstelle_vvo,bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status FROM bau")
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
         product_dicts = []
         for product_tuple in products:
@@ -546,8 +558,39 @@ class BestandLager(CTk.CTk):
             product_dicts.append(product_dict)
 
         return product_dicts
-    
 
+    def get_products_from_database(self, status = 'Aktiv'):
+        # Открываете курсор для выполнения SQL-запроса
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        products = cursor.fetchall()
+        product_dicts = []
+        for product_tuple in products:
+            product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
+                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'datum': product_tuple[8],
+                            'ansprechpartner': product_tuple[9], 'status': product_tuple[10]}
+            product_dicts.append(product_dict)
+
+        return product_dicts
+    def create_inaktiv_frame(self, inaktiv_product):
+        
+        self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3)
+        self.inaktiv_frame.pack(fill='x', pady=5, anchor="nw")
+        photo_button = customtkinter.CTkButton(self.inaktiv_frame, text="Photo", command=lambda p=inaktiv_product['id']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        photo_button.pack(side='left', padx=5, anchor=NW)
+        activate_button = customtkinter.CTkButton(self.inaktiv_frame, text="Return", command=lambda p=inaktiv_product['id']: self.activate_bau(p),corner_radius=2, height=30, width=60, border_spacing=5,
+                                                fg_color=("gray30"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        activate_button.pack(side='left', padx=5, anchor="nw")
+        # Создаем поле с данными о товаре
+        label = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['name']} - {inaktiv_product['kostenstelle']} - {inaktiv_product['bauvorhaben']} - {inaktiv_product['strasse']} - {inaktiv_product['ort']} - {inaktiv_product['ausfurung_von']} - {inaktiv_product['ausfurung_bis']} - {inaktiv_product['datum']} - {inaktiv_product['bauvorhaben']} - {inaktiv_product['ansprechpartner']} - {inaktiv_product['status']} ")
+        label.pack(side='left', padx=5, anchor="nw")
+
+        
     def create_product_frame(self, product):
         
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
@@ -585,18 +628,22 @@ class BestandLager(CTk.CTk):
 
     def deactive_bau(self, product_id):
         cursor = self.conn.cursor()
-        
-            # Выполняете SQL-запрос для получения товаров
-        cursor.execute("DELETE FROM bau WHERE id = %s", (product_id,))
-
+        cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (product_id,))
         self.update_product_list()
-    
+
+    def activate_bau(self, product_id):
+        cursor = self.conn.cursor()
+        cursor.execute("UPDATE bau SET status = 'Aktiv' WHERE id = %s", (product_id,))
+        self.update_product_list()
+
     def update_product_list(self):
-        # Очищаем фрейм с товарами
+        # Очистите фреймы для активных и неактивных продуктов
         for widget in self.bau_frame2.winfo_children():
             widget.destroy()
 
-        # Отображаем обновленный список товаров
+        for widget in self.bau_frame3.winfo_children():
+            widget.destroy()
+
         self.display_existing_products()
 
 
