@@ -11,7 +11,7 @@ conn = regbase.create_conn()
 cursor = conn.cursor()
 
 # Выполнение SQL-запроса для извлечения массива base64-строк из столбца image_data_array
-cursor.execute("SELECT image_data FROM bau WHERE id = 2")
+cursor.execute("SELECT photo_data FROM sicherung WHERE id = '9'")
 
 # Извлечение строки
 row = cursor.fetchone()
@@ -40,7 +40,7 @@ if row:
                         elif orientation == 8:
                             image = image.rotate(90, expand=True)
             # Сохранение изображения на диск
-            cursor.execute("SELECT kostenstelle_vvo FROM bau WHERE id = 2")
+            cursor.execute("SELECT bau FROM sicherung WHERE id = '9'")
             data = cursor.fetchone()
             data1 = data[0]
             image.save(f"{data1}_{i+1}.jpeg", "JPEG", quality=20)

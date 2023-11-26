@@ -25,6 +25,9 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import threading
 from win10toast import ToastNotifier
+from babel import numbers
+from plyer import notification
+from tkinter import messagebox
 
 customtkinter.set_appearance_mode("dark")
 
@@ -88,8 +91,6 @@ class BestandLager(CTk.CTk):
         self.saved_language = self.load_language_from_file()
         self.language_menu.set(self.saved_language)
 
-        # Вызовите update_ui_language с текущим языком
-        
        
         self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["60%","70%","80%", "90%", "100%", "110%", "120%"],
                                                                fg_color="gray10", button_color="red",
@@ -358,38 +359,46 @@ class BestandLager(CTk.CTk):
                            foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
         self.ausfurung_bis.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="ne")
 
-        self.datum_label = customtkinter.CTkLabel(self.bau_frame1, text="VA. Datum:", 
+        self.vrao_ab_label = customtkinter.CTkLabel(self.bau_frame1, text="VA. ab:", 
                                                             font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
-        self.datum_label.grid(row=8, column=0, padx=10, pady=(0,10), sticky = "nw")
+        self.vrao_ab_label.grid(row=8, column=0, padx=10, pady=(0,10), sticky = "nw")
 
-        self.datum = DateEntry(self.bau_frame1, width=12, background='grey',
+        self.vrao_ab = DateEntry(self.bau_frame1, width=12, background='grey',
                            foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
-        self.datum.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="ne")
+        self.vrao_ab.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.vrao_bis_label = customtkinter.CTkLabel(self.bau_frame1, text="VA. bis:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.vrao_bis_label.grid(row=9, column=0, padx=10, pady=(0,10), sticky = "nw")
+
+        self.vrao_bis = DateEntry(self.bau_frame1, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.vrao_bis.grid(column= 0, row=9, padx=(10, 10), pady=(0, 10), sticky="ne")
 
         self.ansprechpartner = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Ansprechpartner:", width= 250, corner_radius = 3)
-        self.ansprechpartner.grid(column= 0, row=9, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.ansprechpartner.grid(column= 0, row=10, padx=(10, 10), pady=(0, 10), sticky="nw")
 
         self.uber = customtkinter.CTkSwitch(self.bau_frame1, text="Uberwachung", font=customtkinter.CTkFont(size=14, weight="bold"), button_color= ("white"), progress_color = ("red"), button_hover_color = ("red"))
-        self.uber.grid(column = 0, row = 10, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.uber.grid(column = 0, row = 11, padx=(10, 10), pady=(0, 10), sticky="nw")
         
         self.map_data = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Map",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.map)
-        self.map_data.grid(column = 0,row=11, padx=(10,0), pady=(0, 10), sticky="nw")
+        self.map_data.grid(column = 0,row=12, padx=(10,0), pady=(0, 10), sticky="nw")
 
         self.select_plan_pdf = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Open VZP...",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.select_images)
-        self.select_plan_pdf.grid(column = 0,row=12, padx=(10,0), pady=(0, 10), sticky="nw")
+        self.select_plan_pdf.grid(column = 0,row=13, padx=(10,0), pady=(0, 10), sticky="nw")
 
         self.selcteded_pdf_files = customtkinter.CTkLabel(self.bau_frame1, text="dsfsd", 
                                                             font=customtkinter.CTkFont(size=11), text_color=("gray30"))
-        self.selcteded_pdf_files.grid(row=12, column=1, padx=10, pady=(0,10), sticky = "e")
+        self.selcteded_pdf_files.grid(row=13, column=1, padx=10, pady=(0,10), sticky = "e")
 
         self.create_bau = customtkinter.CTkButton(master=self.bau_frame1, corner_radius=5, height=30, width=250, border_spacing=5, text="Upload",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.upload_images)
-        self.create_bau.grid(column = 0,row=13, padx=(10,0), pady=(0, 10), sticky="nw")
+        self.create_bau.grid(column = 0,row=14, padx=(10,0), pady=(0, 10), sticky="nw")
 
 
 ############################
@@ -540,6 +549,24 @@ class BestandLager(CTk.CTk):
         # Получаем товары из базы данных
         products = self.get_products_from_database()
         inaktiv_products = self.get_inaktiv_from_database()
+        
+        empty_label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="", width= 167)
+        empty_label.pack(side='left', padx=5, anchor="nw")
+        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="kostenstelle", width= 150)
+        label.pack(side='left', padx=5, anchor="nw")
+        label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="name",width= 150)
+        label2.pack(side='left', padx=5, anchor="nw")
+        label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="bauvorhaben",width= 150)
+        label3.pack(side='left', padx=5, anchor="nw")
+        label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ausfurung_von",width= 150)
+        label4.pack(side='left', padx=5, anchor="nw")
+        label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ausfurung_bis",width= 150)
+        label5.pack(side='left', padx=5, anchor="nw")
+        label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="vrao_ab",width= 150)
+        label6.pack(side='left', padx=5, anchor="nw")
+        label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"vrao_ab",width= 150)
+        label7.pack(side='left', padx=5, anchor="nw")
+        
         # Создаем фреймы для каждого товара
         for product in products:
             self.create_product_frame(product)
@@ -549,26 +576,26 @@ class BestandLager(CTk.CTk):
     def get_inaktiv_from_database(self, status = 'Inaktiv'):
         # Открываете курсор для выполнения SQL-запроса
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
         product_dicts = []
         for product_tuple in products:
             product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
-                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'datum': product_tuple[8],
-                            'ansprechpartner': product_tuple[9], 'status': product_tuple[10]}
+                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'vrao_ab': product_tuple[8],
+                            'vrao_bis': product_tuple[9], 'ansprechpartner': product_tuple[10],'status': product_tuple[11] }
             product_dicts.append(product_dict)
         return product_dicts
 
     def get_products_from_database(self, status = 'Aktiv'):
         # Открываете курсор для выполнения SQL-запроса
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
         product_dicts = []
         for product_tuple in products:
             product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
-                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'datum': product_tuple[8],
-                            'ansprechpartner': product_tuple[9], 'status': product_tuple[10]}
+                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'vrao_ab': product_tuple[8],
+                            'vrao_bis': product_tuple[9], 'ansprechpartner': product_tuple[10],'status': product_tuple[11] }
             product_dicts.append(product_dict)
 
         return product_dicts
@@ -576,7 +603,7 @@ class BestandLager(CTk.CTk):
     def create_inaktiv_frame(self, inaktiv_product):
         self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3)
         self.inaktiv_frame.pack(fill='x', pady=5, anchor="nw")
-        photo_button = customtkinter.CTkButton(self.inaktiv_frame, text="Photo", command=lambda p=inaktiv_product['id']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
+        photo_button = customtkinter.CTkButton(self.inaktiv_frame, text="Photo", command=lambda p=inaktiv_product['kostenstelle']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
                                                 fg_color=("gray30"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
@@ -587,14 +614,14 @@ class BestandLager(CTk.CTk):
                                                 anchor="center" )
         activate_button.pack(side='left', padx=5, anchor="nw")
         # Создаем поле с данными о товаре
-        label = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['name']} - {inaktiv_product['kostenstelle']} - {inaktiv_product['bauvorhaben']} - {inaktiv_product['strasse']} - {inaktiv_product['ort']} - {inaktiv_product['ausfurung_von']} - {inaktiv_product['ausfurung_bis']} - {inaktiv_product['datum']} - {inaktiv_product['bauvorhaben']} - {inaktiv_product['ansprechpartner']} - {inaktiv_product['status']} ")
+        label = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"- {inaktiv_product['kostenstelle']} - {inaktiv_product['name']} - {inaktiv_product['bauvorhaben']} - {inaktiv_product['strasse']} - {inaktiv_product['ort']} - {inaktiv_product['ausfurung_von']} - {inaktiv_product['ausfurung_bis']} - {inaktiv_product['vrao_ab']} - {inaktiv_product['vrao_bis']}")
         label.pack(side='left', padx=5, anchor="nw")
 
         
     def create_product_frame(self, product):
-        self.product_frame = customtkinter.CTkFrame(self.bau_frame2)
+        self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2)
         self.product_frame.pack(fill='x', pady=5, anchor="nw")
-        photo_button = customtkinter.CTkButton(self.product_frame, text="Photo", command=lambda p=product['id']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
+        photo_button = customtkinter.CTkButton(self.product_frame, text="Photo", command=lambda p=product['kostenstelle']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
                                                 fg_color=("gray30"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
@@ -607,10 +634,25 @@ class BestandLager(CTk.CTk):
         status_vorbereitunng = customtkinter.CTkButton(self.product_frame, text="", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=2, height=30, width=30, border_spacing=5,
                                                 fg_color=("white"), hover_color=("white"), font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center" )
         status_vorbereitunng.pack(side='left', padx=5, anchor="nw")
+       
 
         # Создаем поле с данными о товаре
-        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['name']} - {product['kostenstelle']} - {product['bauvorhaben']} - {product['strasse']} - {product['ort']} - {product['ausfurung_von']} - {product['ausfurung_bis']} - {product['datum']} - {product['bauvorhaben']} - {product['ansprechpartner']} - {product['status']} ")
+        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['kostenstelle']}", width= 150)
         label.pack(side='left', padx=5, anchor="nw")
+        label2 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['name']}",width= 150)
+        label2.pack(side='left', padx=5, anchor="nw")
+        label3 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['bauvorhaben']}",width= 150)
+        label3.pack(side='left', padx=5, anchor="nw")
+        label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_von']}",width= 150)
+        label4.pack(side='left', padx=5, anchor="nw")
+        label5 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_bis']}",width= 150)
+        label5.pack(side='left', padx=5, anchor="nw")
+        label6 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_ab']}",width= 150)
+        label6.pack(side='left', padx=5, anchor="nw")
+        label7 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_ab']}",width= 150)
+        label7.pack(side='left', padx=5, anchor="nw")
+        
+
         current_date = datetime.now().date()
         # Преобразуем строку даты из базы данных в объект datetime
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
@@ -619,8 +661,22 @@ class BestandLager(CTk.CTk):
         # Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if days_until_due <= 7:
             label.configure(fg_color="#8a0707")
+            label2.configure(fg_color="#8a0707")
+            label3.configure(fg_color="#8a0707")
+            label4.configure(fg_color="#8a0707")
+            label5.configure(fg_color="#8a0707")
+            label6.configure(fg_color="#8a0707")
+            label7.configure(fg_color="#8a0707")
+        
         if 8 <= days_until_due <= 10:
             label.configure(fg_color="#e6e220", text_color = "black")
+            label2.configure(fg_color="#e6e220", text_color = "black")
+            label3.configure(fg_color="#e6e220", text_color = "black")
+            label4.configure(fg_color="#e6e220", text_color = "black")
+            label5.configure(fg_color="#e6e220", text_color = "black")
+            label6.configure(fg_color="#e6e220", text_color = "black")
+            label7.configure(fg_color="#e6e220", text_color = "black")
+
 
     def deactive_bau(self, product_id):
         cursor = self.conn.cursor()
@@ -634,7 +690,7 @@ class BestandLager(CTk.CTk):
 
     def update_product_list(self):
         # Очистите фреймы для активных и неактивных продуктов
-        for widget in self.bau_frame2.winfo_children():
+        for widget in self.bau_frame2_2.winfo_children():
             widget.destroy()
 
         for widget in self.bau_frame3.winfo_children():
@@ -642,16 +698,17 @@ class BestandLager(CTk.CTk):
 
         self.display_existing_products()
 
-    def download_photo(self, product_id):
-        thread = threading.Thread(target=self.download_photo_in_thread, args=(product_id,))
+    def download_photo(self, product_kostenstelle):
+        thread = threading.Thread(target=self.download_photo_in_thread, args=(product_kostenstelle,))
         thread.start()
 
-    def download_photo_in_thread(self, product_id):
+    def download_photo_in_thread(self, product_kostenstelle):
         folder_path = filedialog.askdirectory(title="Select Folder to Save Images")
         cursor = self.conn.cursor()
-        cursor.execute("SELECT image_data, kostenstelle_vvo FROM bau WHERE id = %s", (product_id,))
+        cursor.execute("SELECT photo_data, bau FROM sicherung WHERE bau = %s", (product_kostenstelle,))
         row = cursor.fetchone()
         data1 = row[1]
+        print(data1)
         if folder_path:
             # Создаем папку для сохранения изображений
             folder_name = f"{data1}"
@@ -700,12 +757,15 @@ class BestandLager(CTk.CTk):
                         except Exception as e:
                             print(f"Error processing image {i+1}: {e}")
                 else:
-                    print(f"No data found for id = {product_id}")
-            self.show_notification("Уведомление", "Изображения успешно загружены!")
+                    print(f"No data found for id = {self.product_kostenstelle}")
+            threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
+    
     def show_notification(self, title, message):
-        toaster = ToastNotifier()
-        toaster.show_toast(title, message, duration=5)  # duration указывает время отображения в секундах
-        toaster = None
+        notification.notify(
+            title=title,
+            message=message,
+            timeout=5  # время отображения в секундах
+        )
 
     def map(self):
         # new_window = test_map.App()
@@ -721,18 +781,64 @@ class BestandLager(CTk.CTk):
         ort = self.ort.get()
         ausfurung_von = self.ausfurung_von.get()
         ausfurung_bis = self.ausfurung_bis.get()
-        datum = self.datum.get()
+        vrao_ab = self.vrao_ab.get()
+        vrao_bis = self.vrao_bis.get()
         uberwacht = self.uber.get()
         ansprechpartner = self.ansprechpartner.get()
-        # Создаем SQL-запрос для создания таблицы
+
+        if not name or not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
+            
+            if not name:
+                self.name_bau.configure(border_color="red")
+            else:
+                self.name_bau.configure(border_color="grey")
+
+            if not kostenstelle_vvo:
+                self.kostenstelle_vvo.configure(border_color="red")
+            else:
+                self.kostenstelle_vvo.configure(border_color="grey")
+
+            if not bauvorhaben:
+                self.bauvorhaben.configure(border_color = "red")
+            else:
+                self.bauvorhaben.configure(border_color = "grey")
+
+            if not strasse:
+                self.strasse.configure(border_color = "red")
+            else:
+                self.strasse.configure(border_color = "grey")
+
+            if not ort:
+                self.ort.configure(border_color = "red")
+            else:
+                self.ort.configure(border_color = "grey")
+
+            if not ansprechpartner: 
+                self.ansprechpartner.configure(border_color = "red")
+            else:
+                self.ansprechpartner.configure(border_color = "grey")
+            return  # Прерываем выполнение функции, так как не все обязательные поля заполнены
+
         cursor = self.conn.cursor()
-        cursor.execute(f"CREATE TABLE IF NOT EXISTS Bau (id SERIAL PRIMARY KEY,name_bau text, kostenstelle_vvo text,bauvorhaben text,ort text, strasse text,ausfurung_von text,ausfurung_bis text,datum text,ansprechpartner text, status text, image_data BYTEA, pdf_data BYTEA, meta_data text, uberwachung text)")
+        cursor.execute(f"CREATE TABLE IF NOT EXISTS Bau (id SERIAL PRIMARY KEY,name_bau text, kostenstelle_vvo text,bauvorhaben text,ort text, strasse text,ausfurung_von text,ausfurung_bis text,vrao_ab text, vrao_bis text, ansprechpartner text, status text, image_data BYTEA, pdf_data BYTEA, meta_data text, uberwachung text)")
 
         meta_data = None
         
-        cursor.execute(f"INSERT INTO Bau (name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, datum, ansprechpartner, status, pdf_data, meta_data , uberwachung) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis,datum, ansprechpartner, status, self.pdf_data, meta_data, uberwacht))
+        cursor.execute(f"INSERT INTO Bau (name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status, pdf_data, meta_data , uberwachung) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab,vrao_bis, ansprechpartner, status, self.pdf_data, meta_data, uberwacht))
         self.update_product_list()
 
+        self.name_bau.delete(0, 'end')
+        self.kostenstelle_vvo.delete(0, 'end')
+        self.bauvorhaben.delete(0, 'end')
+        self.strasse.delete(0, 'end')
+        self.ort.delete(0, 'end')
+        self.ansprechpartner.delete(0, 'end')
+        self.pdf_data = None
+        threading.Thread(target=self.show_notification, args=("Уведомление", "Стройка создана!")).start()
+        user = self.login # имя кто сделал действие для лога
+        action = f"Создал таблицу под названием {name}" # перменная для создания названия действия лога
+        self.user_action(user, action)
+        
     def select_images(self):
         pdf_file_paths = filedialog.askopenfilenames(title="Выберите PDF файлы", filetypes=[("PDF files", "*.pdf")])
         def encode_pdf_to_base64(pdf_file_path):
@@ -752,8 +858,9 @@ class BestandLager(CTk.CTk):
 
             # Преобразование списка в строку с разделителем запятой
         self.pdf_data = ','.join(pdf_files_base64)
-        threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
+        threading.Thread(target=self.show_notification, args=("Уведомление", "Планы успешно загружены!")).start()
         
+
 
     def handle_reduction_change(self, event):
         selected_reduction = self.reduction.get()  # Получаем выбранный параметр
