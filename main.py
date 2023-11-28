@@ -298,9 +298,10 @@ class BestandLager(CTk.CTk):
        
         self.tabview_baustellen = customtkinter.CTkTabview(self.f2)
         self.tabview_baustellen.grid(row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew")
-        self.tabview_baustellen.add("Erstellen")
         self.tabview_baustellen.add("Bearbeitung")
+        self.tabview_baustellen.add("Erstellen")
         self.tabview_baustellen.add("Inaktiv")
+        
         self.tabview_baustellen.tab("Erstellen").grid_columnconfigure(0, weight=1)
         self.tabview_baustellen.tab("Bearbeitung").grid_columnconfigure(0, weight=1)
         self.tabview_baustellen.tab("Inaktiv").grid_columnconfigure(0, weight=1)
@@ -324,7 +325,7 @@ class BestandLager(CTk.CTk):
        
         
        
-        self.status_bau = customtkinter.CTkOptionMenu(self.bau_frame1, values=["Aktiv","Geschlossen"],
+        self.status_bau = customtkinter.CTkOptionMenu(self.bau_frame1, values=["Aktiv","Inaktiv"],
                                                                fg_color="gray10", button_color="red",width= 220)
         self.status_bau.grid(row=0, column=0, padx=20, pady=(20, 0), sticky= "nw")
         
@@ -541,15 +542,9 @@ class BestandLager(CTk.CTk):
         self.show_all_data()
         self.show_material_table()
         self.display_existing_products()
-        
+        self.create_labels()
 
-
-
-    def display_existing_products(self):
-        # Получаем товары из базы данных
-        products = self.get_products_from_database()
-        inaktiv_products = self.get_inaktiv_from_database()
-        
+    def create_labels(self):
         empty_label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="", width= 167)
         empty_label.pack(side='left', padx=5, anchor="nw")
         label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="kostenstelle", width= 150)
@@ -566,6 +561,15 @@ class BestandLager(CTk.CTk):
         label6.pack(side='left', padx=5, anchor="nw")
         label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"vrao_ab",width= 150)
         label7.pack(side='left', padx=5, anchor="nw")
+
+
+
+    def display_existing_products(self):
+        # Получаем товары из базы данных
+        products = self.get_products_from_database()
+        inaktiv_products = self.get_inaktiv_from_database()
+    
+        
         
         # Создаем фреймы для каждого товара
         for product in products:
