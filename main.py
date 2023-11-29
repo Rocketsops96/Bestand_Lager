@@ -28,6 +28,7 @@ from win10toast import ToastNotifier
 from babel import numbers
 from plyer import notification
 from tkinter import messagebox
+import time
 
 customtkinter.set_appearance_mode("dark")
 
@@ -303,8 +304,12 @@ class BestandLager(CTk.CTk):
         self.tabview_baustellen.add("Inaktiv")
         
         self.tabview_baustellen.tab("Erstellen").grid_columnconfigure(0, weight=1)
+
         self.tabview_baustellen.tab("Bearbeitung").grid_columnconfigure(0, weight=1)
+        self.tabview_baustellen.tab("Bearbeitung").grid_rowconfigure(1, weight=1)
         self.tabview_baustellen.tab("Inaktiv").grid_columnconfigure(0, weight=1)
+        self.tabview_baustellen.tab("Inaktiv").grid_rowconfigure(1, weight=1)
+
         self.tabview_baustellen.configure(segmented_button_selected_color="red")
 
 
@@ -315,13 +320,17 @@ class BestandLager(CTk.CTk):
         self.bau_frame2 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
         self.bau_frame2.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
         self.bau_frame2.grid_columnconfigure(0, weight=1)
-        self.bau_frame2_2 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
+        self.bau_frame2_2 = customtkinter.CTkScrollableFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
         self.bau_frame2_2.grid(row=1, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
         self.bau_frame2_2.grid_columnconfigure(0, weight=1)
+        
         
         self.bau_frame3 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Inaktiv"),fg_color="transparent")
         self.bau_frame3.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
         self.bau_frame3.grid_columnconfigure(0, weight=1)
+        self.bau_frame3_2 = customtkinter.CTkScrollableFrame(self.tabview_baustellen.tab("Inaktiv"),fg_color="transparent")
+        self.bau_frame3_2.grid(row=1, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame3_2.grid_columnconfigure(0, weight=1)
        
         
        
@@ -545,35 +554,64 @@ class BestandLager(CTk.CTk):
         self.create_labels()
 
     def create_labels(self):
-        empty_label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="", width= 167)
+        empty_label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="", width= 170)
         empty_label.pack(side='left', padx=5, anchor="nw")
-        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="kostenstelle", width= 150)
+        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE", width= 150, fg_color="#0f5925")
         label.pack(side='left', padx=5, anchor="nw")
-        label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="name",width= 150)
+        label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME",width= 150, fg_color="#0f5925")
         label2.pack(side='left', padx=5, anchor="nw")
-        label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="bauvorhaben",width= 150)
+        label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 150, fg_color="#0f5925")
         label3.pack(side='left', padx=5, anchor="nw")
-        label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ausfurung_von",width= 150)
+        label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG VON",width= 150, fg_color="#0f5925")
         label4.pack(side='left', padx=5, anchor="nw")
-        label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ausfurung_bis",width= 150)
+        label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG BIS",width= 150, fg_color="#0f5925")
         label5.pack(side='left', padx=5, anchor="nw")
-        label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="vrao_ab",width= 150)
+        label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VRAO AB",width= 150, fg_color="#0f5925")
         label6.pack(side='left', padx=5, anchor="nw")
-        label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"vrao_ab",width= 150)
+        label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"VRAO BIS",width= 150, fg_color="#0f5925")
         label7.pack(side='left', padx=5, anchor="nw")
 
+        inaktiv_empty_label = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="", width= 170)
+        inaktiv_empty_label.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE", width= 150, fg_color="#0f5925")
+        inaktiv_label.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME",width= 150, fg_color="#0f5925")
+        inaktiv_label2.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label3 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 150, fg_color="#0f5925")
+        inaktiv_label3.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label4 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG VON",width= 150, fg_color="#0f5925")
+        inaktiv_label4.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label5 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG BIS",width= 150, fg_color="#0f5925")
+        inaktiv_label5.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label6 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="VRAO AB",width= 150, fg_color="#0f5925")
+        inaktiv_label6.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label7 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"VRAO BIS",width= 150, fg_color="#0f5925")
+        inaktiv_label7.pack(side='left', padx=5, anchor="nw")
+
+
+
+
+    def days_until_due(self, product):
+        current_date = datetime.now().date()
+        product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
+        days_until_due = (product_date - current_date).days
+        return days_until_due
 
 
     def display_existing_products(self):
-        # Получаем товары из базы данных
         products = self.get_products_from_database()
-        inaktiv_products = self.get_inaktiv_from_database()
-    
-        
-        
-        # Создаем фреймы для каждого товара
-        for product in products:
+        # Разделяем товары на два списка: те, чья дата уже прошла, и те, чья дата еще предстоит
+        past_due_products = [product for product in products if self.days_until_due(product) < 0]
+        future_products = [product for product in products if self.days_until_due(product) >= 0]
+        # Сортируем товары, у которых дата еще предстоит
+        sorted_future_products = sorted(future_products, key=self.days_until_due)
+        for product in sorted_future_products:
             self.create_product_frame(product)
+        # Создаем фреймы для товаров, у которых дата уже прошла
+        for product in past_due_products:
+            self.create_product_frame(product)
+
+        inaktiv_products = self.get_inaktiv_from_database()
         for inaktiv_product in inaktiv_products:
             self.create_inaktiv_frame(inaktiv_product)
 
@@ -605,7 +643,7 @@ class BestandLager(CTk.CTk):
         return product_dicts
     
     def create_inaktiv_frame(self, inaktiv_product):
-        self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3)
+        self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3_2)
         self.inaktiv_frame.pack(fill='x', pady=5, anchor="nw")
         photo_button = customtkinter.CTkButton(self.inaktiv_frame, text="Photo", command=lambda p=inaktiv_product['kostenstelle']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
                                                 fg_color=("gray30"), text_color=("gray90"),
@@ -617,10 +655,25 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         activate_button.pack(side='left', padx=5, anchor="nw")
-        # Создаем поле с данными о товаре
-        label = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"- {inaktiv_product['kostenstelle']} - {inaktiv_product['name']} - {inaktiv_product['bauvorhaben']} - {inaktiv_product['strasse']} - {inaktiv_product['ort']} - {inaktiv_product['ausfurung_von']} - {inaktiv_product['ausfurung_bis']} - {inaktiv_product['vrao_ab']} - {inaktiv_product['vrao_bis']}")
-        label.pack(side='left', padx=5, anchor="nw")
+        status_vorbereitunng = customtkinter.CTkButton(self.inaktiv_frame, text="", command=lambda p=inaktiv_product['id']: self.deactive_bau(p),corner_radius=2, height=30, width=30, border_spacing=5,
+                                                fg_color=("white"), hover_color=("white"), font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center" )
+        status_vorbereitunng.pack(side='left', padx=5, anchor="nw")
 
+        # Создаем поле с данными о товаре
+        label = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['kostenstelle']}", width= 150)
+        label.pack(side='left', padx=5, anchor="nw")
+        label2 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['name']}",width= 150)
+        label2.pack(side='left', padx=5, anchor="nw")
+        label3 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['bauvorhaben']}",width= 150)
+        label3.pack(side='left', padx=5, anchor="nw")
+        label4 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_von']}",width= 150)
+        label4.pack(side='left', padx=5, anchor="nw")
+        label5 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_bis']}",width= 150)
+        label5.pack(side='left', padx=5, anchor="nw")
+        label6 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['vrao_ab']}",width= 150)
+        label6.pack(side='left', padx=5, anchor="nw")
+        label7 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['vrao_bis']}",width= 150)
+        label7.pack(side='left', padx=5, anchor="nw")
         
     def create_product_frame(self, product):
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2)
@@ -653,7 +706,7 @@ class BestandLager(CTk.CTk):
         label5.pack(side='left', padx=5, anchor="nw")
         label6 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_ab']}",width= 150)
         label6.pack(side='left', padx=5, anchor="nw")
-        label7 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_ab']}",width= 150)
+        label7 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_bis']}",width= 150)
         label7.pack(side='left', padx=5, anchor="nw")
         
 
@@ -662,8 +715,9 @@ class BestandLager(CTk.CTk):
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
         # Вычисляем разницу в днях между текущей датой и датой в товаре
         days_until_due = (product_date - current_date).days
+        
         # Если остается 7 дней или менее до даты, устанавливаем красный цвет
-        if days_until_due <= 7:
+        if 1 <= days_until_due <= 7:
             label.configure(fg_color="#8a0707")
             label2.configure(fg_color="#8a0707")
             label3.configure(fg_color="#8a0707")
@@ -672,7 +726,16 @@ class BestandLager(CTk.CTk):
             label6.configure(fg_color="#8a0707")
             label7.configure(fg_color="#8a0707")
         
-        if 8 <= days_until_due <= 10:
+        elif days_until_due == 0:
+            label.configure(fg_color="#56149c")
+            label2.configure(fg_color="#56149c")
+            label3.configure(fg_color="#56149c")
+            label4.configure(fg_color="#56149c")
+            label5.configure(fg_color="#56149c")
+            label6.configure(fg_color="#56149c")
+            label7.configure(fg_color="#56149c")
+        
+        elif 8 <= days_until_due <= 10:
             label.configure(fg_color="#e6e220", text_color = "black")
             label2.configure(fg_color="#e6e220", text_color = "black")
             label3.configure(fg_color="#e6e220", text_color = "black")
@@ -680,6 +743,15 @@ class BestandLager(CTk.CTk):
             label5.configure(fg_color="#e6e220", text_color = "black")
             label6.configure(fg_color="#e6e220", text_color = "black")
             label7.configure(fg_color="#e6e220", text_color = "black")
+        elif product_date < current_date:
+            # Если время прошло, устанавливаем синий цвет
+            label.configure(fg_color="#0b558a")
+            label2.configure(fg_color="#0b558a")
+            label3.configure(fg_color="#0b558a")
+            label4.configure(fg_color="#0b558a")
+            label5.configure(fg_color="#0b558a")
+            label6.configure(fg_color="#0b558a")
+            label7.configure(fg_color="#0b558a")
 
 
     def deactive_bau(self, product_id):
@@ -697,7 +769,7 @@ class BestandLager(CTk.CTk):
         for widget in self.bau_frame2_2.winfo_children():
             widget.destroy()
 
-        for widget in self.bau_frame3.winfo_children():
+        for widget in self.bau_frame3_2.winfo_children():
             widget.destroy()
 
         self.display_existing_products()
@@ -777,6 +849,7 @@ class BestandLager(CTk.CTk):
         pass
 
     def upload_images(self):
+        cursor = self.conn.cursor()
         name = self.name_bau.get()
         status = self.status_bau.get()
         kostenstelle_vvo = self.kostenstelle_vvo.get()
@@ -793,37 +866,42 @@ class BestandLager(CTk.CTk):
         if not name or not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
             
             if not name:
-                self.name_bau.configure(border_color="red")
+                threading.Thread(target=lambda: self.flash_error_color(self.name_bau), args=()).start()
             else:
                 self.name_bau.configure(border_color="grey")
 
             if not kostenstelle_vvo:
-                self.kostenstelle_vvo.configure(border_color="red")
+                threading.Thread(target=lambda: self.flash_error_color(self.kostenstelle_vvo), args=()).start()
             else:
                 self.kostenstelle_vvo.configure(border_color="grey")
 
             if not bauvorhaben:
-                self.bauvorhaben.configure(border_color = "red")
+                threading.Thread(target=lambda: self.flash_error_color(self.bauvorhaben), args=()).start()
             else:
                 self.bauvorhaben.configure(border_color = "grey")
 
             if not strasse:
-                self.strasse.configure(border_color = "red")
+                threading.Thread(target=lambda: self.flash_error_color(self.strasse), args=()).start()
             else:
                 self.strasse.configure(border_color = "grey")
 
             if not ort:
-                self.ort.configure(border_color = "red")
+                threading.Thread(target=lambda: self.flash_error_color(self.ort), args=()).start()
             else:
                 self.ort.configure(border_color = "grey")
 
             if not ansprechpartner: 
-                self.ansprechpartner.configure(border_color = "red")
+                threading.Thread(target=lambda: self.flash_error_color(self.ansprechpartner), args=()).start()
             else:
                 self.ansprechpartner.configure(border_color = "grey")
             return  # Прерываем выполнение функции, так как не все обязательные поля заполнены
-
-        cursor = self.conn.cursor()
+        cursor.execute("SELECT kostenstelle_vvo FROM Bau WHERE kostenstelle_vvo = %s", (kostenstelle_vvo,))
+        existing_record = cursor.fetchone()
+        if existing_record:
+            threading.Thread(target=self.show_notification, args=("Ошибка", "Стройка с таким номером уже существует!")).start()
+            threading.Thread(target=lambda: self.flash_error_color(self.kostenstelle_vvo), args=()).start()
+            return  # Прерываем выполнение функции, так как запись уже существует
+        
         cursor.execute(f"CREATE TABLE IF NOT EXISTS Bau (id SERIAL PRIMARY KEY,name_bau text, kostenstelle_vvo text,bauvorhaben text,ort text, strasse text,ausfurung_von text,ausfurung_bis text,vrao_ab text, vrao_bis text, ansprechpartner text, status text, image_data BYTEA, pdf_data BYTEA, meta_data text, uberwachung text)")
 
         meta_data = None
@@ -842,7 +920,16 @@ class BestandLager(CTk.CTk):
         user = self.login # имя кто сделал действие для лога
         action = f"Создал таблицу под названием {name}" # перменная для создания названия действия лога
         self.user_action(user, action)
-        
+    
+    def flash_error_color(self, widget):
+        for _ in range(5):  # Меняем цвет 5 раз
+            widget.configure(border_color="grey")
+            time.sleep(0.2)
+            widget.configure(border_color="red")
+            time.sleep(0.2)  # Задержка в 200 миллисекунд
+    
+            
+
     def select_images(self):
         pdf_file_paths = filedialog.askopenfilenames(title="Выберите PDF файлы", filetypes=[("PDF files", "*.pdf")])
         def encode_pdf_to_base64(pdf_file_path):
