@@ -87,13 +87,13 @@ class App(CTk.CTk): # Окно авторизации
         self.check_update()
         
     def check_update(self):
-        proxies = {
-        'http': 'http://d.dobin:dd1710dd@192.168.2.254:3128',
-        'https': 'http://d.dobin:d1710dd@192.168.2.254:3128',
-        }
+        # proxies = {
+        # 'http': 'http://d.dobin:dd1710dd@192.168.2.254:3128',
+        # 'https': 'http://d.dobin:d1710dd@192.168.2.254:3128',
+        # }
         github_api_url = 'https://api.github.com/repos/Rocketsops96/Bestand_Lager/releases/latest'
         # Загрузите информацию о последнем релизе с GitHub API
-        response = requests.get(github_api_url, proxies=proxies)
+        response = requests.get(github_api_url) #, proxies=proxies
         if response.status_code == 200:
             release_info = response.json()
             assets = release_info.get('assets', [])

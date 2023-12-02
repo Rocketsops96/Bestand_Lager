@@ -26,9 +26,9 @@ from datetime import datetime, timedelta
 import threading
 from win10toast import ToastNotifier
 from babel import numbers
-from plyer import notification
 from tkinter import messagebox
 import time
+from set_capo_toplevel import Set_Capo
 
 customtkinter.set_appearance_mode("dark")
 
@@ -554,10 +554,8 @@ class BestandLager(CTk.CTk):
         self.create_labels()
 
     def create_labels(self):
-        empty_label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="", width= 170)
-        empty_label.pack(side='left', padx=5, anchor="nw")
         label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE", width= 150, fg_color="#0f5925")
-        label.pack(side='left', padx=5, anchor="nw")
+        label.pack(side='left', padx=(10,5), anchor="nw")
         label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME",width= 150, fg_color="#0f5925")
         label2.pack(side='left', padx=5, anchor="nw")
         label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 150, fg_color="#0f5925")
@@ -571,8 +569,7 @@ class BestandLager(CTk.CTk):
         label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"VRAO BIS",width= 150, fg_color="#0f5925")
         label7.pack(side='left', padx=5, anchor="nw")
 
-        inaktiv_empty_label = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="", width= 170)
-        inaktiv_empty_label.pack(side='left', padx=5, anchor="nw")
+        
         inaktiv_label = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE", width= 150, fg_color="#0f5925")
         inaktiv_label.pack(side='left', padx=5, anchor="nw")
         inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME",width= 150, fg_color="#0f5925")
@@ -588,15 +585,11 @@ class BestandLager(CTk.CTk):
         inaktiv_label7 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"VRAO BIS",width= 150, fg_color="#0f5925")
         inaktiv_label7.pack(side='left', padx=5, anchor="nw")
 
-
-
-
     def days_until_due(self, product):
         current_date = datetime.now().date()
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
         days_until_due = (product_date - current_date).days
         return days_until_due
-
 
     def display_existing_products(self):
         products = self.get_products_from_database()
@@ -645,20 +638,6 @@ class BestandLager(CTk.CTk):
     def create_inaktiv_frame(self, inaktiv_product):
         self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3_2)
         self.inaktiv_frame.pack(fill='x', pady=5, anchor="nw")
-        photo_button = customtkinter.CTkButton(self.inaktiv_frame, text="Photo", command=lambda p=inaktiv_product['kostenstelle']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        photo_button.pack(side='left', padx=5, anchor=NW)
-        activate_button = customtkinter.CTkButton(self.inaktiv_frame, text="Return", command=lambda p=inaktiv_product['id']: self.activate_bau(p),corner_radius=2, height=30, width=60, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        activate_button.pack(side='left', padx=5, anchor="nw")
-        status_vorbereitunng = customtkinter.CTkButton(self.inaktiv_frame, text="", command=lambda p=inaktiv_product['id']: self.deactive_bau(p),corner_radius=2, height=30, width=30, border_spacing=5,
-                                                fg_color=("white"), hover_color=("white"), font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center" )
-        status_vorbereitunng.pack(side='left', padx=5, anchor="nw")
-
         # Создаем поле с данными о товаре
         label = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['kostenstelle']}", width= 150)
         label.pack(side='left', padx=5, anchor="nw")
@@ -674,25 +653,50 @@ class BestandLager(CTk.CTk):
         label6.pack(side='left', padx=5, anchor="nw")
         label7 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['vrao_bis']}",width= 150)
         label7.pack(side='left', padx=5, anchor="nw")
+
+        image_photo = customtkinter.CTkImage(light_image=Image.open("images/photo.png"),
+                                  dark_image=Image.open("images/material.png"),
+                                  size=(20, 20))
+        photo_button = customtkinter.CTkButton(self.inaktiv_frame,image=image_photo, text="", command=lambda p=inaktiv_product['kostenstelle']: self.download_photo(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        photo_button.pack(side='left', padx=5, anchor="nw")
+
+        image_set_capo = customtkinter.CTkImage(light_image=Image.open("images/capo.png"),
+                                  dark_image=Image.open("images/capo.png"),
+                                  size=(20, 20))
+        set_capo = customtkinter.CTkButton(self.inaktiv_frame, image=image_set_capo, text="", command=lambda p=inaktiv_product['id']: self.set_capo_top_level(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red") )
+        set_capo.pack(side='left', padx=5, anchor="nw")
+        
+        image_stunden = customtkinter.CTkImage(light_image=Image.open("images/clock.png"),
+                                  dark_image=Image.open("images/clock.png"),
+                                  size=(20, 20))
+        stunden = customtkinter.CTkButton(self.inaktiv_frame, image=image_stunden, text="", command=lambda p=inaktiv_product['id']: self.stunden_bau(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        stunden.pack(side='left', padx=5, anchor="nw")
+
+        image_material = customtkinter.CTkImage(light_image=Image.open("images/material.png"),
+                                  dark_image=Image.open("images/material.png"),
+                                  size=(20, 20))
+        material = customtkinter.CTkButton(self.inaktiv_frame, image=image_material, text="", command=lambda p=inaktiv_product['id']: self.material_bau(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        material.pack(side='left', padx=5, anchor="nw")
+
+        image_return = customtkinter.CTkImage(light_image=Image.open("images/return.png"),
+                                  dark_image=Image.open("images/return.png"),
+                                  size=(20, 20))
+        activate_button = customtkinter.CTkButton(self.inaktiv_frame, image=image_return, text="", command=lambda p=inaktiv_product['id']: self.activate_bau(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        activate_button.pack(side='left', padx=5, anchor="nw")
         
     def create_product_frame(self, product):
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2)
-        self.product_frame.pack(fill='x', pady=5, anchor="nw")
-        photo_button = customtkinter.CTkButton(self.product_frame, text="Photo", command=lambda p=product['kostenstelle']: self.download_photo(p),corner_radius=2, height=30, width=60, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        photo_button.pack(side='left', padx=5, anchor=NW)
-        deactive_button = customtkinter.CTkButton(self.product_frame, text="Delete", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=2, height=30, width=60, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        deactive_button.pack(side='left', padx=5, anchor="nw")
-        status_vorbereitunng = customtkinter.CTkButton(self.product_frame, text="", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=2, height=30, width=30, border_spacing=5,
-                                                fg_color=("white"), hover_color=("white"), font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center" )
-        status_vorbereitunng.pack(side='left', padx=5, anchor="nw")
-       
-
+        self.product_frame.pack(fill='x', pady=2, anchor="nw")
+        
         # Создаем поле с данными о товаре
         label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['kostenstelle']}", width= 150)
         label.pack(side='left', padx=5, anchor="nw")
@@ -708,7 +712,45 @@ class BestandLager(CTk.CTk):
         label6.pack(side='left', padx=5, anchor="nw")
         label7 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_bis']}",width= 150)
         label7.pack(side='left', padx=5, anchor="nw")
+
+        photo_image = customtkinter.CTkImage(light_image=Image.open("images/photo.png"),
+                                  dark_image=Image.open("images/photo.png"),
+                                  size=(20, 20))
+        photo_button = customtkinter.CTkButton(self.product_frame,image=photo_image, text="", command=lambda p=product['kostenstelle']: self.download_photo(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        photo_button.pack(side='left', padx=5, anchor="nw")
+
+        image_set_capo = customtkinter.CTkImage(light_image=Image.open("images/capo.png"),
+                                  dark_image=Image.open("images/capo.png"),
+                                  size=(20, 20))
+        set_capo = customtkinter.CTkButton(self.product_frame, image=image_set_capo, text="", command=lambda p=product['id']: self.set_capo_top_level(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red") )
+        set_capo.pack(side='left', padx=5, anchor="nw")
         
+        image_stunden = customtkinter.CTkImage(light_image=Image.open("images/clock.png"),
+                                  dark_image=Image.open("images/clock.png"),
+                                  size=(20, 20))
+        stunden = customtkinter.CTkButton(self.product_frame, image=image_stunden, text="", command=lambda p=product['id']: self.stunden_bau(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        stunden.pack(side='left', padx=5, anchor="nw")
+
+        image_material = customtkinter.CTkImage(light_image=Image.open("images/material.png"),
+                                  dark_image=Image.open("images/material.png"),
+                                  size=(20, 20))
+        material = customtkinter.CTkButton(self.product_frame, image=image_material, text="", command=lambda p=product['id']: self.material_bau(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        material.pack(side='left', padx=5, anchor="nw")
+
+        image_delete = customtkinter.CTkImage(light_image=Image.open("images/delete.png"),
+                                  dark_image=Image.open("images/delete.png"),
+                                  size=(20, 20))
+        deactive_button = customtkinter.CTkButton(self.product_frame, image=image_delete, text="", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=2, height=20, width=50, border_spacing=5,
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        deactive_button.pack(side='left', padx=5, anchor="nw")
 
         current_date = datetime.now().date()
         # Преобразуем строку даты из базы данных в объект datetime
@@ -735,7 +777,7 @@ class BestandLager(CTk.CTk):
             label6.configure(fg_color="#56149c")
             label7.configure(fg_color="#56149c")
         
-        elif 8 <= days_until_due <= 10:
+        elif 8 <= days_until_due <= 14:
             label.configure(fg_color="#e6e220", text_color = "black")
             label2.configure(fg_color="#e6e220", text_color = "black")
             label3.configure(fg_color="#e6e220", text_color = "black")
@@ -753,6 +795,17 @@ class BestandLager(CTk.CTk):
             label6.configure(fg_color="#0b558a")
             label7.configure(fg_color="#0b558a")
 
+    def material_bau(self):
+        pass
+
+    def stunden_bau(self,product_id):
+        pass
+
+    def set_capo_top_level(self,product_id):
+        self.toplevel_window = Set_Capo(self, product_id)  # создаем окно, если его нет или оно уничтожено
+        self.toplevel_window.grab_set()  # захватываем фокус
+        self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
+        self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
 
     def deactive_bau(self, product_id):
         cursor = self.conn.cursor()
@@ -837,11 +890,8 @@ class BestandLager(CTk.CTk):
             threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
     
     def show_notification(self, title, message):
-        notification.notify(
-            title=title,
-            message=message,
-            timeout=5  # время отображения в секундах
-        )
+        toaster = ToastNotifier()
+        toaster.show_toast(title, message, duration=5)
 
     def map(self):
         # new_window = test_map.App()
