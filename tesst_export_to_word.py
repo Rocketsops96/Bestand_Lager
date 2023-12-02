@@ -3,6 +3,8 @@ from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.table import WD_ALIGN_VERTICAL
 import regbase 
+from datetime import datetime
+
 data_table2 = None
 data_table1 = None
 def insert_data_into_tables(input_file, output_file, data_table1, data_table2):
@@ -52,20 +54,43 @@ if __name__ == "__main__":
     
     conn = regbase.create_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM bau WHERE id = 1")
+    cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM bau WHERE id = 7")
     data = cursor.fetchone()
+    ccussor = conn.cursor()
+    bau = data[2]
+    ccussor.execute("SELECT id, name_capo, bau, action, date_ab, date_bis FROM sicherung WHERE bau = %s ",(bau,))
+    sicherung = ccussor.fetchone()
+    time_start_str = sicherung[4]
+    time_end_str = sicherung[5]
+    
+    date = sicherung[4]
+    datetime_with_time = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    date_withot_time = datetime_with_time.date()
+    formated_date = date_withot_time.strftime('%d.%m.%Y')
+    # Преобразование строк в объекты datetime
+    time_start = datetime.strptime(time_start_str, '%Y-%m-%d %H:%M:%S')
+    time_end = datetime.strptime(time_end_str, '%Y-%m-%d %H:%M:%S')
+    print(time_start)
+    print(time_end)
+    # Вычисление разницы во времени
+    time_difference = time_end - time_start
+
+    # Извлечение разницы в часах
+    hours_difference = time_difference.total_seconds() / 3600
+    rounded_difference = round(hours_difference * 2) / 2
+    print(f"Разница в часах: {rounded_difference}")
     data_table1 = [
-        ["", data[2], "", "", f"{data[6]}-{data[7]}"],
+        ["", data[2], "", "", f"{data[6]} - {data[7]}"],
         ["", "", "", "", ""],
         ["", data[3], "","",data[8]],
-        [f"{data[4]},{data[5]}", "","","", data[9]],
+        ["", f"{data[4]}, {data[5]}","","", data[9]],
     ]
 
     # Пример данных для второй таблицы
     data_table2 = [
         ["", "", "", "", "", ""],
         ["", "", "", "", "", "","", "", "", "", "", ""],
-        [1, "", "", "", "", "","", "", "", "", "", ""],
+        [1, f"{sicherung[1]}", f"{formated_date}", "", "", "","", "", "", "", "", f"{rounded_difference}"],
         [2, "", "", "", "", "","", "", "", "", "", ""],
         [3, "", "", "", "", "","", "", "", "", "", ""],
         [4, "", "", "", "", "","", "", "", "", "", ""],
