@@ -4,16 +4,14 @@ from tkinter import *
 import main
 import PIL.Image
 import localizations
-import psycopg2
 import regbase
 import socket
-import time
 import os
 import requests
 import tkinter.messagebox
-import multiprocessing
 import subprocess
 import threading
+from PIL import Image
 
 customtkinter.set_appearance_mode("dark")
 
@@ -48,10 +46,12 @@ class App(CTk.CTk): # Окно авторизации
             self.entrylogin.insert('0', login)
         if password:
             self.entrypass.insert('0',password)
+        image_login = customtkinter.CTkImage(light_image=Image.open("images/login.png"),
+                                  dark_image=Image.open("images/login.png"),
+                                  size=(25, 25))
         self.main_button_1 = customtkinter.CTkButton(master=self, corner_radius=2, height=30, width= 200, 
-                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
-                                                font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center", text='Log in', command=self.getpass)
+                                                fg_color=("gray30"),hover_color=("red"),
+                                                anchor="center",image = image_login, text="", command=self.getpass)
         self.main_button_1.pack(pady=(0,10))
         self.main_button_1.configure(text=self.get_button_text_for_language(self.language))
         
@@ -139,7 +139,6 @@ class App(CTk.CTk): # Окно авторизации
             print("connected")
         except (socket.timeout, socket.error):
             self.connected_status_label("Connection error")
-            print("Nihuya")
             if self.conn:
                 # Если есть соединение с базой данных, закрываем его
                 self.conn.close()
@@ -150,7 +149,6 @@ class App(CTk.CTk): # Окно авторизации
 
     def get_button_text_for_language(self, language):
         texts = localizations.language_texts.get(language, {})
-        return texts.get("Log in", "Log in")
 
     def getpass(self):
         self.login = self.entrylogin.get()
@@ -189,7 +187,7 @@ class App(CTk.CTk): # Окно авторизации
         texts = localizations.language_texts.get(language, {})
         
         # Обновите тексты для виджетов, кнопок, лейблов и других элементов
-        self.main_button_1.configure(text=texts.get("Log in", "Log in"))
+        
        
 
         selected_language = language

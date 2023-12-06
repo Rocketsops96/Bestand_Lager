@@ -1,15 +1,16 @@
-import sqlite3
 import openpyxl
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from tkinter import filedialog, Tk  # добавлен импорт для диалогового окна
+import regbase
 
 def export_to_excel():
 
     # Подключаемся к базе данных BAU
-    conn = sqlite3.connect("bd.db")
+    conn = regbase.create_conn()
     cursor = conn.cursor()
 
     # Выполняем запрос к базе данных и получаем данные
-    cursor.execute("SELECT * FROM Lager_Bestand")
+    cursor.execute("SELECT * FROM lager_bestand")
     data = cursor.fetchall()
 
     # Создаем новую книгу Excel и выбираем активный лист
@@ -44,8 +45,18 @@ def export_to_excel():
             cell.border = data_border
             cell.alignment = data_alignment
 
-    # Сохраняем книгу Excel в файл
-    workbook.save("Bestand_Lager.xlsx")
+    # Открываем диалоговое окно для выбора места сохранения файла
+    root = Tk()
+    root.withdraw()  # Скрываем основное окно
+
+    file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+
+    # Сохраняем книгу Excel в выбранное место
+    if file_path:
+        workbook.save(file_path)
+        
 
     # Закрываем соединение с базой данных
     conn.close()
+
+

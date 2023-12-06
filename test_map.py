@@ -9,9 +9,9 @@ customtkinter.set_default_color_theme("blue")
 # Включаем кэширование на 1 час
 
 
-class App(customtkinter.CTk):
+class App(customtkinter.CTkToplevel):
 
-    APP_NAME = "TkinterMapView with CustomTkinter"
+    APP_NAME = "VVO Map"
     WIDTH = 800
     HEIGHT = 500
     
@@ -26,7 +26,7 @@ class App(customtkinter.CTk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind("<Command-q>", self.on_closing)
         self.bind("<Command-w>", self.on_closing)
-        self.createcommand('tk::mac::Quit', self.on_closing)
+        
 
         self.marker_list = []
 
@@ -36,30 +36,27 @@ class App(customtkinter.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        self.frame_left = customtkinter.CTkFrame(master=self, width=150, corner_radius=0, fg_color=None)
+        self.frame_left = customtkinter.CTkFrame(master=self, corner_radius=0, fg_color=None)
         self.frame_left.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
 
         self.frame_right = customtkinter.CTkFrame(master=self, corner_radius=0)
         self.frame_right.grid(row=0, column=1, rowspan=1, pady=0, padx=0, sticky="nsew")
+
+        self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["OpenStreetMap", "Google normal", "Google satellite"],fg_color="gray10", button_color="red", button_hover_color=("black"),
+                                                                       command=self.change_map)
+        self.map_option_menu.grid(row=0, column=0, padx=5, pady=10)
+
         logins = ["A.Bobrishov", "B.Gashi", "D.Mirakaj", "G.Hudzen"]
         for i, login in enumerate(logins):
-            button = customtkinter.CTkButton(self.frame_left, text=login, command=lambda l=login: self.focus_on_marker(l))
-            button.grid(row=i + 7, column=0, padx=(20, 20), pady=(10, 10))
+            button = customtkinter.CTkButton(self.frame_left, text=login, command=lambda l=login: self.focus_on_marker(l), corner_radius=0, height=40, border_spacing=10, font=("Arial", 14, "bold"),
+                                                      fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("red"),
+                                                       anchor="w")
+            button.grid(row=i + 1, column=0, padx=0, pady=5,sticky="nsew")
         # ============ frame_left ============
 
-        self.frame_left.grid_rowconfigure(2, weight=1)
 
-        self.map_label = customtkinter.CTkLabel(self.frame_left, text="Tile Server:", anchor="w")
-        self.map_label.grid(row=3, column=0, padx=(20, 20), pady=(20, 0))
-        self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["OpenStreetMap", "Google normal", "Google satellite"],
-                                                                       command=self.change_map)
-        self.map_option_menu.grid(row=4, column=0, padx=(20, 20), pady=(10, 0))
+       
 
-        self.appearance_mode_label = customtkinter.CTkLabel(self.frame_left, text="Appearance Mode:", anchor="w")
-        self.appearance_mode_label.grid(row=5, column=0, padx=(20, 20), pady=(20, 0))
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.frame_left, values=["Light", "Dark", "System"],
-                                                                       command=self.change_appearance_mode)
-        self.appearance_mode_optionemenu.grid(row=6, column=0, padx=(20, 20), pady=(10, 20))
 
         # ============ frame_right ============
 
@@ -71,7 +68,7 @@ class App(customtkinter.CTk):
         
        
         self.map_widget = TkinterMapView(self.frame_right, corner_radius=0)
-        self.map_widget.grid(row=1, rowspan=1, column=0, columnspan=3, sticky="nswe", padx=(0, 0), pady=(0, 0))
+        self.map_widget.grid(row=1, rowspan=1, column=0, columnspan=3, sticky="nsew", padx=(0, 0), pady=(0, 0))
         
          # Привязываем метод к событию двойного щелчка мыши на карте
 
@@ -81,15 +78,15 @@ class App(customtkinter.CTk):
         self.entry.bind("<Return>", self.search_event)
 
         self.button_5 = customtkinter.CTkButton(master=self.frame_right,
-                                                text="Search",
-                                                width=90,
+                                                text="Suchen",
+                                                width=90,text_color=("gray10", "gray90"), hover_color=("black"),fg_color=("red"),
                                                 command=self.search_event)
         self.button_5.grid(row=0, column=1, sticky="w", padx=(12, 0), pady=12)
 
         # Set default values
         self.map_widget.set_address("Ulm")
-        self.map_option_menu.set("Google normal")
-        self.appearance_mode_optionemenu.set("Dark")
+        self.map_option_menu.set("OpenStreetMap")
+
 
         # Добавляем контекстное меню для карты
         self.map_widget.add_right_click_menu_command(label="Add Marker",
@@ -103,8 +100,6 @@ class App(customtkinter.CTk):
         self.map_widget.bind("<Double-Button-1>", self.double_click_event)
         self.update_map_markers()
    
-
-
     def update_map_markers(self):
         try:
             print("Updating map markers...")
@@ -141,7 +136,6 @@ class App(customtkinter.CTk):
         # Устанавливаем таймер для следующего обновления маркеров через 6 секунд
         self.after(30000, self.update_map_markers)
 
-
     def double_click_event(self, event):
         current_position = self.map_widget.get_position()
         marker = self.map_widget.set_marker(current_position[0], current_position[1], text="new marker")
@@ -163,7 +157,6 @@ class App(customtkinter.CTk):
             self.map_widget.set_position(marker.position[0], marker.position[1], marker=True, text=login)
             self.map_widget.set_zoom(17)
 
-
     def search_event(self, event=None):
         self.map_widget.set_address(self.entry.get())
 
@@ -171,8 +164,6 @@ class App(customtkinter.CTk):
         print("Add marker:", coords)
         new_marker = self.map_widget.set_marker(coords[0], coords[1], text="new marker")
 
-    def change_appearance_mode(self, new_appearance_mode: str):
-        customtkinter.set_appearance_mode(new_appearance_mode)
 
     def change_map(self, new_map: str):
         if new_map == "OpenStreetMap":
@@ -185,10 +176,3 @@ class App(customtkinter.CTk):
     def on_closing(self, event=0):
         self.destroy()
 
-    def start(self):
-        self.mainloop()
-
-
-if __name__ == "__main__":
-    app = App()
-    app.start()
