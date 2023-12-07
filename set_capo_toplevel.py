@@ -44,7 +44,7 @@ class Set_Capo(CTk.CTkToplevel):
         if result:
             print(result)
             set_capo_values = [value.strip() for value in result[0].split(',')]
-            for checkbox in [self.checkbox1, self.checkbox2, self.checkbox3, self.checkbox4, self.checkbox5]:
+            for checkbox in [self.checkbox1, self.checkbox2, self.checkbox3, self.checkbox4]:
                 value = checkbox.cget("text")
                 if value in set_capo_values:
                     checkbox.select()

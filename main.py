@@ -659,13 +659,13 @@ class BestandLager(CTk.CTk):
     def get_products_from_database(self, status = 'Aktiv'):
         # Открываете курсор для выполнения SQL-запроса
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status, set_capo FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
         product_dicts = []
         for product_tuple in products:
             product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
                             'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'vrao_ab': product_tuple[8],
-                            'vrao_bis': product_tuple[9], 'ansprechpartner': product_tuple[10],'status': product_tuple[11] }
+                            'vrao_bis': product_tuple[9], 'ansprechpartner': product_tuple[10],'status': product_tuple[11],'set_capo': product_tuple[12] }
             product_dicts.append(product_dict)
 
         return product_dicts
@@ -690,7 +690,7 @@ class BestandLager(CTk.CTk):
         label7.pack(side='left', padx=5, anchor="nw")
 
         image_photo = customtkinter.CTkImage(light_image=Image.open("images/photo.png"),
-                                  dark_image=Image.open("images/material.png"),
+                                  dark_image=Image.open("images/photo.png"),
                                   size=(20, 20))
         photo_button = customtkinter.CTkButton(self.inaktiv_frame,image=image_photo, text="", command=lambda p=inaktiv_product['kostenstelle']: self.download_photo(p),corner_radius=2, height=20, width=50, border_spacing=5,
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
@@ -760,7 +760,7 @@ class BestandLager(CTk.CTk):
         photo_image = customtkinter.CTkImage(light_image=Image.open("images/photo.png"),
                                   dark_image=Image.open("images/photo.png"),
                                   size=(20, 20))
-        photo_button = customtkinter.CTkButton(self.product_frame,image=photo_image, text="", command=lambda p=product['id']: self.download_photo(p),corner_radius=2, height=20, width=50, border_spacing=5,
+        photo_button = customtkinter.CTkButton(self.product_frame,image=photo_image, text="", command=lambda p=product['kostenstelle']: self.open_photo_menu(p),corner_radius=2, height=20, width=50, border_spacing=5,
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
@@ -838,6 +838,10 @@ class BestandLager(CTk.CTk):
             label5.configure(fg_color="#0b558a")
             label6.configure(fg_color="#0b558a")
             label7.configure(fg_color="#0b558a")
+    
+        if not product['set_capo'] =="":
+            set_capo.configure(fg_color="#e8bf5c")
+            print(product['id'])
 
     def open_reduction_menu(self,product_id):
         import reduction_bau_menu
@@ -845,6 +849,12 @@ class BestandLager(CTk.CTk):
         reduction_menu.grab_set()  # захватываем фокус
         reduction_menu.wait_window()  # ждем закрытия дочернего окна
         reduction_menu.grab_release()  # освобождаем фокус после его закрытия
+        user = self.login # имя кто сделал действие для лога
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT kostenstelle_vvo FROM bau WHERE id = %s ",(product_id,))
+        name = cursor.fetchone()
+        action = f"Изменил стройку под названием: {name}" # перменная для создания названия действия лога
+        self.user_action(user, action)
         self.update_product_list()
 
     def material_bau(self):
@@ -858,6 +868,13 @@ class BestandLager(CTk.CTk):
         self.toplevel_window.grab_set()  # захватываем фокус
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
+        user = self.login # имя кто сделал действие для лога
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT set_capo FROM bau WHERE id = %s ",(product_id,))
+        name = cursor.fetchone()
+        action = f"Назначил на стройку людей: {name}" # перменная для создания названия действия лога
+        self.user_action(user, action)
+        self.update_product_list()
 
     def deactive_bau(self, product_id):
         cursor = self.conn.cursor()
@@ -878,68 +895,13 @@ class BestandLager(CTk.CTk):
             widget.destroy()
 
         self.display_existing_products()
-
-    def download_photo(self, product_kostenstelle):
-        thread = threading.Thread(target=self.download_photo_in_thread, args=(product_kostenstelle,))
-        thread.start()
-
-    def download_photo_in_thread(self, product_kostenstelle):
-        folder_path = filedialog.askdirectory(title="Select Folder to Save Images")
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT photo_data, bau FROM sicherung WHERE bau = %s", (product_kostenstelle,))
-        row = cursor.fetchone()
-        data1 = row[1]
-        print(data1)
-        if folder_path:
-            # Создаем папку для сохранения изображений
-            folder_name = f"{data1}"
-            folder_path = os.path.join(folder_path, folder_name)
-
-            # Проверяем, существует ли папка, и создаем, если нет
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
-
-            # Извлечение строки
-            if row is not None:
-                # Проверяем, что данные не являются None
-                if row[0] is not None:
-                    # Преобразование объекта memoryview в строку
-                    image_data_array = bytes(row[0]).decode('utf-8').split(',')
-
-                    # Декодирование и сохранение каждого изображения
-                    for i, image_data in enumerate(image_data_array):
-                        try:
-                            # Декодирование из формата base64
-                            image_data_decoded = base64.b64decode(image_data)
-
-                            # Создание объекта изображения
-                            image = Image.open(BytesIO(image_data_decoded))
-                            if hasattr(image, '_getexif'):  # проверка на наличие данных ориентации
-                                exif = image._getexif()
-                                if exif is not None:
-                                    orientation = exif.get(0x0112)
-                                    if orientation is not None:
-                                        if orientation == 3:
-                                            image = image.rotate(180, expand=True)
-                                        elif orientation == 6:
-                                            image = image.rotate(270, expand=True)
-                                        elif orientation == 8:
-                                            image = image.rotate(90, expand=True)
-
-                            # Путь для сохранения изображения
-                            image_path = os.path.join(folder_path, f"{data1}_{i+1}.jpeg")
-
-                            # Проверка наличия файла перед сохранением
-                            if not os.path.exists(image_path):
-                                # Сохранение изображения
-                                image.save(image_path, "JPEG", quality=20)
-                            else:
-                                print(f"File {image_path} already exists, skipping.")
-                        except Exception as e:
-                            print(f"Error processing image {i+1}: {e}")
-                else:
-                    print(f"No data found for id = {self.product_kostenstelle}")
-            threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
+    
+    def open_photo_menu(self,product_kostenstelle):
+        from photo_top_level import Photo_menu
+        photo_menu = Photo_menu(self, product_kostenstelle)  # создаем окно, если его нет или оно уничтожено
+        photo_menu.grab_set()  # захватываем фокус
+        photo_menu.wait_window()  # ждем закрытия дочернего окна
+        photo_menu.grab_release()  # освобождаем фокус после его закрытия
     
     def show_notification(self, title, message):
         toaster = ToastNotifier()
@@ -949,8 +911,7 @@ class BestandLager(CTk.CTk):
         map_window = test_map.App()  # создаем окно, если его нет или оно уничтожено
         map_window.grab_set()  # захватываем фокус
         map_window.wait_window()  # ждем закрытия дочернего окна
-        map_window.grab_release()  # освобождаем фокус после его закрытия
-        
+        map_window.grab_release()  # освобождаем фокус после его закрытия     
 
     def upload_images(self):
         cursor = self.conn.cursor()
