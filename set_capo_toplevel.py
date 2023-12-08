@@ -53,7 +53,7 @@ class Set_Capo(CTk.CTkToplevel):
 
 
     def ok_button_clicked(self):
-        print(self.product_id)
+
         # Выполняем запрос в базу данных с данными из чекбоксов
         checkbox_values = [
             "G.Hudzen" if self.checkbox1.get() else None,
