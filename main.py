@@ -579,7 +579,7 @@ class BestandLager(CTk.CTk):
     def create_product_frame(self, product):
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2, fg_color="transparent")
         self.product_frame.pack(fill='x', pady=2, anchor="nw")
-        
+
         # Создаем поле с данными о товаре
         label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['kostenstelle']}", width= 150)
         label.pack(side='left',pady=5, padx=5, anchor="nw")

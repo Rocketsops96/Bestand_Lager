@@ -122,3 +122,12 @@
 2023-12-08 22:13:13,568 - main - INFO - Пользователь admin выполнил действие: Назначил на стройку людей: ('776771-23',)
 2023-12-08 22:16:32,097 - main - INFO - Логи очищены
 2023-12-08 22:53:21,063 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-09 19:37:15,425 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-09 19:40:15,275 - main - INFO - Пользователь admin выполнил действие: Изменил стройку под названием: ('71076-23',)
+2023-12-09 19:42:31,600 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('G.Hudzen, D.Mirakaj',)
+2023-12-09 19:43:30,046 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('B10 Westringtunnel',)
+2023-12-09 19:45:12,906 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('B10 Westringtunnel',)
+2023-12-09 20:08:43,723 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('G.Hudzen, D.Mirakaj, 1',)
+2023-12-09 21:00:36,372 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('B10 Westringtunnel',)
+2023-12-10 17:08:09,996 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-10 20:12:21,125 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1

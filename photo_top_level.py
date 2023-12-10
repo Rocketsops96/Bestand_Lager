@@ -61,15 +61,16 @@ class Photo_menu(customtkinter.CTkToplevel):
         self.show_all_data()
 
 
-        self.table.bind("<<TreeviewSelect>>", self.download_photo)
+        self.table.bind("<<TreeviewSelect>>", self.threading_download_photo)
 
     def threading_download_all(self):
         threading.Thread(target=self.download_all).start()
 
     def download_all(self):
+
         folder_path = filedialog.askdirectory(title="Select Folder to Save Images")
         cursor = self.conn.cursor()
-        cursor.execute("SELECT photo_data, bau, date_ab FROM sicherung WHERE bau = %s", (self.product_kostenstelle,))
+        cursor.execute("SELECT photo_data, bau, date_ab, id FROM sicherung WHERE bau = %s", (self.product_kostenstelle,))
         rows = cursor.fetchall()
 
         if folder_path:
@@ -79,15 +80,22 @@ class Photo_menu(customtkinter.CTkToplevel):
 
             for row in rows:
                 data1 = row[1]
+                data2 = row[3]
 
                 if row[0] is not None:
-                    image_data_array = bytes(row[0]).decode('utf-8').split(',')
-
+                    # Преобразуем memoryview в строку
+                    image_data_str = bytes(row[0]).decode('utf-8')
+                    
+                    # Декодируем бинарные данные из строки, используя ", " в качестве разделителя
+                    image_data_array = image_data_str.split('~~~~~')
                     for i, image_data in enumerate(image_data_array):
                         try:
+                            # Декодирование из формата base64
                             image_data_decoded = base64.b64decode(image_data)
+                            # Создание объекта изображения
                             image = Image.open(BytesIO(image_data_decoded))
 
+                            # Обработка ориентации изображения
                             if hasattr(image, '_getexif'):
                                 exif = image._getexif()
                                 if exif is not None:
@@ -100,14 +108,16 @@ class Photo_menu(customtkinter.CTkToplevel):
                                         elif orientation == 8:
                                             image = image.rotate(90, expand=True)
 
-                            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                            image_path = os.path.join(folder_path, f"{data1}_{i+1}_{timestamp}.jpeg")
+                            image_path = os.path.join(folder_path, f"{data2}_{i+12}.jpeg")
                             image.save(image_path, "JPEG", quality=20)
+
                         except Exception as e:
-                            print(f"Ошибка обработки изображения {i+1}: {e}")
+                            print(f"Error processing image {i+1}: {e}")
                 else:
-                    print(f"Данные не найдены для id = {self.product_kostenstelle}")
-                threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
+                    print(f"No data found for id = {self.product_kostenstelle}")
+                
+                image = None
+
     
     def show_all_data(self):
         cursor = self.conn.cursor()
@@ -120,8 +130,8 @@ class Photo_menu(customtkinter.CTkToplevel):
         for item in data:
             self.table.insert("", "end", values=item)
 
-    def threading_download_photo(self,event,selected_item):
-        threading.Thread(target=self.download_photo, args=(selected_item)).start()
+    def threading_download_photo(self, event):
+        threading.Thread(target=self.download_photo, args=(event,)).start()
 
     def download_photo(self, event):
         selected_item = self.table.selection()
@@ -129,6 +139,7 @@ class Photo_menu(customtkinter.CTkToplevel):
             id = self.table.item(selected_item, "values")[0] 
             print(id)
             folder_path = filedialog.askdirectory(title="Select Folder to Save Images")
+            print(folder_path)
             cursor = self.conn.cursor()
             cursor.execute("SELECT photo_data, bau, date_ab FROM sicherung WHERE id = %s", (id,))
             row = cursor.fetchone()
@@ -144,7 +155,7 @@ class Photo_menu(customtkinter.CTkToplevel):
             year_month_day = date_object.strftime("%d-%m-%Y")
 
             # Создаем папку для сохранения изображений
-            folder_name = f"{data1} - {year_month_day}"
+            folder_name = f"{data1} - {year_month_day} - {id}"
             folder_path = os.path.join(folder_path, folder_name)
 
             # Проверяем, существует ли папка, и создаем, если нет
@@ -156,14 +167,14 @@ class Photo_menu(customtkinter.CTkToplevel):
                 # Проверяем, что данные не являются None
                 if row[0] is not None:
                     # Преобразование объекта memoryview в строку
-                    image_data_array = bytes(row[0]).decode('utf-8').split(',')
+                    image_data_array = bytes(row[0]).decode('utf-8').split('~~~~~')
 
                     # Декодирование и сохранение каждого изображения
                     for i, image_data in enumerate(image_data_array):
                         try:
                             # Декодирование из формата base64
                             image_data_decoded = base64.b64decode(image_data)
-
+                            
                             # Создание объекта изображения
                             image = Image.open(BytesIO(image_data_decoded))
                             if hasattr(image, '_getexif'):  # проверка на наличие данных ориентации
@@ -179,7 +190,7 @@ class Photo_menu(customtkinter.CTkToplevel):
                                             image = image.rotate(90, expand=True)
 
                             # Путь для сохранения изображения
-                            image_path = os.path.join(folder_path, f"{data1}_{i+1}_{year_month_day}.jpeg")
+                            image_path = os.path.join(folder_path, f"{data1}_{i+1}_{year_month_day}_{id}.jpeg")
 
                             # Проверка наличия файла перед сохранением
                             if not os.path.exists(image_path):
@@ -191,8 +202,8 @@ class Photo_menu(customtkinter.CTkToplevel):
                             print(f"Error processing image {i+1}: {e}")
                 else:
                     print(f"No data found for id = {self.product_kostenstelle}")
-            threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
-
+            # threading.Thread(target=self.show_notification, args=("Уведомление", "Изображения успешно загружены!")).start()
+            image = None
     def show_notification(self, title, message):
         toaster = ToastNotifier()
         toaster.show_toast(title, message, duration=5)

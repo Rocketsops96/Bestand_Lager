@@ -24,6 +24,9 @@ class Set_Capo(CTk.CTkToplevel):
         self.checkbox4 = CTkCheckBox(self, text="A.Bobrishov")
         self.checkbox4.pack(pady=5)
 
+        self.checkbox5 = CTkCheckBox(self, text="1")
+        self.checkbox5.pack(pady=5)
+
         
 
         # Создаем кнопку "Ок"
@@ -60,6 +63,7 @@ class Set_Capo(CTk.CTkToplevel):
             "D.Mirakaj" if self.checkbox2.get() else None,
             "B.Gashi" if self.checkbox3.get() else None,
             "A.Bobrishov" if self.checkbox4.get() else None,
+            "1" if self.checkbox5.get() else None,
             
         ]
         set_capo_text = ", ".join(filter(None, checkbox_values))  # Собираем текст через запятую, удаляя пустые значения
