@@ -422,13 +422,13 @@ class BestandLager(CTk.CTk):
         self.create_labels()
 
     def create_labels(self):
-        diese_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Diese Woche", width= 150, fg_color="#8a0707")
+        diese_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Diese Woche", width= 150, fg_color="#A92F43")
         diese_woche.pack(side='left', padx=(10,5), anchor="nw")
-        nachste_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Nächste Woche",width= 150, fg_color="#e6e220", text_color = "black")
+        nachste_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Nächste Woche",width= 150, fg_color="#998711", text_color = "black")
         nachste_woche.pack(side='left', padx=5, anchor="nw")
-        heute = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Heute",width= 150, fg_color="#56149c")
+        heute = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Heute",width= 150, fg_color="#8c0303")
         heute.pack(side='left', padx=5, anchor="nw")
-        bei_der_arbeit = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Bei der Arbeit",width= 150, fg_color="#0b558a")
+        bei_der_arbeit = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Wird Uberwacht",width= 150, fg_color="#228B22",text_color = "black")
         bei_der_arbeit.pack(side='left', padx=5, anchor="nw")
 
         
@@ -689,50 +689,50 @@ class BestandLager(CTk.CTk):
         
         if 0 <= (new_date - current_date).days <= 6:
             self.flag = True
-            threading.Thread(target=lambda: self.flash_error_color(label4), args=()).start()
+            threading.Thread(target=lambda: self.flash_error_color(self.product_frame), args=()).start()
 
         #Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if 1 <= days_until_due <= 7:
-            label.configure(fg_color="#8a0707")
-            label2.configure(fg_color="#8a0707")
-            kostenstelle_btn.configure(fg_color="#8a0707")
-            label3.configure(fg_color="#8a0707")
-            label4.configure(fg_color="#8a0707")
-            label5.configure(fg_color="#8a0707")
-            label6.configure(fg_color="#8a0707")
-            vzp_btn.configure(fg_color="#8a0707")
+            label.configure(fg_color="#A92F43")
+            label2.configure(fg_color="#A92F43")
+            kostenstelle_btn.configure(fg_color="#A92F43")
+            label3.configure(fg_color="#A92F43")
+            label4.configure(fg_color="#A92F43")
+            label5.configure(fg_color="#A92F43")
+            label6.configure(fg_color="#A92F43")
+            vzp_btn.configure(fg_color="#A92F43")
 
         
         elif days_until_due == 0:
-            label.configure(fg_color="#56149c")
-            label2.configure(fg_color="#56149c")
-            kostenstelle_btn.configure(fg_color="#56149c")
-            label3.configure(fg_color="#56149c")
-            label4.configure(fg_color="#56149c")
-            label5.configure(fg_color="#56149c")
-            label6.configure(fg_color="#56149c")
-            vzp_btn.configure(fg_color="#56149c")
+            label.configure(fg_color="#8c0303")
+            label2.configure(fg_color="#8c0303")
+            kostenstelle_btn.configure(fg_color="#8c0303")
+            label3.configure(fg_color="#8c0303")
+            label4.configure(fg_color="#8c0303")
+            label5.configure(fg_color="#8c0303")
+            label6.configure(fg_color="#8c0303")
+            vzp_btn.configure(fg_color="#8c0303")
         
         elif 8 <= days_until_due <= 14:
-            label.configure(fg_color="#e6e220", text_color = "black")
-            label2.configure(fg_color="#e6e220", text_color = "black")
-            kostenstelle_btn.configure(fg_color="#e6e220", text_color = "black")
-            label3.configure(fg_color="#e6e220", text_color = "black")
-            label4.configure(fg_color="#e6e220", text_color = "black")
-            label5.configure(fg_color="#e6e220", text_color = "black")
-            label6.configure(fg_color="#e6e220", text_color = "black")
-            vzp_btn.configure(fg_color="#e6e220", text_color = "black")
+            label.configure(fg_color="#998711", text_color = "black")
+            label2.configure(fg_color="#998711", text_color = "black")
+            kostenstelle_btn.configure(fg_color="#998711", text_color = "black")
+            label3.configure(fg_color="#998711", text_color = "black")
+            label4.configure(fg_color="#998711", text_color = "black")
+            label5.configure(fg_color="#998711", text_color = "black")
+            label6.configure(fg_color="#998711", text_color = "black")
+            vzp_btn.configure(fg_color="#998711", text_color = "black")
 
         elif product_date < current_date:
             # Если время прошло, устанавливаем синий цвет
-            label.configure(fg_color="#0b558a")
-            label2.configure(fg_color="#0b558a")
-            kostenstelle_btn.configure(fg_color="#0b558a")
-            label3.configure(fg_color="#0b558a")
-            label4.configure(fg_color="#0b558a")
-            label5.configure(fg_color="#0b558a")
-            label6.configure(fg_color="#0b558a")
-            vzp_btn.configure(fg_color="#0b558a")
+            label.configure(fg_color="#228B22",text_color = "black")
+            label2.configure(fg_color="#228B22",text_color = "black")
+            kostenstelle_btn.configure(fg_color="#228B22",text_color = "black")
+            label3.configure(fg_color="#228B22",text_color = "black")
+            label4.configure(fg_color="#228B22",text_color = "black")
+            label5.configure(fg_color="#228B22",text_color = "black")
+            label6.configure(fg_color="#228B22",text_color = "black")
+            vzp_btn.configure(fg_color="#228B22",text_color = "black")
     
         if not product['set_capo'] =="":
             set_capo.configure(fg_color="#e8bf5c")
@@ -911,8 +911,8 @@ class BestandLager(CTk.CTk):
     def flash_error_color(self, widget):
         def flash():
             if self.flag:
-                widget.configure(fg_color="transparent", text_color="gray90")
-                self.after(500, lambda: widget.configure(fg_color="#8a0707", text_color="gray90"))
+                widget.configure(fg_color="transparent")
+                self.after(500, lambda: widget.configure(fg_color="#8a0707"))
                 self.after(1000, flash)
 
         flash()

@@ -165,3 +165,5 @@
 2023-12-13 00:09:18,810 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('1',)
 2023-12-13 00:09:23,210 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('1',)
 2023-12-13 00:09:28,927 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('1',)
+2023-12-13 00:18:31,785 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('12312',)
+2023-12-13 00:20:43,954 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('12512',)
