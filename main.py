@@ -27,6 +27,8 @@ from set_capo_toplevel import Set_Capo
 import test_map
 from tkintermapview import TkinterMapView
 from CTkToolTip import *
+from export_to_word import insert_data_into_tables
+
 
 
 
@@ -411,6 +413,7 @@ class BestandLager(CTk.CTk):
         self.login = login
         self.barcode = None
         self.error_label= None
+
         
         self.show_logs()
         self.show_all_data()
@@ -428,22 +431,25 @@ class BestandLager(CTk.CTk):
         bei_der_arbeit = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Bei der Arbeit",width= 150, fg_color="#0b558a")
         bei_der_arbeit.pack(side='left', padx=5, anchor="nw")
 
-        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE", width= 150, fg_color="#0f5925")
-        label.pack(side='left', padx=(10,5), anchor="nw")
-        label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME",width= 150, fg_color="#0f5925")
+        
+        label8 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME", width= 150, fg_color="#0f5925")
+        label8.pack(side='left', padx=(10,5), anchor="nw")
+        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 150, fg_color="#0f5925")
+        label.pack(side='left', padx=5, anchor="nw")
+        label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
         label2.pack(side='left', padx=5, anchor="nw")
-        label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 150, fg_color="#0f5925")
+        label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
         label3.pack(side='left', padx=5, anchor="nw")
-        label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZ. Nummer",width= 150, fg_color="#0f5925")
+        label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 100, fg_color="#0f5925")
         label4.pack(side='left', padx=5, anchor="nw")
-        label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG VON",width= 150, fg_color="#0f5925")
+        label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF, H.VERBOT",width= 180, fg_color="#0f5925")
         label5.pack(side='left', padx=5, anchor="nw")
-        label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG BIS",width= 150, fg_color="#0f5925")
+        label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG VOM",width= 150, fg_color="#0f5925")
         label6.pack(side='left', padx=5, anchor="nw")
-        label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VRAO AB",width= 150, fg_color="#0f5925")
+        label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
         label7.pack(side='left', padx=5, anchor="nw")
-        label8 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"VRAO BIS",width= 150, fg_color="#0f5925")
-        label8.pack(side='left', padx=5, anchor="nw")
+        
+
         image_add = customtkinter.CTkImage(light_image=Image.open("images/add_btn.png"),
                                   dark_image=Image.open("images/add_btn.png"),
                                   size=(20, 20))
@@ -580,25 +586,43 @@ class BestandLager(CTk.CTk):
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2, fg_color="transparent")
         self.product_frame.pack(fill='x', pady=2, anchor="nw")
 
+        current_date = datetime.now().date()    #18.12.23
+        product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
+        days_until_due = (product_date - current_date).days
+
+        new_date = product_date - timedelta(days=6) #12.12.2023
+        h_verbot=new_date.strftime('%d.%m.%Y')      #12.12.2023
+
+    
+        
+
+
         # Создаем поле с данными о товаре
-        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['kostenstelle']}", width= 150)
-        label.pack(side='left',pady=5, padx=5, anchor="nw")
-        label2 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['name']}",width= 150)
+        label2_text = product['name'][:15] + "..." if len(product['name']) > 15 else product['name']
+        label2 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label2_text, width= 150)
         label2.pack(side='left',pady=5, padx=5, anchor="nw")
-        label3 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['bauvorhaben']}",width= 150)
+        CTkToolTip(label2, message=f"{product['name']}")
+        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['bauvorhaben']}", width= 150)
+        label.pack(side='left',pady=5, padx=5, anchor="nw")
+        kostenstelle_btn = customtkinter.CTkButton(self.product_frame, text=f"{product['kostenstelle']}", command=lambda p=product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=1, height=28, width=150, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
+        label3 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ansprechpartner']}",width= 180)
         label3.pack(side='left',pady=5, padx=5, anchor="nw")
-        label4_text = product['vzp'][:15] + "..." if len(product['vzp']) > 15 else product['vzp']
-        label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold"), text=label4_text, width=150)
+        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['kostenstelle']: self.open_vzp_folder(p),corner_radius=2, height=28, width=100, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        vzp_btn.pack(side='left',pady=5, padx=5, anchor="nw")
+        label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold"), text=h_verbot, width=180)
         label4.pack(side='left',pady=5, padx=5, anchor="nw")
-        CTkToolTip(label4, message=f"{product['vzp']}")
         label5 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_von']}",width= 150)
         label5.pack(side='left',pady=5, padx=5, anchor="nw")
-        label6 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_bis']}",width= 150)
+        label6 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_bis']}",width= 180)
         label6.pack(side='left',pady=5, padx=5, anchor="nw")
-        label7 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_ab']}",width= 150)
-        label7.pack(side='left',pady=5, padx=5, anchor="nw")
-        label8 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['vrao_bis']}",width= 150)
-        label8.pack(side='left',pady=5, padx=5, anchor="nw")
+
 
         image_reduction = customtkinter.CTkImage(light_image=Image.open("images/reduction.png"),
                                   dark_image=Image.open("images/reduction.png"),
@@ -628,14 +652,14 @@ class BestandLager(CTk.CTk):
         image_stunden = customtkinter.CTkImage(light_image=Image.open("images/clock.png"),
                                   dark_image=Image.open("images/clock.png"),
                                   size=(20, 20))
-        stunden = customtkinter.CTkButton(self.product_frame, image=image_stunden, text="", command=lambda p=product['id']: self.stunden_bau(p),corner_radius=2, height=20, width=50, 
+        stunden = customtkinter.CTkButton(self.product_frame, image=image_stunden, text="", command=lambda p=product['kostenstelle']: self.stunden_bau(p),corner_radius=2, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
         stunden.pack(side='left',pady=5, padx=5, anchor="nw")
 
         image_material = customtkinter.CTkImage(light_image=Image.open("images/material.png"),
                                   dark_image=Image.open("images/material.png"),
                                   size=(20, 20))
-        material = customtkinter.CTkButton(self.product_frame, image=image_material, text="", command=lambda p=product['id']: self.material_bau(p),corner_radius=2, height=20, width=50, 
+        material = customtkinter.CTkButton(self.product_frame, image=image_material, text="", command=lambda p=product['kostenstelle']: self.material_bau(p),corner_radius=2, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
         material.pack(side='left',pady=5, padx=5, anchor="nw")
 
@@ -647,56 +671,81 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         deactive_button.pack(side='left',pady=5, padx=5, anchor="nw")
-
-        current_date = datetime.now().date()
-        # Преобразуем строку даты из базы данных в объект datetime
-        product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
-        # Вычисляем разницу в днях между текущей датой и датой в товаре
-        days_until_due = (product_date - current_date).days
         
+        if 0 <= (new_date - current_date).days <= 6:
+            self.flag = True
+            threading.Thread(target=lambda: self.flash_error_color(label4), args=()).start()
+
         # Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if 1 <= days_until_due <= 7:
             label.configure(fg_color="#8a0707")
             label2.configure(fg_color="#8a0707")
+            kostenstelle_btn.configure(fg_color="#8a0707")
             label3.configure(fg_color="#8a0707")
             label4.configure(fg_color="#8a0707")
             label5.configure(fg_color="#8a0707")
             label6.configure(fg_color="#8a0707")
-            label7.configure(fg_color="#8a0707")
-            label8.configure(fg_color="#8a0707")
+            vzp_btn.configure(fg_color="#8a0707")
+
         
         elif days_until_due == 0:
             label.configure(fg_color="#56149c")
             label2.configure(fg_color="#56149c")
+            kostenstelle_btn.configure(fg_color="#56149c")
             label3.configure(fg_color="#56149c")
             label4.configure(fg_color="#56149c")
             label5.configure(fg_color="#56149c")
             label6.configure(fg_color="#56149c")
-            label7.configure(fg_color="#56149c")
-            label8.configure(fg_color="#56149c")
+            vzp_btn.configure(fg_color="#56149c")
         
         elif 8 <= days_until_due <= 14:
             label.configure(fg_color="#e6e220", text_color = "black")
             label2.configure(fg_color="#e6e220", text_color = "black")
+            kostenstelle_btn.configure(fg_color="#e6e220", text_color = "black")
             label3.configure(fg_color="#e6e220", text_color = "black")
             label4.configure(fg_color="#e6e220", text_color = "black")
             label5.configure(fg_color="#e6e220", text_color = "black")
             label6.configure(fg_color="#e6e220", text_color = "black")
-            label7.configure(fg_color="#e6e220", text_color = "black")
-            label8.configure(fg_color="#e6e220", text_color = "black")
+            vzp_btn.configure(fg_color="#e6e220", text_color = "black")
+
         elif product_date < current_date:
             # Если время прошло, устанавливаем синий цвет
             label.configure(fg_color="#0b558a")
             label2.configure(fg_color="#0b558a")
+            kostenstelle_btn.configure(fg_color="#0b558a")
             label3.configure(fg_color="#0b558a")
             label4.configure(fg_color="#0b558a")
             label5.configure(fg_color="#0b558a")
             label6.configure(fg_color="#0b558a")
-            label7.configure(fg_color="#0b558a")
-            label8.configure(fg_color="#0b558a")
+            vzp_btn.configure(fg_color="#0b558a")
     
         if not product['set_capo'] =="":
             set_capo.configure(fg_color="#e8bf5c")
+
+    def open_kostenstelle_folder(self, product_id):
+        base_path = r"test_folder"
+        # base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
+        items = os.listdir(os.path.normpath(base_path))
+        matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
+        if matching_folders:
+            target_folder = os.path.join(base_path, matching_folders[0])
+            os.startfile(target_folder)
+   
+    def open_vzp_folder(self, product_id):
+        # base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
+        base_path = r"test_folder"
+        nested_folders = ["09 Verkehrszeichenpläne", "02 PDF"]
+        items = os.listdir(os.path.normpath(base_path))
+        matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
+
+        if matching_folders:
+            target_folder = os.path.join(base_path, matching_folders[0])
+            for nested_folder in nested_folders:
+                target_folder = os.path.join(target_folder, nested_folder)
+
+            os.startfile(target_folder)
+        else:
+            print(f"No folders matching the keyword '{product_id}' found.")
 
     def open_reduction_menu(self,product_id):
         import reduction_bau_menu
@@ -712,11 +761,69 @@ class BestandLager(CTk.CTk):
         self.user_action(user, action)
         self.update_product_list()
 
-    def material_bau(self):
-        pass
+    def stunden_bau(self, product_kostenstelle):
+        base_path = r"test_folder"
+        nested_folders = ["verkehrssich.unterlage"]
+        items = os.listdir(os.path.normpath(base_path))
+        matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
 
-    def stunden_bau(self,product_id):
-        pass
+        if matching_folders:
+            target_folder = os.path.join(base_path, matching_folders[0])
+            for nested_folder in nested_folders:
+                target_folder = os.path.join(target_folder, nested_folder)
+
+            # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
+            document_path = os.path.join(target_folder, "Stundenbericht Verkehrssicherung.docx")
+
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
+            data = cursor.fetchone()
+            data_table1 = [
+                ["", data[2], "", "", f"{data[6]} - {data[7]}"],
+                ["", "", "", "", ""],
+                ["", data[3], "","",data[8]],
+                ["", f"{data[4]}, {data[5]}","","", data[9]],
+            ]
+
+            # Вставляем данные в документ
+            insert_data_into_tables(document_path, document_path, data_table1)
+
+            # Открываем файл
+            os.startfile(document_path)
+        else:
+            print(f"No folders matching the keyword '{product_kostenstelle}' found.")
+
+    def material_bau(self, product_kostenstelle):
+        base_path = r"test_folder"
+        nested_folders = ["verkehrssich.unterlage"]
+        items = os.listdir(os.path.normpath(base_path))
+        matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
+
+        if matching_folders:
+            target_folder = os.path.join(base_path, matching_folders[0])
+            for nested_folder in nested_folders:
+                target_folder = os.path.join(target_folder, nested_folder)
+
+            # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
+            document_path = os.path.join(target_folder, "Materialliste.docx")
+
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
+            data = cursor.fetchone()
+            data_table1 = [
+                ["", data[2], "", "", f"{data[6]} - {data[7]}"],
+                ["", "", "", "", ""],
+                ["", data[3], "","",data[8]],
+                ["", f"{data[4]}, {data[5]}","","", data[9]],
+            ]
+
+            # Вставляем данные в документ
+            insert_data_into_tables(document_path, document_path, data_table1)
+
+            # Открываем файл
+            os.startfile(document_path)
+        else:
+            print(f"No folders matching the keyword '{product_kostenstelle}' found.")
 
     def set_capo_top_level(self,product_id):
         self.toplevel_window = Set_Capo(self, product_id)  # создаем окно, если его нет или оно уничтожено
@@ -745,7 +852,6 @@ class BestandLager(CTk.CTk):
         action = f"Erstellt eine bedrohte Baustelle:: {name}" # перменная для создания названия действия лога
         self.user_action(user, action)
         
-
     def deactive_bau(self, product_id):
         cursor = self.conn.cursor()
         cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (product_id,))
@@ -758,13 +864,17 @@ class BestandLager(CTk.CTk):
 
     def update_product_list(self):
         # Очистите фреймы для активных и неактивных продуктов
-        for widget in self.bau_frame2_2.winfo_children():
-            widget.destroy()
+        self.flag = False
+        
+        def update():
+            for widget in self.bau_frame2_2.winfo_children():
+                widget.destroy()
 
-        for widget in self.bau_frame3_2.winfo_children():
-            widget.destroy()
+            for widget in self.bau_frame3_2.winfo_children():
+                widget.destroy()
 
-        self.display_existing_products()
+            self.display_existing_products()
+        self.after(700, update)
     
     def open_photo_menu(self,product_kostenstelle):
         from photo_top_level import Photo_menu
@@ -784,12 +894,16 @@ class BestandLager(CTk.CTk):
         map_window.grab_release()  # освобождаем фокус после его закрытия     
     
     def flash_error_color(self, widget):
-        for _ in range(5):  # Меняем цвет 5 раз
-            widget.configure(border_color="grey")
-            time.sleep(0.2)
-            widget.configure(border_color="red")
-            time.sleep(0.2)  # Задержка в 200 миллисекунд
-  
+        def flash():
+            if self.flag and widget.winfo_exists():
+                widget.configure(fg_color="transparent", text_color="gray90")
+                self.after(500, lambda: widget.configure(fg_color="#8a0707", text_color="gray90"))
+                self.after(1000, flash)
+
+        flash()
+
+
+
     def handle_reduction_change(self, event):
         selected_reduction = self.reduction.get()  # Получаем выбранный параметр
         if selected_reduction == "Defect":
@@ -899,124 +1013,6 @@ class BestandLager(CTk.CTk):
         if os.path.exists("Bestand_Lager.xlsx"):
             print("Файл Excel уже существует.")
     
-    # def add_button_bau(self):
-    #     print(self.selected_table)
-    #     self.barcode_f2 = self.bar_code_f2.get()
-    #     self.sum_value = self.sum.get()  # Сохраняем значение суммы как атрибут объекта
-        
-    #     # Создаем контекстные менеджеры для соединений, и здесь не нужно закрывать соединение с базой
-    #     cursor = self.conn.cursor()
-    #     print("0,5")
-    #     # Выполняем операцию SELECT в базе данных "bd.db"
-    #     cursor.execute("SELECT * FROM lager_bestand WHERE bar_code = %s",(self.barcode_f2,))
-    #     data = cursor.fetchone()
-    #     print(data)
-    #     bar = data[0]
-    #     vz = data[1]
-    #     bed = data[4]
-    #     akt = data[5]
-    #     print("1")
-    #     try:
-    #         # Проверяем наличие товара в таблице
-    #         cursor.execute(f"SELECT * FROM {self.selected_table} WHERE Bar_Code = %s",(bar,))
-    #         existing_product = cursor.fetchone()
-    #         print(self.selected_table)
-    #         print("2")
-    #         if existing_product:
-    #             # Если товар уже существует, обновляем Bestand
-    #             cursor.execute(f"UPDATE {self.selected_table} SET bestand = %s WHERE bar_code = %s",(self.sum_value,bar))
-    #             print("3")
-    #         else:
-    #             # Если товар не существует, добавляем новую запись
-    #             cursor.execute(f"INSERT INTO {self.selected_table} (bar_code, vz_nr, bedeutung, bestand) VALUES (%s, %s, %s, %s)",(bar,vz,bed,self.sum_value))
-    #             # Очищаем таблицу программы перед добавлением новых данных
-    #             print("4")
-    #         for row in self.item_table.get_children():
-    #             self.item_table.delete(row)
-    #             print("5")
-    #         # Загружаем все данные из выбранной таблицы и выводим их в таблицу программы
-    #         cursor.execute(f"SELECT vz_Nr, bedeutung, bestand FROM {self.selected_table}")
-    #         data = cursor.fetchall()
-    #         print("6")
-    #         for item in data:
-    #             self.item_table.insert("", "end", values=item)
-    #         self.bar_code_f2.delete(0, 'end')
-    #         self.sum.delete(0, 'end') 
-    #         self.after(50, lambda: self.bar_code_f2.focus_set())
-            
-            
-    #     except Exception as e:
-    #         print("Ошибка add_button_bau:", e)
-
-    # def delete_table(self):
-    #     selected_table = self.table_listbox.get(self.table_listbox.curselection())
-    #     if selected_table:
-    #         # Открываем диалоговое окно с вопросом
-    #         confirmation = tkinter.messagebox.askyesno("Подтверждение", f"Вы уверены что хотите удалить таблицу '{selected_table}'?")
-            
-    #         if confirmation:
-    #             # Удалите таблицу из базы данных
-    #             self.cursor.execute(f"DROP TABLE IF EXISTS {selected_table};")
-    #             self.conn.commit()
-
-    #             # Обновите список таблиц
-    #             self.tables = self.get_table_list()
-    #             self.table_listbox.delete(0, CTk.END)  # Очистите список
-    #             for table in self.tables:
-    #                 self.table_listbox.insert(CTk.END, table)
-    #     user = self.login # имя кто сделал действие для лога
-    #     action = f"удалил таблицу под названием {selected_table}" # перменная для создания названия действия лога
-    #     self.user_action(user, action)
-
-    # def create_table(self):
-    #     # Запросите имя новой таблицы с помощью диалогового окна
-
-    #     dialog = customtkinter.CTkInputDialog(text="Введите название стройки или номер", title="Baustelle", button_fg_color = "gray30",
-    #                                                                                     button_hover_color = "red")
-    #     dialog.geometry("300x200")
-    #     text = dialog.get_input()  # waits for input
-
-    #     if text:
-    #         # Создайте новую таблицу в базе данных
-    #         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {text} (Bar_Code TEXT, VZ_Nr TEXT, Bedeutung TEXT, Bestand TEXT);")
-    #         self.conn.commit()
-
-    #         if self.table_listbox.size() > 0:
-    #             self.table_listbox.delete(0, CTk.END)
-    #         # Обновляем список таблиц, вызывая функцию get_table_list()
-    #         self.tables = self.get_table_list()
-    #         for table in self.tables:
-    #             self.table_listbox.insert(CTk.END, table)
-    #     user = self.login # имя кто сделал действие для лога
-    #     action = f"создал таблицу под названием {text}" # перменная для создания названия действия лога
-    #     self.user_action(user, action)
-   
-    # def get_table_list(self):
-    #     # Получите список таблиц из базы данных
-    #     self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema','pg_catalog') AND table_name NOT IN ('users','lager_bestand', 'app_logs', 'defekt', 'material_lager');")
-    #     table_list = self.cursor.fetchall()
-    #     return [table[0] for table in table_list]
-
-    # def select_table_button(self):
-    #     selected_table = self.table_listbox.get(self.table_listbox.curselection())
-    #     if selected_table:
-    #         self.selected_table = selected_table  # Сохраняем имя выбранной таблицы
-    #         if self.selcted_bau_table_label:
-    #             self.selcted_bau_table_label.destroy()
-    #             self.selcted_bau_table_label = customtkinter.CTkLabel(self.bau_button_frame, text=f"Вы выбрали: {selected_table}", 
-    #                                                             font=customtkinter.CTkFont(size=15, weight="bold"))
-    #             self.selcted_bau_table_label.grid(row=0, column=0, padx=20, pady=20)
-    #     # Очищаем таблицу программы перед добавлением новых данных
-    #     for row in self.item_table.get_children():
-    #         self.item_table.delete(row)
-        
-    #     # Загружаем данные из выбранной таблицы и выводим их в таблицу программы
-    #         cursor = self.conn.cursor()
-    #         cursor.execute(f"SELECT VZ_Nr, Bedeutung, Bestand FROM {selected_table}")
-    #         data = cursor.fetchall()
-    #         for item in data:
-    #             self.item_table.insert("", "end", values=item)
-
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)

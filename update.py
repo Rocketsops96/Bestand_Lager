@@ -92,4 +92,4 @@ def update_programm():
         print("chfdmfsdjfsd")
 
 # Вызовите функцию обновления программы
-update_programm()
+# update_programm()

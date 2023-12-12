@@ -6,7 +6,7 @@ from docx.enum.table import WD_ALIGN_VERTICAL
 
 
 data_table1 = None
-def insert_data_into_tables(input_file, output_file, data_table1):
+def insert_material_data_into_tables(input_file, output_file, data_table1):
     doc = Document(input_file)
     try:
         table1 = doc.tables[0]  # Первая таблица
