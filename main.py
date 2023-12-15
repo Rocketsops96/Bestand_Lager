@@ -35,6 +35,7 @@ from export_to_word_material import insert_data_into_tables
 
 
 
+
 customtkinter.set_appearance_mode("dark")
 
 class BestandLager(CTk.CTk):
@@ -1209,12 +1210,18 @@ class BestandLager(CTk.CTk):
         self.barcode = self.bar_code.get()
         self.vz = self.vz_nr.get()
         bedeutung = self.bedeutung.get()
-        
-        cursor = self.conn.cursor()
-        # Получаем данные из базы данных (замените на ваш SQL-запрос)
-        cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s OR LOWER(bedeutung) ILIKE LOWER(%s)", (self.barcode, self.vz,  f"%{bedeutung}%"))
-        data = cursor.fetchall()
-       
+        if bedeutung:
+
+            cursor = self.conn.cursor()
+            # Получаем данные из базы данных (замените на ваш SQL-запрос)
+            cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s OR LOWER(bedeutung) ILIKE LOWER(%s)", (self.barcode, self.vz,  f"%{bedeutung}%"))
+            data = cursor.fetchall()
+        else:
+            cursor = self.conn.cursor()
+            # Получаем данные из базы данных (замените на ваш SQL-запрос)
+            cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s", (self.barcode, self.vz))
+            data = cursor.fetchall()
+    
         # Очищаем текущие строки в таблице
         for row in self.table.get_children():
             self.table.delete(row)
@@ -1239,6 +1246,7 @@ class BestandLager(CTk.CTk):
         self.bar_code.delete(0, 'end')
         self.vz_nr.delete(0, 'end')
         self.bedeutung.delete(0, 'end')
+        
         
     def check_bedeutung(self,event):
         # Функция вызывается при изменении баркода
