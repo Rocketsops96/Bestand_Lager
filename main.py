@@ -27,7 +27,8 @@ from set_capo_toplevel import Set_Capo
 import test_map
 from tkintermapview import TkinterMapView
 from CTkToolTip import *
-from export_to_word import insert_data_into_tables
+from export_to_word_stunden import insert_data_into_excel
+from export_to_word_material import insert_data_into_tables
 
 
 
@@ -162,9 +163,11 @@ class BestandLager(CTk.CTk):
         self.tabview.add("View")
         self.tabview.add("Editing")
         self.tabview.add("Material")
+        self.tabview.add("Werkzeug")
         self.tabview.tab("View").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
         self.tabview.tab("Editing").grid_columnconfigure(0, weight=1)
         self.tabview.tab("Material").grid_columnconfigure(0, weight=1)
+        self.tabview.tab("Werkzeug").grid_columnconfigure(0, weight=1)
         self.tabview.configure(segmented_button_selected_color="red")
         
 
@@ -236,6 +239,13 @@ class BestandLager(CTk.CTk):
         self.home_frame6 = customtkinter.CTkFrame(self.tabview.tab("Material"),fg_color="transparent")
         self.home_frame6.grid(row=1, column=1, padx=(10,10), sticky="ne")
         self.home_frame6.grid_columnconfigure(1, weight=1)
+
+        self.home_frame7 = customtkinter.CTkFrame(self.tabview.tab("Werkzeug"),fg_color="transparent")
+        self.home_frame7.grid(row=1, column=0, padx=(0,10), sticky="nw")
+        self.home_frame7.grid_columnconfigure(0, weight=1)
+        self.home_frame8 = customtkinter.CTkFrame(self.tabview.tab("Werkzeug"),fg_color="transparent")
+        self.home_frame8.grid(row=1, column=1, padx=(10,10), sticky="ne")
+        self.home_frame8.grid_columnconfigure(1, weight=1)
         
         self.tab1_label_search = customtkinter.CTkLabel(self.home_frame1, text="Search", 
                                                               font=customtkinter.CTkFont(size=15, weight="bold"))
@@ -247,8 +257,11 @@ class BestandLager(CTk.CTk):
         self.vz_nr = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Vz Nr.:", width= 250, corner_radius = 3)
         self.vz_nr.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
 
+        self.bedeutung = customtkinter.CTkEntry(self.home_frame1, placeholder_text="Bedeutung:", width= 250, corner_radius = 3)
+        self.bedeutung.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+
         self.btn_frame = customtkinter.CTkFrame(self.home_frame1, fg_color = "transparent")
-        self.btn_frame.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.btn_frame.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
 
         image_search = customtkinter.CTkImage(light_image=Image.open("images/search.png"),
                                     dark_image=Image.open("images/search.png"),
@@ -296,18 +309,20 @@ class BestandLager(CTk.CTk):
                                                             border_width_unchecked = 2, font=customtkinter.CTkFont(size=14, weight="bold"))
         self.zamena_to_table.grid(row=3, column=0, padx=(10, 10), pady=(5, 0), sticky="nsew")
 
+        self.vz_frame3 = customtkinter.CTkEntry(self.home_frame3, placeholder_text="VZ Nr.:", width= 250, corner_radius = 3)
+        self.vz_frame3.grid(column= 1, row=0,  pady=(20, 0),padx = 10, sticky="nsew")
 
         self.bar_code_home_frame3 = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Bar Code:", width= 250, corner_radius = 3)
-        self.bar_code_home_frame3.grid(column= 1, row=0,  pady=(20, 0),padx = 10, sticky="nsew")
+        self.bar_code_home_frame3.grid(column= 1, row=1,  pady=(10, 0),padx = 10, sticky="nsew")
         
 
         self.sum_home_frame3 = customtkinter.CTkEntry(self.home_frame3, placeholder_text="Введите количество", width= 250, corner_radius = 3)
-        self.sum_home_frame3.grid(column= 1, row=1, pady=(10, 0),padx = 10, sticky="nsew")
+        self.sum_home_frame3.grid(column= 1, row=2, pady=(10, 0),padx = 10, sticky="nsew")
 
         self.apply = customtkinter.CTkButton(master=self.home_frame3, corner_radius=5, height=40, width=250, border_spacing=5, text="Apply",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                     anchor="center", command=self.reduction_main_table)
-        self.apply.grid(column = 1,row=2, padx=10, pady=20, sticky="nw")
+        self.apply.grid(column = 1,row=3, padx=10, pady=20, sticky="nw")
 
 
 
@@ -331,6 +346,31 @@ class BestandLager(CTk.CTk):
         self.material_table.heading("#3", text="Größe")
         self.material_table.heading("#4", text="Lager")
         self.material_table.heading("#5", text="Aktueller")
+
+
+        #_________________________________________________________________________##################_________#############_______________________________________________________________#
+
+
+        self.werkzeug_table = ttk.Treeview(self.tabview.tab("Werkzeug"), columns=("","Bar Code", "Bedeutung", "Größe", "Bestand Lager", "Aktueller bestand"), style="Treeview", height=24)
+        self.werkzeug_table.grid(columnspan=2,row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
+    
+        
+        
+        self.werkzeug_table.column("#0", width=0, stretch=False)
+        self.werkzeug_table.column("#1", minwidth=50)
+        self.werkzeug_table.column("#2", minwidth=700)
+        self.werkzeug_table.column("#3", minwidth=100)
+        self.werkzeug_table.column("#4", minwidth=70)
+        self.werkzeug_table.column("#5", minwidth=150)
+        self.werkzeug_table.column("#6", width=0, stretch=False)
+        
+        # Добавляем заголовки столбцов
+        
+        self.werkzeug_table.heading("#1", text="Bar Code")
+        self.werkzeug_table.heading("#2", text="Bedeutung")
+        self.werkzeug_table.heading("#3", text="Größe")
+        self.werkzeug_table.heading("#4", text="Lager")
+        self.werkzeug_table.heading("#5", text="Aktueller")
 ############## ############## ############## ############## #Настройка фрейма №2 ############## ############## ############## ############## ##############    
        
         self.tabview_baustellen = customtkinter.CTkTabview(self.f2, fg_color="#242424")
@@ -397,12 +437,13 @@ class BestandLager(CTk.CTk):
 
 
     
-        
+        self.bedeutung.bind("<KeyRelease>", self.check_bedeutung)
         self.bar_code.bind("<KeyRelease>", self.check_vz_nr)
         self.vz_nr.bind("<KeyRelease>", self.check_barcode)
         self.table.bind("<<TreeviewSelect>>", self.on_item_select)
         self.bar_code.bind('<Return>', lambda event=None: self.kol2())
         self.vz_nr.bind('<Return>', lambda event=None: self.kol2())
+        self.bedeutung.bind('<Return>', lambda event=None: self.kol2())
         # self.bar_code_f2.bind('<Return>', lambda event=None: self.add_button_bau())
         # self.sum.bind('<Return>', lambda event=None: self.add_button_bau())
         self.sum_home_frame3.bind('<Return>', lambda event=None: self.reduction_main_table())
@@ -418,18 +459,21 @@ class BestandLager(CTk.CTk):
         self.show_logs()
         self.show_all_data()
         self.show_material_table()
+        self.show_werkzeug_table()
         self.display_existing_products()
         self.create_labels()
 
     def create_labels(self):
-        diese_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Diese Woche", width= 150, fg_color="#A92F43")
+        diese_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Diese Woche", width= 150, fg_color="#CE5145")
         diese_woche.pack(side='left', padx=(10,5), anchor="nw")
         nachste_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Nächste Woche",width= 150, fg_color="#998711", text_color = "black")
         nachste_woche.pack(side='left', padx=5, anchor="nw")
         heute = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Heute",width= 150, fg_color="#8c0303")
         heute.pack(side='left', padx=5, anchor="nw")
-        bei_der_arbeit = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Wird Uberwacht",width= 150, fg_color="#228B22",text_color = "black")
+        bei_der_arbeit = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Wird Uberwacht",width= 150, fg_color="#66B032",text_color = "black")
         bei_der_arbeit.pack(side='left', padx=5, anchor="nw")
+        h_verbot_color = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="H.Verbot",width= 150, fg_color="#4424D6",text_color = "white")
+        h_verbot_color.pack(side='left', padx=5, anchor="nw")
 
         
         label8 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME", width= 150, fg_color="#0f5925")
@@ -500,26 +544,26 @@ class BestandLager(CTk.CTk):
     def get_inaktiv_from_database(self, status = 'Inaktiv'):
         # Открываете курсор для выполнения SQL-запроса
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
         product_dicts = []
         for product_tuple in products:
             product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
-                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'vrao_ab': product_tuple[8],
-                            'vrao_bis': product_tuple[9], 'ansprechpartner': product_tuple[10],'status': product_tuple[11] }
+                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'ansprechpartner': product_tuple[8],
+                            'status': product_tuple[9], 'kostenstelle_plannung': product_tuple[10]}
             product_dicts.append(product_dict)
         return product_dicts
 
     def get_products_from_database(self, status = 'Aktiv'):
         # Открываете курсор для выполнения SQL-запроса
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status, set_capo, vzp FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
         product_dicts = []
         for product_tuple in products:
             product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
-                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'vrao_ab': product_tuple[8],
-                            'vrao_bis': product_tuple[9], 'ansprechpartner': product_tuple[10],'status': product_tuple[11],'set_capo': product_tuple[12],'vzp': product_tuple[13] }
+                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'ansprechpartner': product_tuple[8],
+                            'status': product_tuple[9], 'set_capo': product_tuple[10],'kostenstelle_plannung': product_tuple[11] }
             product_dicts.append(product_dict)
 
         return product_dicts
@@ -542,7 +586,7 @@ class BestandLager(CTk.CTk):
         kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
         label4 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ansprechpartner']}",width= 180)
         label4.pack(side='left', padx=5, anchor="nw")
-        vzp_btn = customtkinter.CTkButton(self.inaktiv_frame, text="VZP", command=lambda p=inaktiv_product['kostenstelle']: self.open_vzp_folder(p),corner_radius=2, height=28, width=100, 
+        vzp_btn = customtkinter.CTkButton(self.inaktiv_frame, text="VZP", command=lambda p=inaktiv_product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=100, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
@@ -626,7 +670,7 @@ class BestandLager(CTk.CTk):
         kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
         label3 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ansprechpartner']}",width= 180)
         label3.pack(side='left',pady=5, padx=5, anchor="nw")
-        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['kostenstelle']: self.open_vzp_folder(p),corner_radius=2, height=28, width=100, 
+        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=100, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
@@ -687,20 +731,17 @@ class BestandLager(CTk.CTk):
                                                 anchor="center" )
         deactive_button.pack(side='left',pady=5, padx=5, anchor="nw")
         
-        if 0 <= (new_date - current_date).days <= 6:
-            self.flag = True
-            threading.Thread(target=lambda: self.flash_error_color(self.product_frame), args=()).start()
-
+        
         #Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if 1 <= days_until_due <= 7:
-            label.configure(fg_color="#A92F43")
-            label2.configure(fg_color="#A92F43")
-            kostenstelle_btn.configure(fg_color="#A92F43")
-            label3.configure(fg_color="#A92F43")
-            label4.configure(fg_color="#A92F43")
-            label5.configure(fg_color="#A92F43")
-            label6.configure(fg_color="#A92F43")
-            vzp_btn.configure(fg_color="#A92F43")
+            label.configure(fg_color="#CE5145",text_color = "black")
+            label2.configure(fg_color="#CE5145",text_color = "black")
+            kostenstelle_btn.configure(fg_color="#CE5145",text_color = "black")
+            label3.configure(fg_color="#CE5145",text_color = "black")
+            label4.configure(fg_color="#CE5145",text_color = "black")
+            label5.configure(fg_color="#CE5145",text_color = "black")
+            label6.configure(fg_color="#CE5145",text_color = "black")
+            vzp_btn.configure(fg_color="#CE5145",text_color = "black")
 
         
         elif days_until_due == 0:
@@ -725,21 +766,27 @@ class BestandLager(CTk.CTk):
 
         elif product_date < current_date:
             # Если время прошло, устанавливаем синий цвет
-            label.configure(fg_color="#228B22",text_color = "black")
-            label2.configure(fg_color="#228B22",text_color = "black")
-            kostenstelle_btn.configure(fg_color="#228B22",text_color = "black")
-            label3.configure(fg_color="#228B22",text_color = "black")
-            label4.configure(fg_color="#228B22",text_color = "black")
-            label5.configure(fg_color="#228B22",text_color = "black")
-            label6.configure(fg_color="#228B22",text_color = "black")
-            vzp_btn.configure(fg_color="#228B22",text_color = "black")
+            label.configure(fg_color="#66B032",text_color = "black")
+            label2.configure(fg_color="#66B032",text_color = "black")
+            kostenstelle_btn.configure(fg_color="#66B032",text_color = "black")
+            label3.configure(fg_color="#66B032",text_color = "black")
+            label4.configure(fg_color="#66B032",text_color = "black")
+            label5.configure(fg_color="#66B032",text_color = "black")
+            label6.configure(fg_color="#66B032",text_color = "black")
+            vzp_btn.configure(fg_color="#66B032",text_color = "black")
     
         if not product['set_capo'] =="":
-            set_capo.configure(fg_color="#e8bf5c")
+            set_capo.configure(fg_color="#bec1c4")
+
+        if 0 <= (new_date - current_date).days <= 6:
+            label4.configure(fg_color = "#4424D6", text_color = "white")
+            # self.flag = True
+            # threading.Thread(target=lambda: self.flash_error_color(self.product_frame), args=()).start()
+
 
     def open_kostenstelle_folder(self, product_id):
-        base_path = r"test_folder"
-        # base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
+        # base_path = r"test_folder\02 Verkehrssicherung"
+        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
         items = os.listdir(os.path.normpath(base_path))
         matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
         if matching_folders:
@@ -747,8 +794,8 @@ class BestandLager(CTk.CTk):
             os.startfile(target_folder)
    
     def open_vzp_folder(self, product_id):
-        # base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
-        base_path = r"test_folder"
+        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\01 Verkehrsplanung"
+        # base_path = r"test_folder\01 Verkehrsplanung"
         nested_folders = ["09 Verkehrszeichenpläne", "02 PDF"]
         items = os.listdir(os.path.normpath(base_path))
         matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
@@ -777,68 +824,78 @@ class BestandLager(CTk.CTk):
         self.update_product_list()
 
     def stunden_bau(self, product_kostenstelle):
-        base_path = r"test_folder"
-        nested_folders = ["verkehrssich.unterlage"]
+        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+        prefix_to_match = "11"
         items = os.listdir(os.path.normpath(base_path))
         matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
-
         if matching_folders:
             target_folder = os.path.join(base_path, matching_folders[0])
-            for nested_folder in nested_folders:
-                target_folder = os.path.join(target_folder, nested_folder)
+            # Ищем подпапку внутри найденной папки, начинающуюся с префикса "11"
+            nested_folder_match = [nested_folder for nested_folder in os.listdir(target_folder) if nested_folder.startswith(prefix_to_match)]
+            
+            if nested_folder_match:
+                nested_folder = nested_folder_match[0]
+                
+                # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
+                document_path = os.path.join(target_folder, nested_folder, "Stundenbericht Verkehrssicherung_VVO.xlsx")
 
-            # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
-            document_path = os.path.join(target_folder, "Stundenbericht Verkehrssicherung.docx")
+                cursor = self.conn.cursor()
+                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s", (product_kostenstelle, ))
+                data = cursor.fetchone()
+                data_dict = {
+                'C5': data[2],
+                'C9': data[3],
+                'C11': f"{data[5]}, {data[4]}",
+                'I5': f"{data[6]} - {data[7]}",
+                'I9': f"{data[6]} - {data[7]}",
+                'I11': data[8],
+            }
+                
+                # Вставляем данные в документ
+                insert_data_into_excel(document_path, data_dict)
 
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
-            data = cursor.fetchone()
-            data_table1 = [
-                ["", data[2], "", "", f"{data[6]} - {data[7]}"],
-                ["", "", "", "", ""],
-                ["", data[3], "","",data[8]],
-                ["", f"{data[4]}, {data[5]}","","", data[9]],
-            ]
-
-            # Вставляем данные в документ
-            insert_data_into_tables(document_path, document_path, data_table1)
-
-            # Открываем файл
-            os.startfile(document_path)
+                # Открываем файл
+                os.startfile(document_path)
+            else:
+                print(f"No folders starting with prefix '{prefix_to_match}' found inside folder '{target_folder}'.")
         else:
             print(f"No folders matching the keyword '{product_kostenstelle}' found.")
 
     def material_bau(self, product_kostenstelle):
-        base_path = r"test_folder"
-        nested_folders = ["verkehrssich.unterlage"]
+        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+        # base_path = r"test_folder\02 Verkehrssicherung"
+        prefix_to_match = "11"
         items = os.listdir(os.path.normpath(base_path))
         matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
-
         if matching_folders:
             target_folder = os.path.join(base_path, matching_folders[0])
-            for nested_folder in nested_folders:
-                target_folder = os.path.join(target_folder, nested_folder)
+            # Ищем подпапку внутри найденной папки, начинающуюся с префикса "11"
+            nested_folder_match = [nested_folder for nested_folder in os.listdir(target_folder) if nested_folder.startswith(prefix_to_match)]
+            
+            if nested_folder_match:
+                nested_folder = nested_folder_match[0]
+                
+                # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
+                # Путь к файлу "Stundenbericht Verkehrssicherung.xlsx"
+                document_path = os.path.join(target_folder, nested_folder, "Materialliste.docx")
 
-            # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
-            document_path = os.path.join(target_folder, "Materialliste.docx")
+                cursor = self.conn.cursor()
+                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
+                data = cursor.fetchone()
+                data_table1 = [
+                    ["", data[2], "", "", f"{data[6]} - {data[7]}"],
+                    ["", "", "", "", ""],
+                    ["", data[3], "","",f"{data[6]} - {data[7]}"],
+                    ["", f"{data[5]}, {data[4]}","","", data[8]],
+                ]
 
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, vrao_ab, vrao_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
-            data = cursor.fetchone()
-            data_table1 = [
-                ["", data[2], "", "", f"{data[6]} - {data[7]}"],
-                ["", "", "", "", ""],
-                ["", data[3], "","",data[8]],
-                ["", f"{data[4]}, {data[5]}","","", data[9]],
-            ]
+                # Вставляем данные в файл Excel
+                insert_data_into_tables(document_path,document_path, data_table1)
 
-            # Вставляем данные в документ
-            insert_data_into_tables(document_path, document_path, data_table1)
-
-            # Открываем файл
-            os.startfile(document_path)
-        else:
-            print(f"No folders matching the keyword '{product_kostenstelle}' found.")
+                # Открываем файл
+                os.startfile(document_path)
+            else:
+                print(f"No folders matching the keyword '{product_kostenstelle}' found.")
 
     def set_capo_top_level(self,product_id):
         self.toplevel_window = Set_Capo(self, product_id)  # создаем окно, если его нет или оно уничтожено
@@ -908,14 +965,14 @@ class BestandLager(CTk.CTk):
         map_window.wait_window()  # ждем закрытия дочернего окна
         map_window.grab_release()  # освобождаем фокус после его закрытия     
     
-    def flash_error_color(self, widget):
-        def flash():
-            if self.flag:
-                widget.configure(fg_color="transparent")
-                self.after(500, lambda: widget.configure(fg_color="#8a0707"))
-                self.after(1000, flash)
+    # def flash_error_color(self, widget):
+    #     def flash():
+    #         if self.flag:
+    #             widget.configure(fg_color="transparent")
+    #             self.after(500, lambda: widget.configure(fg_color="#8a0707"))
+    #             self.after(1000, flash)
 
-        flash()
+    #     flash()
 
     def handle_reduction_change(self, event):
         selected_reduction = self.reduction.get()  # Получаем выбранный параметр
@@ -933,61 +990,62 @@ class BestandLager(CTk.CTk):
         selected_action = self.selected_action.get()
         bar_code = self.bar_code_home_frame3.get()
         sum_value = self.sum_home_frame3.get()
+        vz = self.vz_frame3.get()
         cursor = self.conn.cursor()
         try:
             if selected_reduction == "Current":
                 if selected_action == "Add":
-                    cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s OR vz_nr = %s", (bar_code,vz))
                     data = cursor.fetchall()
                     new_data = data[0][0]  # Получаем значение из кортежа
                     if new_data is None: 
                         new_data = 0
                     new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
-                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s OR vz_nr = %s", (new_value, bar_code,vz))
                     self.show_all_data()
 
                 elif selected_action == "Decrease":
-                    cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    cursor.execute("SELECT aktueller_bestand FROM Lager_Bestand WHERE bar_Code = %s OR vz_nr = %s", (bar_code,vz))
                     data = cursor.fetchall()
                     new_data = data[0][0]  # Получаем значение из кортежа
                     if new_data is None: 
                         new_data = 0
                     new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
-                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s OR vz_nr = %s", (new_value, bar_code, vz))
                     self.show_all_data()
 
                 elif selected_action == "Replace":
-                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s", (sum_value, bar_code))
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s WHERE bar_Code = %s OR vz_nr = %s", (sum_value, bar_code, vz))
                     self.show_all_data()
 
             if selected_reduction == "Total on account":
                 if selected_action == "Add":
-                    cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s OR vz_nr = %s", (bar_code,vz))
                     data = cursor.fetchall()
                     new_data = data[0][0]  # Получаем значение из кортежа
                     if new_data is None: 
                         new_data = 0
                     new_value = new_data + int(sum_value)  # Преобразуем sum_value в целое число
-                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s OR vz_nr = %s", (new_value, bar_code,vz))
                     self.show_all_data()
 
                 elif selected_action == "Decrease":
-                    cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    cursor.execute("SELECT bestand_lager FROM Lager_Bestand WHERE bar_Code = %s OR vz_nr = %s", (bar_code,vz))
                     data = cursor.fetchall()
                     new_data = data[0][0]  # Получаем значение из кортежа
                     if new_data is None: 
                         new_data = 0
                     new_value = new_data  - int(sum_value)  # Преобразуем sum_value в целое число
-                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (new_value, bar_code))
+                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s OR vz_nr = %s", (new_value, bar_code,vz))
                     self.show_all_data()
 
                 elif selected_action == "Replace":
-                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s", (sum_value, bar_code))
+                    cursor.execute("UPDATE Lager_Bestand SET bestand_lager = %s WHERE bar_Code = %s OR vz_nr = %s", (sum_value, bar_code, vz))
                     self.show_all_data()
 
             if selected_reduction == "Defect":
                 if selected_action == "Add":
-                    cursor.execute("SELECT * FROM Lager_Bestand WHERE bar_Code = %s", (bar_code,))
+                    cursor.execute("SELECT * FROM Lager_Bestand WHERE bar_Code = %s OR vz_nr = %s", (bar_code, vz))
                     data = cursor.fetchone()
                     new_data = data[5]
                     new_data2 = data[4]
@@ -995,16 +1053,16 @@ class BestandLager(CTk.CTk):
                         new_data = 0
                     new_value = new_data - int(sum_value) 
                     new_value2 = new_data2 - int(sum_value)
-                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s, bestand_lager = %s  WHERE bar_Code = %s", (new_value, new_value2, bar_code))
+                    cursor.execute("UPDATE Lager_Bestand SET aktueller_bestand = %s, bestand_lager = %s  WHERE bar_Code = %s OR vz_nr = %s", (new_value, new_value2, bar_code, vz))
                     if data:
                         # Если данные были найдены, извлекаем нужные значения
                         (bar_code, vz_nr, bedeutung, größe, bestand_lager, aktueller_bestand) = data
-                        cursor.execute("SELECT * FROM Defekt WHERE bar_code = %s", (bar_code,))
+                        cursor.execute("SELECT * FROM Defekt WHERE bar_code = %s OR vz_nr = %s", (bar_code, vz))
                         existing_defekt_data = cursor.fetchone()
                         # Выполняем запрос на вставку данных в Defekt
                         if existing_defekt_data:
                             rest_data = existing_defekt_data[4] + int(sum_value)
-                            cursor.execute("UPDATE Defekt SET bestand = %s WHERE bar_code = %s",(rest_data, bar_code))
+                            cursor.execute("UPDATE Defekt SET bestand = %s WHERE bar_code = %s OR vz_nr = %s",(rest_data, bar_code, vz))
                         else:
                             cursor.execute("INSERT INTO Defekt (bar_code, vz_nr, bedeutung, größe, bestand) VALUES (%s, %s, %s, %s, %s)", (bar_code, vz_nr, bedeutung, größe, sum_value))
         except Exception as e:
@@ -1013,6 +1071,7 @@ class BestandLager(CTk.CTk):
             self.show_all_data()
         self.bar_code_home_frame3.delete(0, 'end')
         self.sum_home_frame3.delete(0, 'end')
+        self.vz_frame3.delete(0, 'end')
         self.after(100, lambda: self.bar_code_home_frame3.focus_set())
 
     def export_to_excel_button_click(self):
@@ -1084,6 +1143,29 @@ class BestandLager(CTk.CTk):
             except Exception as e:
                 print(f"Ошибка открытия изображения: {e}") # показывает какая ошибка в консоль! {e}
 
+    def show_img_for_bedeutung(self, vz):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT VZ_Nr FROM lager_bestand WHERE VZ_Nr = %s", (vz,))
+        data= cursor.fetchone()
+        
+        if data is not None:
+            vznr = data[0]
+            image_path = f"VZ_DB/{vznr}.jpg"  # Предполагаем, что все изображения имеют расширение .png
+
+            try:
+                image = PIL.Image.open(image_path)
+                ctk_image = CTk.CTkImage(image, size=(200,200))
+                # Создайте виджет для отображения изображения
+                if hasattr(self, "image_label"):
+                    self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
+
+                self.image_label = CTk.CTkLabel(self.home_frame2, image=ctk_image, text="")
+                self.image_label.grid(row=0, column=0, padx=0, pady=0, sticky="ne")
+            except FileNotFoundError:
+                self.result_show("Изображение не найдено")
+            except Exception as e:
+                print(f"Ошибка открытия изображения: {e}") # показывает какая ошибка в консоль! {e}
+
     def show_img_for_vz(self, vz):
         cursor = self.conn.cursor()
         cursor.execute("SELECT VZ_Nr FROM Lager_Bestand WHERE VZ_Nr = %s", (vz,))
@@ -1126,12 +1208,13 @@ class BestandLager(CTk.CTk):
     def kol2(self):
         self.barcode = self.bar_code.get()
         self.vz = self.vz_nr.get()
+        bedeutung = self.bedeutung.get()
         
         cursor = self.conn.cursor()
         # Получаем данные из базы данных (замените на ваш SQL-запрос)
-        cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s", (self.barcode, self.vz))
+        cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s OR LOWER(bedeutung) ILIKE LOWER(%s)", (self.barcode, self.vz,  f"%{bedeutung}%"))
         data = cursor.fetchall()
-        
+       
         # Очищаем текущие строки в таблице
         for row in self.table.get_children():
             self.table.delete(row)
@@ -1141,27 +1224,52 @@ class BestandLager(CTk.CTk):
                 # Добавляем новые строки с данными в таблицу
                 self.show_img_for_barcode(self.bar_code.get())
                 self.show_img_for_vz(self.vz_nr.get())
+                if len(data) == 1:
+                    # Выполняем определенное действие только для одного товара
+                    self.show_img_for_bedeutung(item[1])
+                elif self.error_label:
+                    self.error_label.destroy()  # Удаляем предыдущее сообщение об ошибке, если оно уже было
+                elif hasattr(self, "image_label"):
+                    self.image_label.destroy()  # Удаляем предыдущий виджет, если он существует
                 self.table.insert("", "end", values=item)
-        elif self.barcode == "" and self.vz == "":
-            print("Сработало")
+        elif self.barcode == "" and self.vz == "" and bedeutung == "":
             self.result_show("Забыл ввести данные")
         else:
             self.result_show("Данных не найдено")
         self.bar_code.delete(0, 'end')
         self.vz_nr.delete(0, 'end')
+        self.bedeutung.delete(0, 'end')
+        
+    def check_bedeutung(self,event):
+        # Функция вызывается при изменении баркода
+        if self.bedeutung.get(): 
+            # Если баркод не пустой, очищаем поле Vz Nr
+            self.vz_nr.delete(0, 'end')
+            self.bar_code.delete(0, 'end')
 
     def check_vz_nr(self, event):
         # Функция вызывается при изменении баркода
         if self.bar_code.get():
             # Если баркод не пустой, очищаем поле Vz Nr
             self.vz_nr.delete(0, 'end')
+            self.bedeutung.delete(0, 'end')
         
     def check_barcode(self, event):
-
         # Функция вызывается при изменении Vz Nr
         if self.vz_nr.get():
             # Если Vz Nr не пустой, очищаем поле баркода
             self.bar_code.delete(0, 'end')
+            self.bedeutung.delete(0, 'end')
+
+    def show_werkzeug_table(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM werkzeug_lager")
+        data = cursor.fetchall()
+        for row in self.werkzeug_table.get_children():
+            self.werkzeug_table.delete(row)
+       
+        for item in data:
+            self.werkzeug_table.insert("", "end", values=item)
 
     def show_material_table(self):
         cursor = self.conn.cursor()

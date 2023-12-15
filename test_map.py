@@ -22,7 +22,7 @@ class App(customtkinter.CTkToplevel):
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
         self.minsize(App.WIDTH, App.HEIGHT)
-
+        self.state("zoomed")
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind("<Command-q>", self.on_closing)
         self.bind("<Command-w>", self.on_closing)
@@ -85,7 +85,7 @@ class App(customtkinter.CTkToplevel):
 
         # Set default values
         self.map_widget.set_address("Ulm")
-        self.map_option_menu.set("OpenStreetMap")
+        self.change_map("Google normal")
 
 
         # Добавляем контекстное меню для карты

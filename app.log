@@ -167,3 +167,19 @@
 2023-12-13 00:09:28,927 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('1',)
 2023-12-13 00:18:31,785 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('12312',)
 2023-12-13 00:20:43,954 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('12512',)
+2023-12-14 19:06:15,357 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('Wiblingen,Haauptstrasse',)
+2023-12-14 19:07:04,790 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('OLgastrasse',)
+2023-12-14 19:15:09,140 - main - INFO - Пользователь admin выполнил действие: Изменил стройку под названием: ('75085-23',)
+2023-12-14 19:15:18,914 - main - INFO - Пользователь admin выполнил действие: Erstellt eine bedrohte Baustelle:: ('OLgastrasse123',)
+2023-12-14 19:15:26,925 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('G.Hudzen',)
+2023-12-14 19:15:31,312 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('G.Hudzen, 1',)
+2023-12-14 19:15:34,747 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('G.Hudzen, 1',)
+2023-12-14 19:15:37,936 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('G.Hudzen, 1',)
+2023-12-14 23:18:45,826 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-14 23:23:09,126 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-14 23:25:37,426 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-14 23:26:26,786 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-14 23:34:24,400 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-14 23:35:08,429 - geocoder.base - INFO - Requested https://nominatim.openstreetmap.org/search?q=Ulm&format=jsonv2&addressdetails=1&limit=1
+2023-12-14 23:50:51,645 - main - INFO - Пользователь admin выполнил действие: Изменил стройку под названием: ('75023-23',)
+2023-12-14 23:51:08,979 - main - INFO - Пользователь admin выполнил действие: Beauftragte Personen f\xfcr die Baustelle: ('G.Hudzen, 1',)
