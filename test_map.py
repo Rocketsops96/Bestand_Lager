@@ -42,7 +42,7 @@ class App(customtkinter.CTkToplevel):
         self.frame_right = customtkinter.CTkFrame(master=self, corner_radius=0)
         self.frame_right.grid(row=0, column=1, rowspan=1, pady=0, padx=0, sticky="nsew")
 
-        self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["OpenStreetMap", "Google normal", "Google satellite"],fg_color="gray10", button_color="red", button_hover_color=("black"),
+        self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["Google normal", "Google satellite"],fg_color="gray10", button_color="red", button_hover_color=("black"),
                                                                        command=self.change_map)
         self.map_option_menu.grid(row=0, column=0, padx=5, pady=10)
 
@@ -84,9 +84,9 @@ class App(customtkinter.CTkToplevel):
         self.button_5.grid(row=0, column=1, sticky="w", padx=(12, 0), pady=12)
 
         # Set default values
-        self.map_widget.set_address("Ulm")
+        # self.map_widget.set_address("Ulm")
         self.change_map("Google normal")
-
+        
 
         # Добавляем контекстное меню для карты
         self.map_widget.add_right_click_menu_command(label="Add Marker",
@@ -99,7 +99,7 @@ class App(customtkinter.CTkToplevel):
         # После инициализации карты в функции __init__
         self.map_widget.bind("<Double-Button-1>", self.double_click_event)
         self.update_map_markers()
-   
+        self.focus_on_marker("B.Gashi")
     def update_map_markers(self):
         try:
             print("Updating map markers...")
@@ -166,9 +166,8 @@ class App(customtkinter.CTkToplevel):
 
 
     def change_map(self, new_map: str):
-        if new_map == "OpenStreetMap":
-            self.map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
-        elif new_map == "Google normal":
+        
+        if new_map == "Google normal":
             self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         elif new_map == "Google satellite":
             self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
