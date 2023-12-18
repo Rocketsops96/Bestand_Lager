@@ -7,6 +7,7 @@ from tkinter import filedialog
 import base64
 from win10toast import ToastNotifier
 import os
+from tkinter import StringVar
 
 
 
@@ -44,8 +45,19 @@ class Bau(customtkinter.CTkToplevel):
         self.kostenstelle_vvo = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
         self.kostenstelle_vvo.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.kostenstelle_plannung = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle Verkehrsplannung:", width= 250, corner_radius = 3)
-        self.kostenstelle_plannung.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+        # self.kostenstelle_plannung = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle Verkehrsplannung:", width= 250, corner_radius = 3)
+        # self.kostenstelle_plannung.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.kostenstelle_plannung_var = StringVar()
+
+        self.kostenstelle_plannung_button = customtkinter.CTkButton(self.two_frame, text="Ordner auswählen", 
+                                                                    command=self.choose_folder, width=250,
+                                                                    fg_color=("gray70", "gray30"), corner_radius=2, 
+                                                                    text_color=("gray10", "gray90"), hover_color=("red"),
+                                                                    font=customtkinter.CTkFont(size=14, weight="bold"),
+                                                                    anchor="center")
+        self.kostenstelle_plannung_button.grid(column=0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+
 
         self.bauvorhaben = customtkinter.CTkEntry(self.two_frame, placeholder_text="Bauvorhaben:", width= 250, corner_radius = 3)
         self.bauvorhaben.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
@@ -79,7 +91,7 @@ class Bau(customtkinter.CTkToplevel):
         self.uber.grid(column = 0, row = 10, padx=(10, 10), pady=(0, 10), sticky="nw")
 
 
-        self.create_bau = customtkinter.CTkButton(master=self.two_frame, corner_radius=5, height=30, width=250, border_spacing=5, text="Speichern",
+        self.create_bau = customtkinter.CTkButton(master=self.two_frame, corner_radius=2, height=30, width=250, border_spacing=5, text="Speichern",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.create)
         self.create_bau.grid(column = 0,row=11, padx=(10,0), pady=(0, 10), sticky="nw")
@@ -97,10 +109,10 @@ class Bau(customtkinter.CTkToplevel):
         ausfurung_bis = self.ausfurung_bis.get()
         uberwacht = self.uber.get()
         ansprechpartner = self.ansprechpartner.get()
-        kostenstelle_plannung = self.kostenstelle_plannung.get()
+        kostenstelle_plannung = self.kostenstelle_plannung_var.get()
  
 
-        if not name or not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
+        if not name or not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner or not kostenstelle_plannung:
             
             if not name:
                 threading.Thread(target=lambda: self.flash_error_color(self.name_bau), args=()).start()
@@ -111,7 +123,10 @@ class Bau(customtkinter.CTkToplevel):
                 threading.Thread(target=lambda: self.flash_error_color(self.kostenstelle_vvo), args=()).start()
             else:
                 self.kostenstelle_vvo.configure(border_color="grey")
-
+            if not kostenstelle_plannung:
+                threading.Thread(target=lambda: self.flash_error_color_for_btn(self.bauvorhaben), args=()).start()
+            else:
+                self.kostenstelle_plannung_button.configure(fg_color = "gray70")
             if not bauvorhaben:
                 threading.Thread(target=lambda: self.flash_error_color(self.bauvorhaben), args=()).start()
             else:
@@ -161,7 +176,11 @@ class Bau(customtkinter.CTkToplevel):
         self.ansprechpartner.delete(0, 'end')
         threading.Thread(target=self.show_notification, args=("Уведомление", "Стройка создана!")).start()
         self.on_closing()
-
+    
+    def choose_folder(self):
+        folder_path = filedialog.askdirectory()
+        if folder_path:
+            self.kostenstelle_plannung_var.set(folder_path)
 
     def show_notification(self, title, message):
         toaster = ToastNotifier()
@@ -172,6 +191,12 @@ class Bau(customtkinter.CTkToplevel):
             widget.configure(border_color="grey")
             time.sleep(0.2)
             widget.configure(border_color="red")
+            time.sleep(0.2)  # Задержка в 200 миллисекунд
+    def flash_error_color_for_btn(self, widget):
+        for _ in range(5):  # Меняем цвет 5 раз
+            self.kostenstelle_plannung_button.configure(fg_color="grey")
+            time.sleep(0.2)
+            self.kostenstelle_plannung_button.configure(fg_color="red")
             time.sleep(0.2)  # Задержка в 200 миллисекунд
         
     def on_closing(self, event=0):

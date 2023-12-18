@@ -450,6 +450,7 @@ class BestandLager(CTk.CTk):
         self.sum_home_frame3.bind('<Return>', lambda event=None: self.reduction_main_table())
         self.update_ui_language(self.language)
         self.update()
+        self.after(5000, self.check_connection_periodically)  # Периодическая проверка каждые 5 секунд
 
         
         self.login = login
@@ -477,7 +478,7 @@ class BestandLager(CTk.CTk):
         h_verbot_color.pack(side='left', padx=5, anchor="nw")
 
         
-        label8 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME", width= 150, fg_color="#0f5925")
+        label8 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="PROJEKTNAME", width= 150, fg_color="#0f5925")
         label8.pack(side='left', padx=(10,5), anchor="nw")
         label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 150, fg_color="#0f5925")
         label.pack(side='left', padx=5, anchor="nw")
@@ -544,6 +545,7 @@ class BestandLager(CTk.CTk):
 
     def get_inaktiv_from_database(self, status = 'Inaktiv'):
         # Открываете курсор для выполнения SQL-запроса
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
@@ -557,6 +559,7 @@ class BestandLager(CTk.CTk):
 
     def get_products_from_database(self, status = 'Aktiv'):
         # Открываете курсор для выполнения SQL-запроса
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
@@ -784,7 +787,6 @@ class BestandLager(CTk.CTk):
             # self.flag = True
             # threading.Thread(target=lambda: self.flash_error_color(self.product_frame), args=()).start()
 
-
     def open_kostenstelle_folder(self, product_id):
         # base_path = r"test_folder\02 Verkehrssicherung"
         base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
@@ -795,18 +797,20 @@ class BestandLager(CTk.CTk):
             os.startfile(target_folder)
    
     def open_vzp_folder(self, product_id):
-        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\01 Verkehrsplanung"
-        # base_path = r"test_folder\01 Verkehrsplanung"
-        nested_folders = ["09 Verkehrszeichenpläne", "02 PDF"]
-        items = os.listdir(os.path.normpath(base_path))
-        matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
+        # base_path = r"\\FILESRV1\Abteilungen\VVO\2024\01 Verkehrsplanung"
+        # # base_path = r"test_folder\01 Verkehrsplanung"
+        # nested_folders = ["09 Verkehrszeichenpläne", "02 PDF"]
+        # items = os.listdir(os.path.normpath(base_path))
+        # matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
 
-        if matching_folders:
-            target_folder = os.path.join(base_path, matching_folders[0])
-            for nested_folder in nested_folders:
-                target_folder = os.path.join(target_folder, nested_folder)
+        # if matching_folders:
+        #     target_folder = os.path.join(base_path, matching_folders[0])
+        #     for nested_folder in nested_folders:
+        #         target_folder = os.path.join(target_folder, nested_folder)
 
-            os.startfile(target_folder)
+        #     os.startfile(target_folder)
+        if product_id:
+            os.startfile(product_id)
         else:
             print(f"No folders matching the keyword '{product_id}' found.")
 
@@ -817,6 +821,7 @@ class BestandLager(CTk.CTk):
         reduction_menu.wait_window()  # ждем закрытия дочернего окна
         reduction_menu.grab_release()  # освобождаем фокус после его закрытия
         user = self.login # имя кто сделал действие для лога
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT kostenstelle_vvo FROM bau WHERE id = %s ",(product_id,))
         name = cursor.fetchone()
@@ -839,7 +844,7 @@ class BestandLager(CTk.CTk):
                 
                 # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
                 document_path = os.path.join(target_folder, nested_folder, "Stundenbericht Verkehrssicherung_VVO.xlsx")
-
+                self.check_connection()
                 cursor = self.conn.cursor()
                 cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s", (product_kostenstelle, ))
                 data = cursor.fetchone()
@@ -879,7 +884,7 @@ class BestandLager(CTk.CTk):
                 # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
                 # Путь к файлу "Stundenbericht Verkehrssicherung.xlsx"
                 document_path = os.path.join(target_folder, nested_folder, "Materialliste.docx")
-
+                self.check_connection()
                 cursor = self.conn.cursor()
                 cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
                 data = cursor.fetchone()
@@ -904,6 +909,7 @@ class BestandLager(CTk.CTk):
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
         user = self.login # имя кто сделал действие для лога
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT set_capo FROM bau WHERE id = %s ",(product_id,))
         name = cursor.fetchone()
@@ -918,6 +924,7 @@ class BestandLager(CTk.CTk):
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
         self.update_product_list()
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT name_bau FROM Bau ORDER BY id DESC LIMIT 1;")
         name = cursor.fetchone()
@@ -926,11 +933,13 @@ class BestandLager(CTk.CTk):
         self.user_action(user, action)
         
     def deactive_bau(self, product_id):
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (product_id,))
         self.update_product_list()
 
     def activate_bau(self, product_id):
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("UPDATE bau SET status = 'Aktiv' WHERE id = %s", (product_id,))
         self.update_product_list()
@@ -992,6 +1001,7 @@ class BestandLager(CTk.CTk):
         bar_code = self.bar_code_home_frame3.get()
         sum_value = self.sum_home_frame3.get()
         vz = self.vz_frame3.get()
+        self.check_connection()
         cursor = self.conn.cursor()
         try:
             if selected_reduction == "Current":
@@ -1122,6 +1132,7 @@ class BestandLager(CTk.CTk):
         self.save_language_to_file(selected_language)
 
     def show_img_for_barcode(self, barcode):
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT VZ_Nr FROM lager_bestand WHERE Bar_Code = %s", (barcode,))
         data= cursor.fetchone()
@@ -1145,6 +1156,7 @@ class BestandLager(CTk.CTk):
                 print(f"Ошибка открытия изображения: {e}") # показывает какая ошибка в консоль! {e}
 
     def show_img_for_bedeutung(self, vz):
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT VZ_Nr FROM lager_bestand WHERE VZ_Nr = %s", (vz,))
         data= cursor.fetchone()
@@ -1168,6 +1180,7 @@ class BestandLager(CTk.CTk):
                 print(f"Ошибка открытия изображения: {e}") # показывает какая ошибка в консоль! {e}
 
     def show_img_for_vz(self, vz):
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT VZ_Nr FROM Lager_Bestand WHERE VZ_Nr = %s", (vz,))
         data = cursor.fetchone()
@@ -1191,6 +1204,7 @@ class BestandLager(CTk.CTk):
                 print(f"Ошибка открытия изображения: {e}")
 
     def check_values(self):
+        self.check_connection()
         cursor = self.conn.cursor()
 
         # Получаем все строки из базы данных
@@ -1211,12 +1225,13 @@ class BestandLager(CTk.CTk):
         self.vz = self.vz_nr.get()
         bedeutung = self.bedeutung.get()
         if bedeutung:
-
+            self.check_connection()
             cursor = self.conn.cursor()
             # Получаем данные из базы данных (замените на ваш SQL-запрос)
             cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s OR LOWER(bedeutung) ILIKE LOWER(%s)", (self.barcode, self.vz,  f"%{bedeutung}%"))
             data = cursor.fetchall()
         else:
+            self.check_connection()
             cursor = self.conn.cursor()
             # Получаем данные из базы данных (замените на ваш SQL-запрос)
             cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s", (self.barcode, self.vz))
@@ -1246,8 +1261,7 @@ class BestandLager(CTk.CTk):
         self.bar_code.delete(0, 'end')
         self.vz_nr.delete(0, 'end')
         self.bedeutung.delete(0, 'end')
-        
-        
+         
     def check_bedeutung(self,event):
         # Функция вызывается при изменении баркода
         if self.bedeutung.get(): 
@@ -1270,6 +1284,7 @@ class BestandLager(CTk.CTk):
             self.bedeutung.delete(0, 'end')
 
     def show_werkzeug_table(self):
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM werkzeug_lager")
         data = cursor.fetchall()
@@ -1280,6 +1295,7 @@ class BestandLager(CTk.CTk):
             self.werkzeug_table.insert("", "end", values=item)
 
     def show_material_table(self):
+        self.check_connection()
         cursor = self.conn.cursor()
         
         # Получаем все записи из таблицы "Lager_Bestand"
@@ -1298,7 +1314,7 @@ class BestandLager(CTk.CTk):
             self.material_table.insert("", "end", values=item)
 
     def show_all_data(self):
-       
+        self.check_connection()
         cursor = self.conn.cursor()
         
         # Получаем все записи из таблицы "Lager_Bestand"
@@ -1405,6 +1421,7 @@ class BestandLager(CTk.CTk):
         new_window.mainloop()  # Запускаем главный цикл нового окна
    
     def show_logs(self):
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS app_logs (log_id SERIAL PRIMARY KEY,log_time TIMESTAMP,log_user VARCHAR(255),log_action VARCHAR(255));")
     
@@ -1438,7 +1455,7 @@ class BestandLager(CTk.CTk):
 
     def user_action(self, user, action):
         # Запись действия пользователя в лог
-        
+        self.check_connection()
         cursor = self.conn.cursor()
         cursor.execute("INSERT INTO app_logs (log_time, log_user, log_action) VALUES (NOW(), %s, %s);",(user,action))
         self.logger.info(f"Пользователь {user} выполнил действие: {action}")
@@ -1448,6 +1465,7 @@ class BestandLager(CTk.CTk):
         self.log_view.configure(state="normal")
         
         try:
+            self.check_connection()
             cursor = self.conn.cursor()
             cursor.execute("DELETE FROM app_logs")  # Этот запрос удаляет все записи из таблицы
             
@@ -1467,7 +1485,17 @@ class BestandLager(CTk.CTk):
         info_window.wait_window()  # ждем закрытия дочернего окна
         info_window.grab_release()  # освобождаем фокус после его закрытия
 
-        
+    def check_connection(self):
+        try:
+            if self.conn is None or self.conn.closed != 0:
+                # Если соединения нет или оно закрыто, создаем новое соединение
+                self.conn = regbase.create_conn()
+        except Exception as e:
+            print(f"Error connecting to the database: {e}")
+
+    def check_connection_periodically(self):
+        threading.Thread(target=self.check_connection).start()
+        self.after(5000, self.check_connection_periodically)  # Запуск следующей проверки через 5 секунд
 
 if __name__ == '__main__':
     

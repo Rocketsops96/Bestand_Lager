@@ -7,7 +7,7 @@ from tkinter import filedialog
 import base64
 from win10toast import ToastNotifier
 import os
-
+from tkinter import StringVar
 
 
 
@@ -46,8 +46,18 @@ class App(customtkinter.CTkToplevel):
         self.kostenstelle_vvo = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
         self.kostenstelle_vvo.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
 
-        self.kostenstelle_plannung = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle Verkehrsplannung:", width= 250, corner_radius = 3)
-        self.kostenstelle_plannung.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+        # self.kostenstelle_plannung = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle Verkehrsplannung:", width= 250, corner_radius = 3)
+        # self.kostenstelle_plannung.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.kostenstelle_plannung_var = StringVar()
+
+        self.kostenstelle_plannung_button = customtkinter.CTkButton(self.two_frame, text="Ordner auswählen", 
+                                                                    command=self.choose_folder, width=250,
+                                                                    fg_color=("gray70", "gray30"), corner_radius=2, 
+                                                                    text_color=("gray10", "gray90"), hover_color=("red"),
+                                                                    font=customtkinter.CTkFont(size=14, weight="bold"),
+                                                                    anchor="center")
+        self.kostenstelle_plannung_button.grid(column=0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
 
         self.bauvorhaben = customtkinter.CTkEntry(self.two_frame, placeholder_text="Bauvorhaben:", width= 250, corner_radius = 3)
         self.bauvorhaben.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
@@ -81,15 +91,16 @@ class App(customtkinter.CTkToplevel):
         self.uber.grid(column = 0, row = 10, padx=(10, 10), pady=(0, 10), sticky="nw")
 
 
-        self.change_bau_btn = customtkinter.CTkButton(master=self.two_frame, corner_radius=5, height=30, width=250, border_spacing=5, text="Speichern",
+        self.change_bau_btn = customtkinter.CTkButton(master=self.two_frame, corner_radius=2, height=30, width=250, border_spacing=5, text="Speichern",
                                                 fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"), font=customtkinter.CTkFont(size=14, weight="bold"),
                                                     anchor="center", command=self.chanhe_bau)
         self.change_bau_btn.grid(column = 0,row=11, padx=(10,0), pady=(0, 10), sticky="nw")
 
         self.show_all_info()
+
     def show_all_info(self):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung FROM Bau WHERE id = %s",(self.product_id,))
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, uberwachung FROM Bau WHERE id = %s",(self.product_id,))
         data = cursor.fetchone()
         self.status_bau.set(data[9])
         self.name_bau.insert(0, data[1])
@@ -100,7 +111,11 @@ class App(customtkinter.CTkToplevel):
         self.ausfurung_von.set_date(data[6])
         self.ausfurung_bis.set_date(data[7])
         self.ansprechpartner.insert(0, data[8])
-        self.kostenstelle_plannung.insert(0, data[10])
+        self.kostenstelle_plannung_var.set(data[10])
+        if data[11] == "1":
+            self.uber.select()
+        else:
+            self.uber.deselect()
 
     def chanhe_bau(self):
         cursor = self.conn.cursor()
@@ -114,9 +129,9 @@ class App(customtkinter.CTkToplevel):
         ausfurung_bis = self.ausfurung_bis.get()
         uberwacht = self.uber.get()
         ansprechpartner = self.ansprechpartner.get()
-        kostenstelle_plannung = self.kostenstelle_plannung.get()
+        kostenstelle_plannung = self.kostenstelle_plannung_var.get()
 
-        if not name or not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner or not kostenstelle_plannung:
+        if not name or not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
             
             if not name:
                 threading.Thread(target=lambda: self.flash_error_color(self.name_bau), args=()).start()
@@ -132,10 +147,10 @@ class App(customtkinter.CTkToplevel):
                 threading.Thread(target=lambda: self.flash_error_color(self.bauvorhaben), args=()).start()
             else:
                 self.bauvorhaben.configure(border_color = "grey")
-            if not kostenstelle_plannung:
-                threading.Thread(target=lambda: self.flash_error_color(self.kostenstelle_plannung), args=()).start()
-            else:
-                self.kostenstelle_plannung.configure(border_color = "grey")
+            # if not kostenstelle_plannung:
+            #     threading.Thread(target=lambda: self.flash_error_color(self.kostenstelle_plannung_var), args=()).start()
+            # else:
+            #     self.kostenstelle_plannung_var.configure(border_color = "grey")
             if not strasse:
                 threading.Thread(target=lambda: self.flash_error_color(self.strasse), args=()).start()
             else:
@@ -151,9 +166,13 @@ class App(customtkinter.CTkToplevel):
                 self.ansprechpartner.configure(border_color = "grey")
             return  # Прерываем выполнение функции, так как не все обязательные поля заполнены
 
-        cursor.execute("UPDATE bau SET name_bau = %s, kostenstelle_vvo = %s, bauvorhaben = %s, ort = %s, strasse = %s, ausfurung_von = %s, ausfurung_bis = %s, ansprechpartner = %s, status = %s, kostenstelle_plannung = %s WHERE id = %s", (name, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, self.product_id))
+        cursor.execute("UPDATE bau SET name_bau = %s, kostenstelle_vvo = %s, bauvorhaben = %s, ort = %s, strasse = %s, ausfurung_von = %s, ausfurung_bis = %s, ansprechpartner = %s, status = %s, kostenstelle_plannung = %s, uberwachung = %s WHERE id = %s", (name, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, uberwacht, self.product_id))
         self.on_closing()
 
+    def choose_folder(self):
+        folder_path = filedialog.askdirectory()
+        if folder_path:
+            self.kostenstelle_plannung_var.set(folder_path)
 
     def show_notification(self, title, message):
         toaster = ToastNotifier()
