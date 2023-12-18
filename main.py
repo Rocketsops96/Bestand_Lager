@@ -852,8 +852,6 @@ class BestandLager(CTk.CTk):
                 'C5': data[2],
                 'C9': data[3],
                 'C11': f"{data[5]}, {data[4]}",
-                'I5': f"{data[6]} - {data[7]}",
-                'I9': f"{data[6]} - {data[7]}",
                 'I11': data[8],
             }
                 
