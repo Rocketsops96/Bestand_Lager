@@ -153,7 +153,7 @@ class BestandLager(CTk.CTk):
         self.f4.grid_columnconfigure(0, weight=1)
 
         #Создаем дефолтный фрейм
-        self.select_frame_by_name("home")
+        
 
 
 
@@ -435,9 +435,12 @@ class BestandLager(CTk.CTk):
 ############## ############## ############## ############## #Настройка фрейма №5 ############## ############## ############## ############## ##############         
 
 
+        # Открываем сразу стройки если зашел в учетную запись под Славой
+        if login == "v.jaufmann":
+            self.after(1000,self.select_frame_by_name("Traffic safety"))
+        else:
+            self.select_frame_by_name("home")
 
-
-    
         self.bedeutung.bind("<KeyRelease>", self.check_bedeutung)
         self.bar_code.bind("<KeyRelease>", self.check_vz_nr)
         self.vz_nr.bind("<KeyRelease>", self.check_barcode)
@@ -468,7 +471,7 @@ class BestandLager(CTk.CTk):
     def create_labels(self):
         diese_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Diese Woche", width= 150, fg_color="#CE5145")
         diese_woche.pack(side='left', padx=(10,5), anchor="nw")
-        nachste_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Nächste Woche",width= 150, fg_color="#998711", text_color = "black")
+        nachste_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Nächste Woche",width= 150, fg_color="#F89820", text_color = "black")
         nachste_woche.pack(side='left', padx=5, anchor="nw")
         heute = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Heute",width= 150, fg_color="#8c0303")
         heute.pack(side='left', padx=5, anchor="nw")
@@ -478,10 +481,9 @@ class BestandLager(CTk.CTk):
         h_verbot_color.pack(side='left', padx=5, anchor="nw")
 
         
-        label8 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="PROJEKTNAME", width= 150, fg_color="#0f5925")
-        label8.pack(side='left', padx=(10,5), anchor="nw")
-        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 150, fg_color="#0f5925")
-        label.pack(side='left', padx=5, anchor="nw")
+
+        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 300, fg_color="#0f5925")
+        label.pack(side='left', padx=(10,5), anchor="nw")
         label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
         label2.pack(side='left', padx=5, anchor="nw")
         label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
@@ -490,7 +492,7 @@ class BestandLager(CTk.CTk):
         label4.pack(side='left', padx=5, anchor="nw")
         label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF, H.VERBOT",width= 180, fg_color="#0f5925")
         label5.pack(side='left', padx=5, anchor="nw")
-        label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFURUNG VOM",width= 150, fg_color="#0f5925")
+        label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
         label6.pack(side='left', padx=5, anchor="nw")
         label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
         label7.pack(side='left', padx=5, anchor="nw")
@@ -505,17 +507,16 @@ class BestandLager(CTk.CTk):
                                                 anchor="center" )
         add_btn.pack(side='left', padx=5, anchor="nw")
         
-        inaktiv_label = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="NAME", width= 150, fg_color="#0f5925")
-        inaktiv_label.pack(side='left', padx=(10,5), anchor="nw")
-        inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 150, fg_color="#0f5925")
-        inaktiv_label2.pack(side='left', padx=5, anchor="nw")
+
+        inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 300, fg_color="#0f5925")
+        inaktiv_label2.pack(side='left', padx=(10,5), anchor="nw")
         inaktiv_label3 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
         inaktiv_label3.pack(side='left', padx=5, anchor="nw")
         inaktiv_label4 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
         inaktiv_label4.pack(side='left', padx=5, anchor="nw")
         inaktiv_label5 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 100, fg_color="#0f5925")
         inaktiv_label5.pack(side='left', padx=5, anchor="nw")
-        inaktiv_label7 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSFURUNG VOM",width= 150, fg_color="#0f5925")
+        inaktiv_label7 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
         inaktiv_label7.pack(side='left', padx=5, anchor="nw")
         inaktiv_label8 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
         inaktiv_label8.pack(side='left', padx=5, anchor="nw")
@@ -576,13 +577,14 @@ class BestandLager(CTk.CTk):
         self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3_2)
         self.inaktiv_frame.pack(fill='x', pady=5, anchor="nw")
         # Создаем поле с данными о товаре
-        label1_text = inaktiv_product['name'][:15] + "..." if len(inaktiv_product['name']) > 15 else inaktiv_product['name']
-        label1 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 150)
-        label1.pack(side='left', padx=5, anchor="nw")
-        CTkToolTip(label1, message=f"{inaktiv_product['name']}")
-
-        label2 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['bauvorhaben']}", width= 150)
+        
+        # label1 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 150)
+        # label1.pack(side='left', padx=5, anchor="nw")
+       
+        label1_text = inaktiv_product['bauvorhaben'][:30] + "..." if len(inaktiv_product['bauvorhaben']) > 30 else inaktiv_product['bauvorhaben']
+        label2 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 300)
         label2.pack(side='left', padx=5, anchor="nw")
+        CTkToolTip(label2, message=f"{inaktiv_product['bauvorhaben']}")
         kostenstelle_btn = customtkinter.CTkButton(self.inaktiv_frame, text=f"{inaktiv_product['kostenstelle']}", command=lambda p=inaktiv_product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=1, height=28, width=150, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
@@ -661,12 +663,13 @@ class BestandLager(CTk.CTk):
         h_verbot=new_date.strftime('%d.%m.%Y')      #12.12.2023
 
             # Создаем поле с данными о товаре
-        label2_text = product['name'][:15] + "..." if len(product['name']) > 15 else product['name']
-        label2 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label2_text, width= 150)
-        label2.pack(side='left',pady=5, padx=5, anchor="nw")
-        CTkToolTip(label2, message=f"{product['name']}")
-        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['bauvorhaben']}", width= 150)
+        label1_text = product['bauvorhaben'][:30] + "..." if len(product['bauvorhaben']) > 30 else product['bauvorhaben']
+        # label2 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label2_text, width= 150)
+        # label2.pack(side='left',pady=5, padx=5, anchor="nw")
+        
+        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 300, anchor="w")
         label.pack(side='left',pady=5, padx=5, anchor="nw")
+        CTkToolTip(label, message=f"{product['bauvorhaben']}")
         kostenstelle_btn = customtkinter.CTkButton(self.product_frame, text=f"{product['kostenstelle']}", command=lambda p=product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=1, height=28, width=150, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
@@ -735,11 +738,9 @@ class BestandLager(CTk.CTk):
                                                 anchor="center" )
         deactive_button.pack(side='left',pady=5, padx=5, anchor="nw")
         
-        
         #Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if 1 <= days_until_due <= 7:
             label.configure(fg_color="#CE5145",text_color = "black")
-            label2.configure(fg_color="#CE5145",text_color = "black")
             kostenstelle_btn.configure(fg_color="#CE5145",text_color = "black")
             label3.configure(fg_color="#CE5145",text_color = "black")
             label4.configure(fg_color="#CE5145",text_color = "black")
@@ -747,49 +748,72 @@ class BestandLager(CTk.CTk):
             label6.configure(fg_color="#CE5145",text_color = "black")
             vzp_btn.configure(fg_color="#CE5145",text_color = "black")
 
-        
         elif days_until_due == 0:
             label.configure(fg_color="#8c0303")
-            label2.configure(fg_color="#8c0303")
             kostenstelle_btn.configure(fg_color="#8c0303")
             label3.configure(fg_color="#8c0303")
             label4.configure(fg_color="#8c0303")
             label5.configure(fg_color="#8c0303")
             label6.configure(fg_color="#8c0303")
             vzp_btn.configure(fg_color="#8c0303")
-        
-        elif 8 <= days_until_due <= 14:
-            label.configure(fg_color="#998711", text_color = "black")
-            label2.configure(fg_color="#998711", text_color = "black")
-            kostenstelle_btn.configure(fg_color="#998711", text_color = "black")
-            label3.configure(fg_color="#998711", text_color = "black")
-            label4.configure(fg_color="#998711", text_color = "black")
-            label5.configure(fg_color="#998711", text_color = "black")
-            label6.configure(fg_color="#998711", text_color = "black")
-            vzp_btn.configure(fg_color="#998711", text_color = "black")
 
         elif product_date < current_date:
             # Если время прошло, устанавливаем синий цвет
             label.configure(fg_color="#66B032",text_color = "black")
-            label2.configure(fg_color="#66B032",text_color = "black")
             kostenstelle_btn.configure(fg_color="#66B032",text_color = "black")
             label3.configure(fg_color="#66B032",text_color = "black")
             label4.configure(fg_color="#66B032",text_color = "black")
             label5.configure(fg_color="#66B032",text_color = "black")
             label6.configure(fg_color="#66B032",text_color = "black")
             vzp_btn.configure(fg_color="#66B032",text_color = "black")
-    
-        if not product['set_capo'] =="":
-            set_capo.configure(fg_color="#bec1c4")
-
+        
+        # Ищем следующие недели и устанавливаем для них цвет
+        if product_date > current_date:
+            current_week = current_date.isocalendar()[1]
+            due_week = product_date.isocalendar()[1]
+            if due_week > current_week:
+                label.configure(fg_color="#F89820", text_color="black")
+                kostenstelle_btn.configure(fg_color="#F89820", text_color="black")
+                label3.configure(fg_color="#F89820", text_color="black")
+                label4.configure(fg_color="#F89820", text_color="black")
+                label5.configure(fg_color="#F89820", text_color="black")
+                label6.configure(fg_color="#F89820", text_color="black")
+                vzp_btn.configure(fg_color="#F89820", text_color="black")
+        
         if 0 <= (new_date - current_date).days <= 6:
             label4.configure(fg_color = "#4424D6", text_color = "white")
+
+        if not product['set_capo'] =="":
+            set_capo.configure(fg_color="#bec1c4")
             # self.flag = True
             # threading.Thread(target=lambda: self.flash_error_color(self.product_frame), args=()).start()
 
     def open_kostenstelle_folder(self, product_id):
-        # base_path = r"test_folder\02 Verkehrssicherung"
-        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+            # Разбиваем текст по знаку "-"
+        parts = product_id.split("-")
+
+        # Проверяем, есть ли в тексте после знака "-" значение "24"
+        if len(parts) > 1 and "24" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+        elif len(parts) > 1 and "23" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
+        elif len(parts) > 1 and "22" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2022\02 Verkehrssicherung"
+        elif len(parts) > 1 and "21" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2021\02 Verkehrssicherung"
+        elif len(parts) > 1 and "20" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2020\02 Verkehrssicherung"
+        elif len(parts) > 1 and "25" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2025\02 Verkehrssicherung"
+        elif len(parts) > 1 and "26" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2026\02 Verkehrssicherung"
+        elif len(parts) > 1 and "27" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2027\02 Verkehrssicherung"
+        elif len(parts) > 1 and "28" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2028\02 Verkehrssicherung"
+        else:
+            # По умолчанию
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
         items = os.listdir(os.path.normpath(base_path))
         matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
         if matching_folders:
@@ -797,19 +821,8 @@ class BestandLager(CTk.CTk):
             os.startfile(target_folder)
    
     def open_vzp_folder(self, product_id):
-        # base_path = r"\\FILESRV1\Abteilungen\VVO\2024\01 Verkehrsplanung"
-        # # base_path = r"test_folder\01 Verkehrsplanung"
-        # nested_folders = ["09 Verkehrszeichenpläne", "02 PDF"]
-        # items = os.listdir(os.path.normpath(base_path))
-        # matching_folders = [folder for folder in items if product_id.lower() in folder.lower()]
-
-        # if matching_folders:
-        #     target_folder = os.path.join(base_path, matching_folders[0])
-        #     for nested_folder in nested_folders:
-        #         target_folder = os.path.join(target_folder, nested_folder)
-
-        #     os.startfile(target_folder)
         if product_id:
+            product_id = os.path.normpath(product_id)
             os.startfile(product_id)
         else:
             print(f"No folders matching the keyword '{product_id}' found.")
@@ -830,7 +843,31 @@ class BestandLager(CTk.CTk):
         self.update_product_list()
 
     def stunden_bau(self, product_kostenstelle):
-        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+            # Разбиваем текст по знаку "-"
+        parts = product_kostenstelle.split("-")
+
+        # Проверяем, есть ли в тексте после знака "-" значение "24"
+        if len(parts) > 1 and "24" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+        elif len(parts) > 1 and "23" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
+        elif len(parts) > 1 and "22" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2022\02 Verkehrssicherung"
+        elif len(parts) > 1 and "21" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2021\02 Verkehrssicherung"
+        elif len(parts) > 1 and "20" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2020\02 Verkehrssicherung"
+        elif len(parts) > 1 and "25" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2025\02 Verkehrssicherung"
+        elif len(parts) > 1 and "26" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2026\02 Verkehrssicherung"
+        elif len(parts) > 1 and "27" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2027\02 Verkehrssicherung"
+        elif len(parts) > 1 and "28" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2028\02 Verkehrssicherung"
+        else:
+            # По умолчанию
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
         prefix_to_match = "11"
         items = os.listdir(os.path.normpath(base_path))
         matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
@@ -838,26 +875,22 @@ class BestandLager(CTk.CTk):
             target_folder = os.path.join(base_path, matching_folders[0])
             # Ищем подпапку внутри найденной папки, начинающуюся с префикса "11"
             nested_folder_match = [nested_folder for nested_folder in os.listdir(target_folder) if nested_folder.startswith(prefix_to_match)]
-            
             if nested_folder_match:
                 nested_folder = nested_folder_match[0]
-                
                 # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
                 document_path = os.path.join(target_folder, nested_folder, "Stundenbericht Verkehrssicherung_VVO.xlsx")
-                self.check_connection()
-                cursor = self.conn.cursor()
-                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s", (product_kostenstelle, ))
-                data = cursor.fetchone()
-                data_dict = {
-                'C5': data[2],
-                'C9': data[3],
-                'C11': f"{data[5]}, {data[4]}",
-                'I11': data[8],
-            }
-                
-                # Вставляем данные в документ
-                insert_data_into_excel(document_path, data_dict)
-
+            #     self.check_connection()
+            #     cursor = self.conn.cursor()
+            #     cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s", (product_kostenstelle, ))
+            #     data = cursor.fetchone()
+            #     data_dict = {
+            #     'C5': data[2],
+            #     'C9': data[3],
+            #     'C11': f"{data[5]}, {data[4]}",
+            #     'I11': data[8],
+            # }
+            #     # Вставляем данные в документ
+            #     insert_data_into_excel(document_path, data_dict)
                 # Открываем файл
                 os.startfile(document_path)
             else:
@@ -866,8 +899,30 @@ class BestandLager(CTk.CTk):
             print(f"No folders matching the keyword '{product_kostenstelle}' found.")
 
     def material_bau(self, product_kostenstelle):
-        base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
-        # base_path = r"test_folder\02 Verkehrssicherung"
+        parts = product_kostenstelle.split("-")
+
+        # Проверяем, есть ли в тексте после знака "-" значение "24"
+        if len(parts) > 1 and "24" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+        elif len(parts) > 1 and "23" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
+        elif len(parts) > 1 and "22" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2022\02 Verkehrssicherung"
+        elif len(parts) > 1 and "21" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2021\02 Verkehrssicherung"
+        elif len(parts) > 1 and "20" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2020\02 Verkehrssicherung"
+        elif len(parts) > 1 and "25" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2025\02 Verkehrssicherung"
+        elif len(parts) > 1 and "26" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2026\02 Verkehrssicherung"
+        elif len(parts) > 1 and "27" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2027\02 Verkehrssicherung"
+        elif len(parts) > 1 and "28" in parts[1]:
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2028\02 Verkehrssicherung"
+        else:
+            # По умолчанию
+            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
         prefix_to_match = "11"
         items = os.listdir(os.path.normpath(base_path))
         matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
@@ -878,25 +933,22 @@ class BestandLager(CTk.CTk):
             
             if nested_folder_match:
                 nested_folder = nested_folder_match[0]
-                
-                # Путь к файлу "Stundenbericht Verkehrssicherung.docx"
-                # Путь к файлу "Stundenbericht Verkehrssicherung.xlsx"
                 document_path = os.path.join(target_folder, nested_folder, "Materialliste.docx")
-                self.check_connection()
-                cursor = self.conn.cursor()
-                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
-                data = cursor.fetchone()
-                data_table1 = [
-                    ["", data[2], "", "", f"{data[6]} - {data[7]}"],
-                    ["", "", "", "", ""],
-                    ["", data[3], "","",f"{data[6]} - {data[7]}"],
-                    ["", f"{data[5]}, {data[4]}","","", data[8]],
-                ]
+                # self.check_connection()
+                # cursor = self.conn.cursor()
+                # cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
+                # data = cursor.fetchone()
+                # data_table1 = [
+                #     ["", data[2], "", "", f"{data[6]} - {data[7]}"],
+                #     ["", "", "", "", ""],
+                #     ["", data[3], "","",f"{data[6]} - {data[7]}"],
+                #     ["", f"{data[5]}, {data[4]}","","", data[8]],
+                # ]
 
-                # Вставляем данные в файл Excel
-                insert_data_into_tables(document_path,document_path, data_table1)
+                # # Вставляем данные в файл Excel
+                # insert_data_into_tables(document_path,document_path, data_table1)
 
-                # Открываем файл
+                # # Открываем файл
                 os.startfile(document_path)
             else:
                 print(f"No folders matching the keyword '{product_kostenstelle}' found.")

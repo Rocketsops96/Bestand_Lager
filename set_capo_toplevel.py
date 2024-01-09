@@ -1,37 +1,44 @@
 import customtkinter as CTk
 from customtkinter import CTkCheckBox
 import regbase
+from PIL import Image
 
 class Set_Capo(CTk.CTkToplevel):
+    APP_NAME = "Kolonenführer"
     def __init__(self,parent,product_id, *args, **kwargs):
         super().__init__(parent,*args, **kwargs)
-        self.geometry("400x300")
+        self.geometry("300x300")
+        self.title(Set_Capo.APP_NAME)
         self.product_id= product_id
 
-        self.label = CTk.CTkLabel(self, text="Team")
-        self.label.pack(padx=20, pady=20)
+        
 
         # Создаем 5 чекбоксов и размещаем их в окне
-        self.checkbox1 = CTkCheckBox(self, text="G.Hudzen")
-        self.checkbox1.pack(pady=5)
+        self.checkbox1 = CTkCheckBox(self, text="G.Hudzen", border_width = 2, hover_color = "red", fg_color = "red", font=CTk.CTkFont(size=14, weight="bold"))
+        self.checkbox1.pack(side="top", pady=(15, 5), padx = 10, anchor="w")
 
-        self.checkbox2 = CTkCheckBox(self, text="D.Mirakaj")
-        self.checkbox2.pack(pady=5)
+        self.checkbox2 = CTkCheckBox(self, text="D.Mirakaj", border_width = 2, hover_color = "red", fg_color = "red", font=CTk.CTkFont(size=14, weight="bold"))
+        self.checkbox2.pack(side="top", pady=5, padx = 10, anchor="w")
 
-        self.checkbox3 = CTkCheckBox(self, text="B.Gashi")
-        self.checkbox3.pack(pady=5)
+        self.checkbox3 = CTkCheckBox(self, text="B.Gashi", border_width = 2, hover_color = "red", fg_color = "red", font=CTk.CTkFont(size=14, weight="bold"))
+        self.checkbox3.pack(side="top", pady=5, padx = 10, anchor="w")
 
-        self.checkbox4 = CTkCheckBox(self, text="A.Bobrishov")
-        self.checkbox4.pack(pady=5)
+        self.checkbox4 = CTkCheckBox(self, text="A.Bobrishov", border_width = 2, hover_color = "red", fg_color = "red", font=CTk.CTkFont(size=14, weight="bold"))
+        self.checkbox4.pack(side="top", pady=5, padx = 10, anchor="w")
 
-        self.checkbox5 = CTkCheckBox(self, text="1")
-        self.checkbox5.pack(pady=5)
+        # self.checkbox5 = CTkCheckBox(self, text="1", border_width = 2, hover_color = "red", fg_color = "red", font=CTk.CTkFont(size=14, weight="bold"))
+        # self.checkbox5.pack(side="top", pady=5, padx = 10, anchor="w")
 
         
 
         # Создаем кнопку "Ок"
-        ok_button = CTk.CTkButton(self, text="Ок", command=self.ok_button_clicked)
-        ok_button.pack(pady=10)
+        ok_image = CTk.CTkImage(light_image=Image.open("images/set_capo.png"),
+                                  dark_image=Image.open("images/set_capo.png"),
+                                  size=(30, 30))
+        ok_button = CTk.CTkButton(self, image = ok_image, corner_radius=2, height=30, width=250, text="",
+                                                fg_color=("gray70", "gray30"), text_color=("gray10", "gray90"), hover_color=("red"),
+                                                    anchor="center", command=self.ok_button_clicked)
+        ok_button.pack(side="bottom", pady=10)
         
         self.set_initial_checkbox_state()
 
@@ -54,7 +61,6 @@ class Set_Capo(CTk.CTkToplevel):
                 else:
                     checkbox.deselect()
 
-
     def ok_button_clicked(self):
 
         # Выполняем запрос в базу данных с данными из чекбоксов
@@ -63,7 +69,7 @@ class Set_Capo(CTk.CTkToplevel):
             "D.Mirakaj" if self.checkbox2.get() else None,
             "B.Gashi" if self.checkbox3.get() else None,
             "A.Bobrishov" if self.checkbox4.get() else None,
-            "1" if self.checkbox5.get() else None,
+           
             
         ]
         set_capo_text = ", ".join(filter(None, checkbox_values))  # Собираем текст через запятую, удаляя пустые значения

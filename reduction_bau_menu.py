@@ -40,18 +40,18 @@ class App(customtkinter.CTkToplevel):
                                                                fg_color="gray10", button_color="red",width= 220)
         self.status_bau.grid(row=0, column=0, padx=20, pady=(20, 0), sticky= "nw")
         
-        self.name_bau = customtkinter.CTkEntry(self.two_frame, placeholder_text="Name:", width= 250, corner_radius = 3)
-        self.name_bau.grid(column= 0, row=1, padx=(10, 10), pady=(10, 10), sticky="nw")
+        # self.name_bau = customtkinter.CTkEntry(self.two_frame, placeholder_text="Name:", width= 250, corner_radius = 3)
+        # self.name_bau.grid(column= 0, row=1, padx=(10, 10), pady=(10, 10), sticky="nw")
 
         self.kostenstelle_vvo = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
-        self.kostenstelle_vvo.grid(column= 0, row=2, padx=(10, 10), pady=(0, 10), sticky="nw")
+        self.kostenstelle_vvo.grid(column= 0, row=2, padx=(10, 10), pady=(10, 10), sticky="nw")
 
         # self.kostenstelle_plannung = customtkinter.CTkEntry(self.two_frame, placeholder_text="Kostenstelle Verkehrsplannung:", width= 250, corner_radius = 3)
         # self.kostenstelle_plannung.grid(column= 0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
 
         self.kostenstelle_plannung_var = StringVar()
 
-        self.kostenstelle_plannung_button = customtkinter.CTkButton(self.two_frame, text="Ordner auswählen", 
+        self.kostenstelle_plannung_button = customtkinter.CTkButton(self.two_frame, text="VZP ordner auswählen", 
                                                                     command=self.choose_folder, width=250,
                                                                     fg_color=("gray70", "gray30"), corner_radius=2, 
                                                                     text_color=("gray10", "gray90"), hover_color=("red"),
@@ -100,26 +100,26 @@ class App(customtkinter.CTkToplevel):
 
     def show_all_info(self):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, uberwachung FROM Bau WHERE id = %s",(self.product_id,))
+        cursor.execute("SELECT id, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, uberwachung FROM Bau WHERE id = %s",(self.product_id,))
         data = cursor.fetchone()
-        self.status_bau.set(data[9])
-        self.name_bau.insert(0, data[1])
-        self.kostenstelle_vvo.insert(0, data[2])
-        self.bauvorhaben.insert(0, data[3])
-        self.ort.insert(0, data[4])
-        self.strasse.insert(0, data[5])
-        self.ausfurung_von.set_date(data[6])
-        self.ausfurung_bis.set_date(data[7])
-        self.ansprechpartner.insert(0, data[8])
-        self.kostenstelle_plannung_var.set(data[10])
-        if data[11] == "1":
+        self.status_bau.set(data[8])
+        # self.name_bau.insert(0, data[1])
+        self.kostenstelle_vvo.insert(0, data[1])
+        self.bauvorhaben.insert(0, data[2])
+        self.ort.insert(0, data[3])
+        self.strasse.insert(0, data[4])
+        self.ausfurung_von.set_date(data[5])
+        self.ausfurung_bis.set_date(data[6])
+        self.ansprechpartner.insert(0, data[7])
+        self.kostenstelle_plannung_var.set(data[9])
+        if data[10] == "1":
             self.uber.select()
         else:
             self.uber.deselect()
 
     def chanhe_bau(self):
         cursor = self.conn.cursor()
-        name = self.name_bau.get()
+        # name = self.name_bau.get()
         status = self.status_bau.get()
         kostenstelle_vvo = self.kostenstelle_vvo.get()
         bauvorhaben = self.bauvorhaben.get()
@@ -131,12 +131,12 @@ class App(customtkinter.CTkToplevel):
         ansprechpartner = self.ansprechpartner.get()
         kostenstelle_plannung = self.kostenstelle_plannung_var.get()
 
-        if not name or not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
+        if not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
             
-            if not name:
-                threading.Thread(target=lambda: self.flash_error_color(self.name_bau), args=()).start()
-            else:
-                self.name_bau.configure(border_color="grey")
+            # if not name:
+            #     threading.Thread(target=lambda: self.flash_error_color(self.name_bau), args=()).start()
+            # else:
+            #     self.name_bau.configure(border_color="grey")
 
             if not kostenstelle_vvo:
                 threading.Thread(target=lambda: self.flash_error_color(self.kostenstelle_vvo), args=()).start()
@@ -166,7 +166,7 @@ class App(customtkinter.CTkToplevel):
                 self.ansprechpartner.configure(border_color = "grey")
             return  # Прерываем выполнение функции, так как не все обязательные поля заполнены
 
-        cursor.execute("UPDATE bau SET name_bau = %s, kostenstelle_vvo = %s, bauvorhaben = %s, ort = %s, strasse = %s, ausfurung_von = %s, ausfurung_bis = %s, ansprechpartner = %s, status = %s, kostenstelle_plannung = %s, uberwachung = %s WHERE id = %s", (name, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, uberwacht, self.product_id))
+        cursor.execute("UPDATE bau SET kostenstelle_vvo = %s, bauvorhaben = %s, ort = %s, strasse = %s, ausfurung_von = %s, ausfurung_bis = %s, ansprechpartner = %s, status = %s, kostenstelle_plannung = %s, uberwachung = %s WHERE id = %s", (kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, uberwacht, self.product_id))
         self.on_closing()
 
     def choose_folder(self):
