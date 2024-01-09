@@ -1,9 +1,63 @@
 import os
-import shutil
 import requests
+import shutil
 import zipfile
+import sys
+import ctypes
+import time
+import win32com.client  # Импортируем библиотеку pywin32
 
-def update_programm():
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+def create_desktop_shortcut(target_path, shortcut_name):
+    # Получаем путь к рабочему столу пользователя
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+
+    # Создаем объект ярлыка
+    shell = win32com.client.Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortCut(os.path.join(desktop_path, f"{shortcut_name}.lnk"))
+
+    # Устанавливаем параметры ярлыка
+    shortcut.Targetpath = target_path
+    shortcut.save()
+def delete_files_except_temp_and_update_exe():
+    temp_dir = 'new'
+    update_exe = 'update2.exe'
+    
+    for root, dirs, files in os.walk(os.getcwd(), topdown=False):
+        for file in files:
+            file_path = os.path.join(root, file)
+            # Исключаем временную папку и update.exe из удаления
+            if file_path not in [os.path.abspath(os.path.join(os.getcwd(), temp_dir)),
+                                 os.path.abspath(os.path.join(os.getcwd(), update_exe))]:
+                try:
+                    # Проверяем, не является ли файл update.exe
+                    if file.lower() != 'update.exe':
+                        os.remove(file_path)
+                    else:
+                        print(f"Пропущено удаление файла {file_path}")
+                except Exception as e:
+                    print(f"Не удалось удалить файл {file_path}: {e}")
+        for dir in dirs:
+            dir_path = os.path.join(root, dir)
+            # Исключаем временную папку из удаления
+            if dir_path != os.path.abspath(os.path.join(os.getcwd(), temp_dir)):
+                try:
+                    shutil.rmtree(dir_path)
+                except Exception as e:
+                    print(f"Не удалось удалить папку {dir_path}: {e}")
+
+
+def update_program():
+    # Проверяем, запущен ли скрипт с правами администратора
+    if not is_admin():
+        # Если нет, повторно запускаем скрипт с запросом прав администратора
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        sys.exit()
+
     # URL для GitHub API, указывающий на ваш репозиторий
     github_api_url = 'https://api.github.com/repos/Rocketsops96/Bestand_Lager/releases/latest'
 
@@ -37,16 +91,8 @@ def update_programm():
             if current_version != release_info['tag_name']:
                 print("Обнаружено обновление. Начинается процесс обновления...")
 
-                # Удалите все файлы и папки в корневой папке, кроме update.bat и update.exe
-                for root, dirs, files in os.walk(os.getcwd(), topdown=False):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        if file not in ['update.bat', 'update.exe']:
-                            os.remove(file_path)
-                    for dir in dirs:
-                        dir_path = os.path.join(root, dir)
-                        if dir != 'new':
-                            shutil.rmtree(dir_path)
+                # Удалите все файлы и папки в корневой папке, кроме временной папки и update.exe
+                delete_files_except_temp_and_update_exe()
 
                 # Загрузите новую версию с GitHub и сохраните как zip-файл
                 response = requests.get(download_url)
@@ -55,29 +101,22 @@ def update_programm():
                 with open(os.path.join(temp_dir, 'update_files.zip'), 'wb') as zip_file:
                     zip_file.write(response.content)
 
-                try:
-                    # Распакуйте zip-файл во временную папку
-                    with zipfile.ZipFile(os.path.join(temp_dir, 'update_files.zip'), 'r') as zip_ref:
-                        # Извлеките содержимое папки "VVO" во временную подпапку
-                        temp_update_dir = os.path.join(temp_dir, 'Bestand_Lager-main', 'VVO')
-                        zip_ref.extractall(temp_update_dir)
+                # Распакуйте zip-файл в корневую папку
+                with zipfile.ZipFile(os.path.join(temp_dir, 'update_files.zip'), 'r') as zip_ref:
+                    # Извлеките содержимое, пропустив замену update.exe
+                    for file_info in zip_ref.infolist():
+                        file_path = os.path.join(os.getcwd(), file_info.filename)
+                        if file_info.filename.lower() == 'update.exe' and os.path.exists(file_path):
+                            print(f"Пропущена замена файла {file_info.filename}")
+                        else:
+                            zip_ref.extract(file_info, os.getcwd())
+                 # Создаем ярлык для файла VVO.exe на рабочем столе
+                create_desktop_shortcut(os.path.join(os.getcwd(), 'VVO.exe'), 'VVO')
+                # Обновите версию
+                with open(current_version_path, 'w') as current_version_file:
+                    current_version_file.write(release_info['tag_name'])
 
-                        # Копируйте содержимое папки "VVO" в корневую папку
-                        for item in os.listdir(temp_update_dir):
-                            source = os.path.join(temp_update_dir, item)
-                            destination = os.path.join(os.getcwd(), item)
-                            if os.path.isdir(source):
-                                shutil.copytree(source, destination, dirs_exist_ok=True)
-                            else:
-                                shutil.copy(source, destination)
-
-                        # Обновите версию
-                        with open(current_version_path, 'w') as current_version_file:
-                            current_version_file.write(release_info['tag_name'])
-
-                        print("Обновление завершено.")
-                except Exception as e:
-                    print(f"Не удалось загрузить новую версию с GitHub: {e}")
+                print("Обновление завершено.")
             else:
                 print("У вас уже установлена последняя версия.")
         else:
@@ -88,8 +127,11 @@ def update_programm():
         print(f"Произошла ошибка: {e}")
     finally:
         # Удалите временную папку в конце, после копирования файлов
+        time.sleep(5)  # Добавим небольшую задержку перед удалением
         shutil.rmtree(temp_dir)
-        print("chfdmfsdjfsd")
+
+    # Добавим задержку перед закрытием консоли
+    input("Нажмите Enter для завершения...")
 
 # Вызовите функцию обновления программы
-# update_programm()
+update_program()
