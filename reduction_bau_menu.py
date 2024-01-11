@@ -30,8 +30,8 @@ class App(customtkinter.CTkToplevel):
         self.resizable(False, False)
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
-        self.bind("<Command-q>", self.on_closing)
-        self.bind("<Command-w>", self.on_closing)
+        # self.bind("<Command-q>", self.on_closing)
+        # self.bind("<Command-w>", self.on_closing)
 
         self.two_frame = customtkinter.CTkFrame(self, fg_color="transparent")
         self.two_frame.grid(row=0, column=0, padx=10, pady=10, sticky= "nsew")

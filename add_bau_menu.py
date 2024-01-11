@@ -29,8 +29,8 @@ class Bau(customtkinter.CTkToplevel):
         self.resizable(False, False)
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
-        self.bind("<Command-q>", self.on_closing)
-        self.bind("<Command-w>", self.on_closing)
+        # self.bind("<Command-q>", self.on_closing)
+        # self.bind("<Command-w>", self.on_closing)
 
         self.two_frame = customtkinter.CTkFrame(self, fg_color="transparent")
         self.two_frame.grid(row=0, column=0, padx=10, pady=10, sticky= "nsew")
@@ -112,7 +112,7 @@ class Bau(customtkinter.CTkToplevel):
         kostenstelle_plannung = self.kostenstelle_plannung_var.get()
  
 
-        if not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner or not kostenstelle_plannung:
+        if not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
             
             # if not name:
             #     threading.Thread(target=lambda: self.flash_error_color(self.name_bau), args=()).start()
@@ -123,10 +123,6 @@ class Bau(customtkinter.CTkToplevel):
                 threading.Thread(target=lambda: self.flash_error_color(self.kostenstelle_vvo), args=()).start()
             else:
                 self.kostenstelle_vvo.configure(border_color="grey")
-            if not kostenstelle_plannung:
-                threading.Thread(target=lambda: self.flash_error_color_for_btn(self.bauvorhaben), args=()).start()
-            else:
-                self.kostenstelle_plannung_button.configure(fg_color = "gray70")
             if not bauvorhaben:
                 threading.Thread(target=lambda: self.flash_error_color(self.bauvorhaben), args=()).start()
             else:
