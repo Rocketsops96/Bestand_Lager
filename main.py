@@ -437,7 +437,7 @@ class BestandLager(CTk.CTk):
 
         # Открываем сразу стройки если зашел в учетную запись под Славой
         if login == "v.jaufmann":
-            self.after(1000,self.select_frame_by_name("Traffic safety"))
+            self.select_frame_by_name("Traffic safety")
         else:
             self.select_frame_by_name("home")
 
@@ -479,7 +479,34 @@ class BestandLager(CTk.CTk):
         bei_der_arbeit.pack(side='left', padx=5, anchor="nw")
         h_verbot_color = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="H.Verbot",width= 150, fg_color="#4424D6",text_color = "white")
         h_verbot_color.pack(side='left', padx=5, anchor="nw")
+        self.search = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Suchen:", width= 250, height=28, corner_radius = 3)
+        self.search.pack(side='left', padx=5, anchor="nw")
+        image_search = customtkinter.CTkImage(light_image=Image.open("images/search.png"),
+                                  dark_image=Image.open("images/search.png"),
+                                  size=(20, 20))
+        search_btn = customtkinter.CTkButton(self.bau_frame1, image = image_search,text="", command=self.search_bau, corner_radius=2, height=28, width=50, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"),
+                                                anchor="center" )
+        search_btn.pack(side='left', padx=5, anchor="center")
+        image_show_all = customtkinter.CTkImage(light_image=Image.open("images/show_all.png"),
+                                  dark_image=Image.open("images/show_all.png"),
+                                  size=(20, 20))
+        show_all_items = customtkinter.CTkButton(self.bau_frame1, image= image_show_all, text="", command=self.update_product_list, corner_radius=2, height=28, width=50, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"),
+                                                anchor="center" )
+        show_all_items.pack(side='left', padx=5, anchor="nw")
 
+        
+        image_add = customtkinter.CTkImage(light_image=Image.open("images/add_btn.png"),
+                                  dark_image=Image.open("images/add_btn.png"),
+                                  size=(20, 20))
+        add_btn = customtkinter.CTkButton(self.bau_frame1,image=image_add, text="", command=self.open_add_bau_menu_toplevel, corner_radius=2, height=28, width=50, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"),
+                                                anchor="center" )
+        add_btn.pack(side='left', padx=5, anchor="nw")
         
 
         label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 300, fg_color="#0f5925")
@@ -488,7 +515,7 @@ class BestandLager(CTk.CTk):
         label2.pack(side='left', padx=5, anchor="nw")
         label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
         label3.pack(side='left', padx=5, anchor="nw")
-        label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 100, fg_color="#0f5925")
+        label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 80, fg_color="#0f5925")
         label4.pack(side='left', padx=5, anchor="nw")
         label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF, H.VERBOT",width= 180, fg_color="#0f5925")
         label5.pack(side='left', padx=5, anchor="nw")
@@ -498,14 +525,6 @@ class BestandLager(CTk.CTk):
         label7.pack(side='left', padx=5, anchor="nw")
         
 
-        image_add = customtkinter.CTkImage(light_image=Image.open("images/add_btn.png"),
-                                  dark_image=Image.open("images/add_btn.png"),
-                                  size=(20, 20))
-        add_btn = customtkinter.CTkButton(self.bau_frame2,image=image_add, text="", command=self.open_add_bau_menu_toplevel, corner_radius=2, height=20, width=50, 
-                                                fg_color=("#2d2e2e"), text_color=("gray90"),
-                                                hover_color=("red"),
-                                                anchor="center" )
-        add_btn.pack(side='left', padx=5, anchor="nw")
         
 
         inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 300, fg_color="#0f5925")
@@ -525,28 +544,48 @@ class BestandLager(CTk.CTk):
         current_date = datetime.now().date()
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
         days_until_due = (product_date - current_date).days
+        print(f"ausfurung_von = {product_date} - {days_until_due}")
+        return days_until_due
+    
+    def abbau_datum(self, product):
+        current_date = datetime.now().date()
+        product_date = datetime.strptime(product['ausfurung_bis'], '%d.%m.%Y').date()
+        days_until_due = (product_date - current_date).days
+        print(f"ausfurung_bis = {product_date} - {days_until_due}")
         return days_until_due
 
     def display_existing_products(self):
         products = self.get_products_from_database()
-        # Разделяем товары на два списка: те, чья дата уже прошла, и те, чья дата еще предстоит
-        past_due_products = [product for product in products if self.days_until_due(product) < 0]
+        future_products = None
+        abbau_products = None
+        past_due_products = None
         future_products = [product for product in products if self.days_until_due(product) >= 0]
+        abbau_products = [product for product in products if 0 <= self.abbau_datum(product) < 7 and self.days_until_due(product) < 0]
+        past_due_products = [product for product in products if self.days_until_due(product) < 0 and 7 <= self.abbau_datum(product)]
         # Сортируем товары, у которых дата еще предстоит
         sorted_future_products = sorted(future_products, key=self.days_until_due)
+        alternate_color = True
+
         for product in sorted_future_products:
-            self.create_product_frame(product)
+            self.create_product_frame(product, alternate_color)
+            alternate_color = not alternate_color
+
+        for product in abbau_products:
+            self.create_product_frame(product, alternate_color)
+            alternate_color = not alternate_color
+
         # Создаем фреймы для товаров, у которых дата уже прошла
         for product in past_due_products:
-            self.create_product_frame(product)
+            self.create_product_frame(product, alternate_color)
+            alternate_color = not alternate_color
 
         inaktiv_products = self.get_inaktiv_from_database()
         for inaktiv_product in inaktiv_products:
-            self.create_inaktiv_frame(inaktiv_product)
+            self.create_inaktiv_frame(inaktiv_product)     
 
     def get_inaktiv_from_database(self, status = 'Inaktiv'):
         # Открываете курсор для выполнения SQL-запроса
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
@@ -560,7 +599,7 @@ class BestandLager(CTk.CTk):
 
     def get_products_from_database(self, status = 'Aktiv'):
         # Открываете курсор для выполнения SQL-запроса
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
         products = cursor.fetchall()
@@ -592,7 +631,7 @@ class BestandLager(CTk.CTk):
         kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
         label4 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ansprechpartner']}",width= 180)
         label4.pack(side='left', padx=5, anchor="nw")
-        vzp_btn = customtkinter.CTkButton(self.inaktiv_frame, text="VZP", command=lambda p=inaktiv_product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=100, 
+        vzp_btn = customtkinter.CTkButton(self.inaktiv_frame, text="VZP", command=lambda p=inaktiv_product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=80, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
@@ -651,12 +690,13 @@ class BestandLager(CTk.CTk):
                                                 anchor="center" )
         activate_button.pack(side='left', padx=5, anchor="nw")
         
-    def create_product_frame(self, product):
+    def create_product_frame(self, product, alternate_color=False):
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2, fg_color="transparent")
         self.product_frame.pack(fill='x', pady=2, anchor="nw")
 
         current_date = datetime.now().date()    #18.12.23
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
+        ausfurung_bis_date = datetime.strptime(product['ausfurung_bis'], '%d.%m.%Y').date()
         days_until_due = (product_date - current_date).days
 
         new_date = product_date - timedelta(days=6) #12.12.2023
@@ -677,7 +717,7 @@ class BestandLager(CTk.CTk):
         kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
         label3 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ansprechpartner']}",width= 180)
         label3.pack(side='left',pady=5, padx=5, anchor="nw")
-        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=100, 
+        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=80, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
@@ -737,7 +777,24 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         deactive_button.pack(side='left',pady=5, padx=5, anchor="nw")
-        
+        if product_date < current_date:
+            # Если время прошло, устанавливаем зеленый цвет цвет
+            label.configure(fg_color="#66B032",text_color = "black")
+            kostenstelle_btn.configure(fg_color="#66B032",text_color = "black")
+            label3.configure(fg_color="#66B032",text_color = "black")
+            label4.configure(fg_color="#66B032",text_color = "black")
+            label5.configure(fg_color="#66B032",text_color = "black")
+            label6.configure(fg_color="#66B032",text_color = "black")
+            vzp_btn.configure(fg_color="#66B032",text_color = "black")
+        if alternate_color:
+            # Если условие выполнено, меняем цвет на альтернативный
+            label.configure(fg_color="#A7C393", text_color="black")
+            kostenstelle_btn.configure(fg_color="#A7C393", text_color="black")
+            label3.configure(fg_color="#A7C393", text_color="black")
+            label4.configure(fg_color="#A7C393", text_color="black")
+            label5.configure(fg_color="#A7C393", text_color="black")
+            label6.configure(fg_color="#A7C393", text_color="black")
+            vzp_btn.configure(fg_color="#A7C393", text_color="black")
         #Если остается 7 дней или менее до даты, устанавливаем красный цвет
         if 1 <= days_until_due <= 7:
             label.configure(fg_color="#CE5145",text_color = "black")
@@ -756,17 +813,7 @@ class BestandLager(CTk.CTk):
             label5.configure(fg_color="#8c0303")
             label6.configure(fg_color="#8c0303")
             vzp_btn.configure(fg_color="#8c0303")
-
-        elif product_date < current_date:
-            # Если время прошло, устанавливаем синий цвет
-            label.configure(fg_color="#66B032",text_color = "black")
-            kostenstelle_btn.configure(fg_color="#66B032",text_color = "black")
-            label3.configure(fg_color="#66B032",text_color = "black")
-            label4.configure(fg_color="#66B032",text_color = "black")
-            label5.configure(fg_color="#66B032",text_color = "black")
-            label6.configure(fg_color="#66B032",text_color = "black")
-            vzp_btn.configure(fg_color="#66B032",text_color = "black")
-        
+            
         # Ищем следующие недели и устанавливаем для них цвет
         if product_date > current_date:
             current_week = current_date.isocalendar()[1]
@@ -785,8 +832,71 @@ class BestandLager(CTk.CTk):
 
         if not product['set_capo'] =="":
             set_capo.configure(fg_color="#bec1c4")
-            # self.flag = True
-            # threading.Thread(target=lambda: self.flash_error_color(self.product_frame), args=()).start()
+        
+        if (ausfurung_bis_date - current_date).days < 7:
+            label6.configure(fg_color="#8c0303", text_color="white")
+
+    def search_bau(self):
+        search= self.search.get()
+        if search:
+            self.check_connection_with_thread()
+            cursor = self.conn.cursor()
+            # Получаем данные из базы данных (замените на ваш SQL-запрос)
+            cursor.execute("SELECT bauvorhaben FROM Bau WHERE LOWER(bauvorhaben) ILIKE LOWER(%s)", (f"%{search}%",))
+            data = cursor.fetchall()
+            if data:
+                self.item = [item[0] for item in data]
+                    
+                for widget in self.bau_frame2_2.winfo_children():
+                    widget.destroy()
+                self.display_search_products()
+        else:
+            print("Не введены данные в поиск")
+        self.search.delete(0, 'end')
+
+    def display_search_products(self):
+        products = self.get_products_for_serach()
+        # Разделяем товары на два списка: те, чья дата уже прошла, и те, чья дата еще предстоит
+       
+        future_products = [product for product in products if self.days_until_due(product) >= 0]
+        abbau_products = [product for product in products if 0 <= self.abbau_datum(product) < 7 and self.days_until_due(product) < 0]
+        past_due_products = [product for product in products if self.days_until_due(product) < 0 and 7 <= self.abbau_datum(product)]
+        # Сортируем товары, у которых дата еще предстоит
+        sorted_future_products = sorted(future_products, key=self.days_until_due)
+        alternate_color = True
+
+        for product in sorted_future_products:
+            self.create_product_frame(product, alternate_color)
+            alternate_color = not alternate_color
+
+        for product in abbau_products:
+            self.create_product_frame(product, alternate_color)
+            alternate_color = not alternate_color
+
+        # Создаем фреймы для товаров, у которых дата уже прошла
+        for product in past_due_products:
+            self.create_product_frame(product, alternate_color)
+            alternate_color = not alternate_color
+
+        inaktiv_products = self.get_inaktiv_from_database()
+        for inaktiv_product in inaktiv_products:
+            self.create_inaktiv_frame(inaktiv_product)     
+        
+    def get_products_for_serach(self):
+        # Открываете курсор для выполнения SQL-запроса
+        self.check_connection_with_thread()
+        cursor = self.conn.cursor()
+        product_dicts = []
+        for item in self.item:
+            cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung FROM Bau WHERE bauvorhaben = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (item,))
+            products = cursor.fetchall()
+            for product_tuple in products:
+                product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
+                                'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'ansprechpartner': product_tuple[8],
+                                'status': product_tuple[9], 'set_capo': product_tuple[10],'kostenstelle_plannung': product_tuple[11] }
+                product_dicts.append(product_dict)
+
+        return product_dicts
 
     def open_kostenstelle_folder(self, product_id):
             # Разбиваем текст по знаку "-"
@@ -834,7 +944,7 @@ class BestandLager(CTk.CTk):
         reduction_menu.wait_window()  # ждем закрытия дочернего окна
         reduction_menu.grab_release()  # освобождаем фокус после его закрытия
         user = self.login # имя кто сделал действие для лога
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT kostenstelle_vvo FROM bau WHERE id = %s ",(product_id,))
         name = cursor.fetchone()
@@ -933,7 +1043,7 @@ class BestandLager(CTk.CTk):
             
             if nested_folder_match:
                 nested_folder = nested_folder_match[0]
-                document_path = os.path.join(target_folder, nested_folder, "Materialliste.docx")
+                document_path = os.path.join(target_folder, nested_folder, "Materialliste.xlsx")
                 # self.check_connection()
                 # cursor = self.conn.cursor()
                 # cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
@@ -959,7 +1069,7 @@ class BestandLager(CTk.CTk):
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
         user = self.login # имя кто сделал действие для лога
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT set_capo FROM bau WHERE id = %s ",(product_id,))
         name = cursor.fetchone()
@@ -974,7 +1084,7 @@ class BestandLager(CTk.CTk):
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
         self.update_product_list()
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT name_bau FROM Bau ORDER BY id DESC LIMIT 1;")
         name = cursor.fetchone()
@@ -983,21 +1093,20 @@ class BestandLager(CTk.CTk):
         self.user_action(user, action)
         
     def deactive_bau(self, product_id):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (product_id,))
         self.update_product_list()
 
     def activate_bau(self, product_id):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("UPDATE bau SET status = 'Aktiv' WHERE id = %s", (product_id,))
         self.update_product_list()
 
     def update_product_list(self):
         # Очистите фреймы для активных и неактивных продуктов
-        self.flag = False
-        
+
         def update():
             for widget in self.bau_frame2_2.winfo_children():
                 widget.destroy()
@@ -1051,7 +1160,7 @@ class BestandLager(CTk.CTk):
         bar_code = self.bar_code_home_frame3.get()
         sum_value = self.sum_home_frame3.get()
         vz = self.vz_frame3.get()
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         try:
             if selected_reduction == "Current":
@@ -1182,7 +1291,7 @@ class BestandLager(CTk.CTk):
         self.save_language_to_file(selected_language)
 
     def show_img_for_barcode(self, barcode):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT VZ_Nr FROM lager_bestand WHERE Bar_Code = %s", (barcode,))
         data= cursor.fetchone()
@@ -1206,7 +1315,7 @@ class BestandLager(CTk.CTk):
                 print(f"Ошибка открытия изображения: {e}") # показывает какая ошибка в консоль! {e}
 
     def show_img_for_bedeutung(self, vz):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT VZ_Nr FROM lager_bestand WHERE VZ_Nr = %s", (vz,))
         data= cursor.fetchone()
@@ -1230,7 +1339,7 @@ class BestandLager(CTk.CTk):
                 print(f"Ошибка открытия изображения: {e}") # показывает какая ошибка в консоль! {e}
 
     def show_img_for_vz(self, vz):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT VZ_Nr FROM Lager_Bestand WHERE VZ_Nr = %s", (vz,))
         data = cursor.fetchone()
@@ -1254,7 +1363,7 @@ class BestandLager(CTk.CTk):
                 print(f"Ошибка открытия изображения: {e}")
 
     def check_values(self):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
 
         # Получаем все строки из базы данных
@@ -1275,13 +1384,13 @@ class BestandLager(CTk.CTk):
         self.vz = self.vz_nr.get()
         bedeutung = self.bedeutung.get()
         if bedeutung:
-            self.check_connection()
+            self.check_connection_with_thread()
             cursor = self.conn.cursor()
             # Получаем данные из базы данных (замените на ваш SQL-запрос)
             cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s OR LOWER(bedeutung) ILIKE LOWER(%s)", (self.barcode, self.vz,  f"%{bedeutung}%"))
             data = cursor.fetchall()
         else:
-            self.check_connection()
+            self.check_connection_with_thread()
             cursor = self.conn.cursor()
             # Получаем данные из базы данных (замените на ваш SQL-запрос)
             cursor.execute("SELECT * FROM Lager_Bestand WHERE Bar_Code = %s OR VZ_Nr = %s", (self.barcode, self.vz))
@@ -1334,7 +1443,7 @@ class BestandLager(CTk.CTk):
             self.bedeutung.delete(0, 'end')
 
     def show_werkzeug_table(self):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("SELECT Bar_Code, Bedeutung,Größe, Bestand_Lager, Aktueller_bestand FROM werkzeug_lager")
         data = cursor.fetchall()
@@ -1345,7 +1454,7 @@ class BestandLager(CTk.CTk):
             self.werkzeug_table.insert("", "end", values=item)
 
     def show_material_table(self):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         
         # Получаем все записи из таблицы "Lager_Bestand"
@@ -1364,7 +1473,7 @@ class BestandLager(CTk.CTk):
             self.material_table.insert("", "end", values=item)
 
     def show_all_data(self):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         
         # Получаем все записи из таблицы "Lager_Bestand"
@@ -1471,7 +1580,7 @@ class BestandLager(CTk.CTk):
         new_window.mainloop()  # Запускаем главный цикл нового окна
    
     def show_logs(self):
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS app_logs (log_id SERIAL PRIMARY KEY,log_time TIMESTAMP,log_user VARCHAR(255),log_action VARCHAR(255));")
     
@@ -1505,7 +1614,7 @@ class BestandLager(CTk.CTk):
 
     def user_action(self, user, action):
         # Запись действия пользователя в лог
-        self.check_connection()
+        self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("INSERT INTO app_logs (log_time, log_user, log_action) VALUES (NOW(), %s, %s);",(user,action))
         self.logger.info(f"Пользователь {user} выполнил действие: {action}")
@@ -1515,7 +1624,7 @@ class BestandLager(CTk.CTk):
         self.log_view.configure(state="normal")
         
         try:
-            self.check_connection()
+            self.check_connection_with_thread()
             cursor = self.conn.cursor()
             cursor.execute("DELETE FROM app_logs")  # Этот запрос удаляет все записи из таблицы
             
@@ -1536,16 +1645,21 @@ class BestandLager(CTk.CTk):
         info_window.grab_release()  # освобождаем фокус после его закрытия
 
     def check_connection(self):
+        print("пошла проверка")
         try:
             if self.conn is None or self.conn.closed != 0:
                 # Если соединения нет или оно закрыто, создаем новое соединение
                 self.conn = regbase.create_conn()
+                print("соединение повторно создано")
         except Exception as e:
             print(f"Error connecting to the database: {e}")
 
     def check_connection_periodically(self):
         threading.Thread(target=self.check_connection).start()
         self.after(5000, self.check_connection_periodically)  # Запуск следующей проверки через 5 секунд
+    
+    def check_connection_with_thread(self):
+        threading.Thread(target=self.check_connection).start()
 
 if __name__ == '__main__':
     
