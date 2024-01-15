@@ -516,19 +516,19 @@ class BestandLager(CTk.CTk):
         
 
         label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 330, fg_color="#0f5925")
-        label.pack(side='left', padx=(10,5), anchor="nw")
+        label.pack(side='left', padx=(5,1), anchor="nw")
         label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
-        label2.pack(side='left', padx=5, anchor="nw")
+        label2.pack(side='left', padx=1, anchor="nw")
         label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
-        label3.pack(side='left', padx=5, anchor="nw")
+        label3.pack(side='left', padx=1, anchor="nw")
         label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 80, fg_color="#0f5925")
-        label4.pack(side='left', padx=5, anchor="nw")
+        label4.pack(side='left', padx=1, anchor="nw")
         label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF, H.VERBOT",width= 150, fg_color="#0f5925")
-        label5.pack(side='left', padx=5, anchor="nw")
+        label5.pack(side='left', padx=1, anchor="nw")
         label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
-        label6.pack(side='left', padx=5, anchor="nw")
+        label6.pack(side='left', padx=1, anchor="nw")
         label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
-        label7.pack(side='left', padx=5, anchor="nw")
+        label7.pack(side='left', padx=1, anchor="nw")
         
 
         
@@ -723,7 +723,7 @@ class BestandLager(CTk.CTk):
 
     def create_product_frame(self, product, alternate_color=False):
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2, fg_color="transparent")
-        self.product_frame.pack(fill='x', pady=2, anchor="nw")
+        self.product_frame.pack(fill='x', pady=0, anchor="nw")
 
         current_date = datetime.now().date()
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
@@ -736,63 +736,63 @@ class BestandLager(CTk.CTk):
             # Создаем поле с данными о товаре
         label1_text = product['bauvorhaben'][:38] + "..." if len(product['bauvorhaben']) > 38 else product['bauvorhaben']     
         label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 330, anchor="w")
-        label.pack(side='left',pady=5, padx=5, anchor="nw")
+        label.pack(side='left',pady=0, padx=0, anchor="nw")
         CTkToolTip(label, message=f"{product['bauvorhaben']}")
-        kostenstelle_btn = customtkinter.CTkButton(self.product_frame, text=f"{product['kostenstelle']}", command=lambda p=product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=1, height=28, width=150, 
+        kostenstelle_btn = customtkinter.CTkButton(self.product_frame, text=f"{product['kostenstelle']}", command=lambda p=product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=0, height=28, width=150, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
+        kostenstelle_btn.pack(side='left',pady=0, padx=0, anchor="nw")
         label3 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ansprechpartner']}",width= 180)
-        label3.pack(side='left',pady=5, padx=5, anchor="nw")
-        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=80, 
+        label3.pack(side='left',pady=0, padx=0, anchor="nw")
+        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=0, height=28, width=80, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        vzp_btn.pack(side='left',pady=5, padx=5, anchor="nw")
+        vzp_btn.pack(side='left',pady=0, padx=(0,1), anchor="nw")
         label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold"), text=h_verbot, width=150)
-        label4.pack(side='left',pady=5, padx=5, anchor="nw")
+        label4.pack(side='left',pady=0, padx=0, anchor="nw")
         label5 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_von']}",width= 150)
-        label5.pack(side='left',pady=5, padx=5, anchor="nw")
+        label5.pack(side='left',pady=0, padx=0, anchor="nw")
         label6 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_bis']}",width= 180)
-        label6.pack(side='left',pady=5, padx=5, anchor="nw")
+        label6.pack(side='left',pady=0, padx=0, anchor="nw")
 
 
         
-        reduction_btn = customtkinter.CTkButton(self.product_frame,image=self.image_reduction, text="", command=lambda p=product['id']: self.open_reduction_menu(p),corner_radius=2, height=15, width=50, 
+        reduction_btn = customtkinter.CTkButton(self.product_frame,image=self.image_reduction, text="", command=lambda p=product['id']: self.open_reduction_menu(p),corner_radius=0, height=15, width=50, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        reduction_btn.pack(side='left',pady=5, padx=5, anchor="nw")
+        reduction_btn.pack(side='left',pady=1, padx=1, anchor="nw")
 
          
-        photo_button = customtkinter.CTkButton(self.product_frame,image=self.image_photo, text="", command=lambda p=product['kostenstelle']: self.open_photo_menu(p),corner_radius=2, height=20, width=50,
+        photo_button = customtkinter.CTkButton(self.product_frame,image=self.image_photo, text="", command=lambda p=product['kostenstelle']: self.open_photo_menu(p),corner_radius=0, height=20, width=50,
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        photo_button.pack(side='left',pady=5, padx=5, anchor="nw")
+        photo_button.pack(side='left',pady=1, padx=1, anchor="nw")
 
         
-        set_capo = customtkinter.CTkButton(self.product_frame, image=self.image_capo, text="", command=lambda p=product['id']: self.set_capo_top_level(p),corner_radius=2, height=20, width=50, 
+        set_capo = customtkinter.CTkButton(self.product_frame, image=self.image_capo, text="", command=lambda p=product['id']: self.set_capo_top_level(p),corner_radius=0, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red") )
-        set_capo.pack(side='left',pady=5, padx=5, anchor="nw")
+        set_capo.pack(side='left',pady=1, padx=1, anchor="nw")
         
         
-        stunden = customtkinter.CTkButton(self.product_frame, image=self.image_clock, text="", command=lambda p=product['kostenstelle']: self.stunden_bau(p),corner_radius=2, height=20, width=50, 
+        stunden = customtkinter.CTkButton(self.product_frame, image=self.image_clock, text="", command=lambda p=product['kostenstelle']: self.stunden_bau(p),corner_radius=0, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
-        stunden.pack(side='left',pady=5, padx=5, anchor="nw")
+        stunden.pack(side='left',pady=1, padx=1, anchor="nw")
 
         
-        material = customtkinter.CTkButton(self.product_frame, image=self.image_material, text="", command=lambda p=product['kostenstelle']: self.material_bau(p),corner_radius=2, height=20, width=50, 
+        material = customtkinter.CTkButton(self.product_frame, image=self.image_material, text="", command=lambda p=product['kostenstelle']: self.material_bau(p),corner_radius=0, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
-        material.pack(side='left',pady=5, padx=5, anchor="nw")
+        material.pack(side='left',pady=1, padx=1, anchor="nw")
 
         
-        deactive_button = customtkinter.CTkButton(self.product_frame, image=self.image_delete, text="", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=2, height=20, width=50, 
+        deactive_button = customtkinter.CTkButton(self.product_frame, image=self.image_delete, text="", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=0, height=20, width=50, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        deactive_button.pack(side='left',pady=5, padx=5, anchor="nw")
+        deactive_button.pack(side='left',pady=1, padx=1, anchor="nw")
         label.configure(fg_color="grey")
         kostenstelle_btn.configure(fg_color="grey")
         label3.configure(fg_color="grey")
@@ -891,7 +891,6 @@ class BestandLager(CTk.CTk):
             label6.configure(fg_color="#8c0303", text_color="white")
         if (current_date - ausfurung_bis_date).days >= 1 and (current_date - ausfurung_bis_date).days <= 2:
             label6.configure(fg_color="#CE5145", text_color="white")
-
 
     def search_bau(self):
         search= self.search.get()
