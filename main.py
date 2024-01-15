@@ -477,12 +477,12 @@ class BestandLager(CTk.CTk):
         self.image_delete = customtkinter.CTkImage(light_image=Image.open("images/delete.png"), dark_image=Image.open("images/delete.png"), size=(20, 20))
         
     def create_labels(self):
+        heute = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Heute",width= 150, fg_color="#8c0303")
+        heute.pack(side='left', padx=5, anchor="nw")
         diese_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Diese Woche", width= 150, fg_color="#CE5145")
         diese_woche.pack(side='left', padx=(10,5), anchor="nw")
         nachste_woche = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Nächste Woche",width= 150, fg_color="#F89820", text_color = "black")
         nachste_woche.pack(side='left', padx=5, anchor="nw")
-        heute = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Heute",width= 150, fg_color="#8c0303")
-        heute.pack(side='left', padx=5, anchor="nw")
         bei_der_arbeit = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Wird Uberwacht",width= 150, fg_color="#66B032",text_color = "black")
         bei_der_arbeit.pack(side='left', padx=5, anchor="nw")
         self.search = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Suchen:", width= 250, height=28, corner_radius = 3)
@@ -515,7 +515,7 @@ class BestandLager(CTk.CTk):
         add_btn.pack(side='left', padx=5, anchor="nw")
         
 
-        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 300, fg_color="#0f5925")
+        label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 330, fg_color="#0f5925")
         label.pack(side='left', padx=(10,5), anchor="nw")
         label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
         label2.pack(side='left', padx=5, anchor="nw")
@@ -523,7 +523,7 @@ class BestandLager(CTk.CTk):
         label3.pack(side='left', padx=5, anchor="nw")
         label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 80, fg_color="#0f5925")
         label4.pack(side='left', padx=5, anchor="nw")
-        label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF, H.VERBOT",width= 180, fg_color="#0f5925")
+        label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF, H.VERBOT",width= 150, fg_color="#0f5925")
         label5.pack(side='left', padx=5, anchor="nw")
         label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
         label6.pack(side='left', padx=5, anchor="nw")
@@ -533,19 +533,20 @@ class BestandLager(CTk.CTk):
 
         
 
-        inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 300, fg_color="#0f5925")
+        inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 330, fg_color="#0f5925")
         inaktiv_label2.pack(side='left', padx=(10,5), anchor="nw")
         inaktiv_label3 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
         inaktiv_label3.pack(side='left', padx=5, anchor="nw")
         inaktiv_label4 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
         inaktiv_label4.pack(side='left', padx=5, anchor="nw")
-        inaktiv_label5 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 100, fg_color="#0f5925")
+        inaktiv_label5 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 80, fg_color="#0f5925")
         inaktiv_label5.pack(side='left', padx=5, anchor="nw")
         inaktiv_label7 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
         inaktiv_label7.pack(side='left', padx=5, anchor="nw")
         inaktiv_label8 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
         inaktiv_label8.pack(side='left', padx=5, anchor="nw")
         self.search.bind('<Return>', lambda event=None: self.search_bau())
+    
     def days_until_due(self, product):
         current_date = datetime.now().date()
         product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
@@ -636,33 +637,33 @@ class BestandLager(CTk.CTk):
         return product_dicts
     
     def create_inaktiv_frame(self, inaktiv_product):
-        self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3_2)
-        self.inaktiv_frame.pack(fill='x', pady=5, anchor="nw")
+        self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3_2, fg_color="transparent")
+        self.inaktiv_frame.pack(fill='x', pady=2, anchor="nw")
         # Создаем поле с данными о товаре
         
         # label1 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 150)
         # label1.pack(side='left', padx=5, anchor="nw")
        
-        label1_text = inaktiv_product['bauvorhaben'][:30] + "..." if len(inaktiv_product['bauvorhaben']) > 30 else inaktiv_product['bauvorhaben']
-        label2 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 300)
-        label2.pack(side='left', padx=5, anchor="nw")
+        label1_text = inaktiv_product['bauvorhaben'][:38] + "..." if len(inaktiv_product['bauvorhaben']) > 38 else inaktiv_product['bauvorhaben']
+        label2 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 330, anchor="w")
+        label2.pack(side='left',pady=5, padx=5, anchor="nw")
         CTkToolTip(label2, message=f"{inaktiv_product['bauvorhaben']}")
-        kostenstelle_btn = customtkinter.CTkButton(self.inaktiv_frame, text=f"{inaktiv_product['kostenstelle']}", command=lambda p=inaktiv_product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=1, height=28, width=150, 
+        kostenstelle_btn = customtkinter.CTkButton(self.inaktiv_frame, text=f"{inaktiv_product['kostenstelle']}", command=lambda p=inaktiv_product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=2, height=28, width=150, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
         label4 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ansprechpartner']}",width= 180)
-        label4.pack(side='left', padx=5, anchor="nw")
+        label4.pack(side='left',pady=5, padx=5, anchor="nw")
         vzp_btn = customtkinter.CTkButton(self.inaktiv_frame, text="VZP", command=lambda p=inaktiv_product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=80, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         vzp_btn.pack(side='left',pady=5, padx=5, anchor="nw")
         label5 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_von']}",width= 150)
-        label5.pack(side='left', padx=5, anchor="nw")
+        label5.pack(side='left',pady=5, padx=5, anchor="nw")
         label6 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_bis']}",width= 180)
-        label6.pack(side='left', padx=5, anchor="nw")
+        label6.pack(side='left',pady=5, padx=5, anchor="nw")
 
 
         image_reduction = customtkinter.CTkImage(light_image=Image.open("images/reduction.png"),
@@ -707,12 +708,19 @@ class BestandLager(CTk.CTk):
         image_return = customtkinter.CTkImage(light_image=Image.open("images/return.png"),
                                   dark_image=Image.open("images/return.png"),
                                   size=(20, 20))
-        activate_button = customtkinter.CTkButton(self.inaktiv_frame, image=image_return, text="", command=lambda p=inaktiv_product['id']: self.activate_bau(p),corner_radius=2, height=20, width=50, border_spacing=5,
+        activate_button = customtkinter.CTkButton(self.inaktiv_frame, image=image_return, text="", command=lambda p=inaktiv_product['id']: self.activate_bau(p),corner_radius=2, height=20, width=50,
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        activate_button.pack(side='left', padx=5, anchor="nw")
+        activate_button.pack(side='left',pady=5, padx=5, anchor="nw")
         
+        label2.configure(fg_color="grey")
+        kostenstelle_btn.configure(fg_color="grey")
+        label4.configure(fg_color="grey")
+        label5.configure(fg_color="grey")
+        label6.configure(fg_color="grey")
+        vzp_btn.configure(fg_color="grey")
+
     def create_product_frame(self, product, alternate_color=False):
         self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2, fg_color="transparent")
         self.product_frame.pack(fill='x', pady=2, anchor="nw")
@@ -726,8 +734,8 @@ class BestandLager(CTk.CTk):
         h_verbot=new_date.strftime('%d.%m.%Y')      #12.12.2023
 
             # Создаем поле с данными о товаре
-        label1_text = product['bauvorhaben'][:30] + "..." if len(product['bauvorhaben']) > 30 else product['bauvorhaben']     
-        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 300, anchor="w")
+        label1_text = product['bauvorhaben'][:38] + "..." if len(product['bauvorhaben']) > 38 else product['bauvorhaben']     
+        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 330, anchor="w")
         label.pack(side='left',pady=5, padx=5, anchor="nw")
         CTkToolTip(label, message=f"{product['bauvorhaben']}")
         kostenstelle_btn = customtkinter.CTkButton(self.product_frame, text=f"{product['kostenstelle']}", command=lambda p=product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=1, height=28, width=150, 
@@ -742,7 +750,7 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         vzp_btn.pack(side='left',pady=5, padx=5, anchor="nw")
-        label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold"), text=h_verbot, width=180)
+        label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold"), text=h_verbot, width=150)
         label4.pack(side='left',pady=5, padx=5, anchor="nw")
         label5 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_von']}",width= 150)
         label5.pack(side='left',pady=5, padx=5, anchor="nw")
@@ -785,7 +793,13 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         deactive_button.pack(side='left',pady=5, padx=5, anchor="nw")
-        
+        label.configure(fg_color="grey")
+        kostenstelle_btn.configure(fg_color="grey")
+        label3.configure(fg_color="grey")
+        label4.configure(fg_color="grey")
+        label5.configure(fg_color="grey")
+        label6.configure(fg_color="grey")
+        vzp_btn.configure(fg_color="grey")
         if product_date < current_date:
             # Если время прошло, устанавливаем зеленый цвет цвет
             label.configure(fg_color="#66B032",text_color = "black")
@@ -827,10 +841,32 @@ class BestandLager(CTk.CTk):
             vzp_btn.configure(fg_color="#8c0303")
             
         # Ищем следующие недели и устанавливаем для них цвет
+        # if product_date > current_date:
+        #     current_week = current_date.isocalendar()[1]
+        #     # current_year = current_date.isocalendar()[0]
+        #     due_week = product_date.isocalendar()[1]
+        #     # due_year = product_date.isocalendar()[0]
+        #     if due_week > current_week:
+        #         label.configure(fg_color="#F89820", text_color="black")
+        #         kostenstelle_btn.configure(fg_color="#F89820", text_color="black")
+        #         label3.configure(fg_color="#F89820", text_color="black")
+        #         label4.configure(fg_color="#F89820", text_color="black")
+        #         label5.configure(fg_color="#F89820", text_color="black")
+        #         label6.configure(fg_color="#F89820", text_color="black")
+        #         vzp_btn.configure(fg_color="#F89820", text_color="black")
+            
         if product_date > current_date:
-            current_week = current_date.isocalendar()[1]
-            due_week = product_date.isocalendar()[1]
-            if due_week > current_week:
+            current_week, _ = current_date.isocalendar()[1:]
+            current_month = current_date.month
+            current_year = current_date.year
+            due_week, _ = product_date.isocalendar()[1:]
+            due_month = product_date.month
+            due_year = product_date.year
+            if (
+        (due_week > current_week and current_year == due_year and due_month == current_month) or
+        (due_week == 1 and current_week == 52 and due_year == current_year + 1 and due_month == current_month + 1) or
+        (due_week == current_week + 1 and current_year == due_year and due_month == current_month + 1)
+    ):
                 label.configure(fg_color="#F89820", text_color="black")
                 kostenstelle_btn.configure(fg_color="#F89820", text_color="black")
                 label3.configure(fg_color="#F89820", text_color="black")
@@ -838,6 +874,7 @@ class BestandLager(CTk.CTk):
                 label5.configure(fg_color="#F89820", text_color="black")
                 label6.configure(fg_color="#F89820", text_color="black")
                 vzp_btn.configure(fg_color="#F89820", text_color="black")
+
 
         # Красим красныфм цветом дату установки H verbot если до даты постройки остается от 6 до 7 дней
         if 6 <= (product_date - current_date).days <= 7:
@@ -854,6 +891,7 @@ class BestandLager(CTk.CTk):
             label6.configure(fg_color="#8c0303", text_color="white")
         if (current_date - ausfurung_bis_date).days >= 1 and (current_date - ausfurung_bis_date).days <= 2:
             label6.configure(fg_color="#CE5145", text_color="white")
+
 
     def search_bau(self):
         search= self.search.get()
