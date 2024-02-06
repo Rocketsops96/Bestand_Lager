@@ -379,35 +379,47 @@ class BestandLager(CTk.CTk):
         self.tabview_baustellen.grid(row=0, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew")
         self.tabview_baustellen.add("Bearbeitung")
         self.tabview_baustellen.add("Inaktiv")
+        self.tabview_baustellen.add("Abgeschlossen")
 
         self.tabview_baustellen.tab("Bearbeitung").grid_columnconfigure(0, weight=1)
         self.tabview_baustellen.tab("Bearbeitung").grid_rowconfigure(2, weight=1)
         self.tabview_baustellen.tab("Inaktiv").grid_columnconfigure(0, weight=1)
         self.tabview_baustellen.tab("Inaktiv").grid_rowconfigure(1, weight=1)
+        self.tabview_baustellen.tab("Abgeschlossen").grid_columnconfigure(0, weight=1)
+        self.tabview_baustellen.tab("Abgeschlossen").grid_rowconfigure(2, weight=1)
 
         self.tabview_baustellen.configure(segmented_button_selected_color="red")
 
         self.bau_frame1 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
-        self.bau_frame1.grid(row=0, column=0, padx=(10,10),pady=(0,10), sticky="nsew")
+        self.bau_frame1.grid(row=0, column=0, padx=(5,10),pady=(0,10), sticky="nsew")
         self.bau_frame1.grid_columnconfigure(0, weight=1)
         
         self.bau_frame2 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
-        self.bau_frame2.grid(row=1, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame2.grid(row=1, column=0, padx=(5,10),pady=(10,10), sticky="nsew")
         self.bau_frame2.grid_columnconfigure(0, weight=1)
         
         self.bau_frame2_2 = customtkinter.CTkScrollableFrame(self.tabview_baustellen.tab("Bearbeitung"),fg_color="transparent")
-        self.bau_frame2_2.grid(row=2, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame2_2.grid(row=2, column=0, padx=(5,10),pady=(0,10), sticky="nsew")
         self.bau_frame2_2.grid_columnconfigure(0, weight=1)
         
         
         self.bau_frame3 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Inaktiv"),fg_color="transparent")
-        self.bau_frame3.grid(row=0, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame3.grid(row=0, column=0, padx=(5,10),pady=(0,5), sticky="nsew")
         self.bau_frame3.grid_columnconfigure(0, weight=1)
+        
         self.bau_frame3_2 = customtkinter.CTkScrollableFrame(self.tabview_baustellen.tab("Inaktiv"),fg_color="transparent")
-        self.bau_frame3_2.grid(row=1, column=0, padx=(10,10),pady=(10,10), sticky="nsew")
+        self.bau_frame3_2.grid(row=1, column=0, padx=(5,10),pady=(0,5), sticky="nsew")
         self.bau_frame3_2.grid_columnconfigure(0, weight=1)
-       
 
+        self.bau_frame4 = customtkinter.CTkFrame(self.tabview_baustellen.tab("Abgeschlossen"),fg_color="transparent")
+        self.bau_frame4.grid(row=0, column=0, padx=(5,10),pady=(0,10), sticky="nsew")
+        self.bau_frame4.grid_columnconfigure(0, weight=1)
+        
+        self.bau_frame4_2 = customtkinter.CTkScrollableFrame(self.tabview_baustellen.tab("Abgeschlossen"),fg_color="transparent")
+        self.bau_frame4_2.grid(row=2, column=0, padx=(5,10),pady=(0,5), sticky="nsew")
+        self.bau_frame4_2.grid_columnconfigure(0, weight=1)
+       
+        
 ############################
 
 
@@ -465,8 +477,9 @@ class BestandLager(CTk.CTk):
         self.show_all_data()
         self.show_material_table()
         self.show_werkzeug_table()
-        self.display_existing_products()
         self.create_labels()
+        self.display_existing_products()
+        
 
     def load_image(self):
         self.image_reduction = customtkinter.CTkImage(light_image=Image.open("images/reduction.png"), dark_image=Image.open("images/reduction.png"), size=(20, 20))
@@ -513,38 +526,64 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"),
                                                 anchor="center" )
         add_btn.pack(side='left', padx=5, anchor="nw")
+
+        self.sort = customtkinter.CTkOptionMenu(self.bau_frame1, values=("Bauvorhaben", "Kostenstelle", "Ausführung von", "Ausführung bis"),
+                                                               fg_color="gray10", button_color="red", corner_radius = 1,
+                                                               command=self.update_product_list)
+        self.sort.pack(side='left', padx=(5,0), anchor="nw")
+        self.sort.set("Bauvorhaben")
+        check_var = customtkinter.StringVar(value="on")
+        self.on_sort = customtkinter.CTkCheckBox(self.bau_frame1,variable=check_var, text="",width = 0, checkbox_height = 28, checkbox_width = 28, corner_radius=1, border_width = 2, hover_color = "red", fg_color = "red", font=customtkinter.CTkFont(size=14, weight="bold"),onvalue="on", offvalue="off", command=self.update_product_list)
+        self.on_sort.pack(side='left', padx=(0,5), anchor="nw")
+  
         
 
         label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 330, fg_color="#0f5925")
         label.pack(side='left', padx=(5,1), anchor="nw")
         label2 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
-        label2.pack(side='left', padx=1, anchor="nw")
+        label2.pack(side='left', padx=0, anchor="nw")
         label3 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
-        label3.pack(side='left', padx=1, anchor="nw")
+        label3.pack(side='left', padx=0, anchor="nw")
         label4 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 80, fg_color="#0f5925")
-        label4.pack(side='left', padx=1, anchor="nw")
+        label4.pack(side='left', padx=0, anchor="nw")
         label5 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF, H.VERBOT",width= 150, fg_color="#0f5925")
-        label5.pack(side='left', padx=1, anchor="nw")
+        label5.pack(side='left', padx=0, anchor="nw")
         label6 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
-        label6.pack(side='left', padx=1, anchor="nw")
+        label6.pack(side='left', padx=0, anchor="nw")
+        umbau_datum = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="UMBAU",width= 100, fg_color="#0f5925")
+        umbau_datum.pack(side='left', padx=0, anchor="nw")
         label7 = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
-        label7.pack(side='left', padx=1, anchor="nw")
+        label7.pack(side='left', padx=0, anchor="nw")
         
 
         
 
         inaktiv_label2 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 330, fg_color="#0f5925")
-        inaktiv_label2.pack(side='left', padx=(10,5), anchor="nw")
+        inaktiv_label2.pack(side='left', padx=(5,1), anchor="nw")
         inaktiv_label3 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
-        inaktiv_label3.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label3.pack(side='left', padx=0, anchor="nw")
         inaktiv_label4 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
-        inaktiv_label4.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label4.pack(side='left', padx=0, anchor="nw")
         inaktiv_label5 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 80, fg_color="#0f5925")
-        inaktiv_label5.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label5.pack(side='left', padx=0, anchor="nw")
         inaktiv_label7 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
-        inaktiv_label7.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label7.pack(side='left', padx=0, anchor="nw")
         inaktiv_label8 = customtkinter.CTkLabel(self.bau_frame3, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
-        inaktiv_label8.pack(side='left', padx=5, anchor="nw")
+        inaktiv_label8.pack(side='left', padx=0, anchor="nw")
+
+
+        abgeschlossen_label2 = customtkinter.CTkLabel(self.bau_frame4, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN",width= 330, fg_color="#0f5925")
+        abgeschlossen_label2.pack(side='left', padx=(5,1), anchor="nw")
+        abgeschlossen_label3 = customtkinter.CTkLabel(self.bau_frame4, font=customtkinter.CTkFont(size=15, weight="bold") , text="KOSTENSTELLE",width= 150, fg_color="#0f5925")
+        abgeschlossen_label3.pack(side='left', padx=0, anchor="nw")
+        abgeschlossen_label4 = customtkinter.CTkLabel(self.bau_frame4, font=customtkinter.CTkFont(size=15, weight="bold") , text="ANSPRECHPARTNER",width= 180, fg_color="#0f5925")
+        abgeschlossen_label4.pack(side='left', padx=0, anchor="nw")
+        abgeschlossen_label5 = customtkinter.CTkLabel(self.bau_frame4, font=customtkinter.CTkFont(size=15, weight="bold") , text="VZP",width= 80, fg_color="#0f5925")
+        abgeschlossen_label5.pack(side='left', padx=0, anchor="nw")
+        abgeschlossen_label7 = customtkinter.CTkLabel(self.bau_frame4, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSFÜHRUNG VON",width= 150, fg_color="#0f5925")
+        abgeschlossen_label7.pack(side='left', padx=0, anchor="nw")
+        abgeschlossen_label8 = customtkinter.CTkLabel(self.bau_frame4, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"AUSF. BIS/VRAO ENDE",width= 180, fg_color="#0f5925")
+        abgeschlossen_label8.pack(side='left', padx=0, anchor="nw")
         self.search.bind('<Return>', lambda event=None: self.search_bau())
     
     def days_until_due(self, product):
@@ -564,6 +603,30 @@ class BestandLager(CTk.CTk):
         product_date = datetime.strptime(product['ausfurung_bis'], '%d.%m.%Y').date()
         days_until_due = (current_date - product_date).days
         return days_until_due
+    
+    def expired_umbau(self, product):
+        current_date = datetime.now().date()
+        product_date = datetime.strptime(product['umbau_datum'], '%d.%m.%Y').date()
+        days_until_due = (current_date - product_date).days
+        return days_until_due
+
+    def umbau_datum(self, product):
+        if product['check_umbau'] == "1":
+            current_date = datetime.now().date()
+            product_date = datetime.strptime(product['umbau_datum'], '%d.%m.%Y').date()
+            umbau_days = (product_date - current_date).days
+            return umbau_days
+        return None  # Добавьте возврат None для случая, когда условие не выполняется
+    
+    def update_expired_products_show_two_days(self, product):
+        id = product['id']
+        cursor = self.conn.cursor()
+        cursor.execute("UPDATE bau SET status = 'Abgeschlossen' WHERE id = %s", (id,))
+
+    def update_completed_products(self, product):
+        id = product['id']
+        cursor = self.conn.cursor()
+        cursor.execute("UPDATE bau SET complete = '0' WHERE id = %s", (id,))
 
     def display_existing_products(self):
         products = self.get_products_from_database()
@@ -571,41 +634,100 @@ class BestandLager(CTk.CTk):
         abbau_products = None
         past_due_products = None
         expired_two_days = None
-        future_products = [product for product in products if self.days_until_due(product) >= 0]
-        abbau_products = [product for product in products if 0 <= self.abbau_datum(product) < 7 and self.days_until_due(product) < 0]
-        past_due_products = [product for product in products if self.days_until_due(product) < 0 and 7 <= self.abbau_datum(product)]
-        expired_two_days = [product for product in products if self.expired_products_show_two_days(product) >= 1 and self.expired_products_show_two_days(product) <= 2]
+        umbau_products = None
+        self.check_connection_with_thread()
         for product in products:
             if self.expired_products_show_two_days(product) > 2:
-                id = product['id']
-                self.check_connection_with_thread()
-                cursor = self.conn.cursor()
-                cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (id,))
+                self.update_expired_products_show_two_days(product)
+            if product['umbau_datum'] is not None and product['umbau_datum'] != "0":
+                if self.expired_umbau(product) > 0:
+                    id = product['id']
+                    self.check_connection_with_thread()
+                    cursor = self.conn.cursor()
+                    cursor.execute("UPDATE bau SET check_umbau = '0' WHERE id = %s", (id,))
+                
+            if self.days_until_due(product) < 0 and 7 <= self.abbau_datum(product):
+                self.update_completed_products(product)
+        products = self.get_products_from_database()
+        
+        future_products = [product for product in products if self.days_until_due(product) >= 0]
+        abbau_products = [product for product in products if 0 <= self.abbau_datum(product) < 7 and self.days_until_due(product) < 0]
+        umbau_products = [product for product in products if self.umbau_datum(product) is not None and 0 <= self.umbau_datum(product) < 7 and self.days_until_due(product) < 0 and product['check_umbau'] == "1"]
+        umbau_past_due_products = [product for product in products if self.umbau_datum(product) is not None and 7 <= self.umbau_datum(product) and self.days_until_due(product) < 0 and product['check_umbau'] == "1"]
+        past_due_products = [product for product in products if self.days_until_due(product) < 0 and 7 <= self.abbau_datum(product) and product['check_umbau'] == "0"]
+        expired_two_days = [product for product in products if self.expired_products_show_two_days(product) >= 1 and self.expired_products_show_two_days(product) <= 2 and product['check_umbau'] == "0"]
 
         # Сортируем товары, у которых дата еще предстоит
         sorted_future_products = sorted(future_products, key=self.days_until_due)
+        
         alternate_color = True
 
+        #Сортируем предстоящие стройки все
         for product in sorted_future_products:
-            self.create_product_frame(product, alternate_color)
-            alternate_color = not alternate_color
+            if product['complete'] == "0":
+                self.create_product_frame(product, alternate_color)
+                alternate_color = not alternate_color
 
+        #  Включаем сортировку по умбау
+        for product in umbau_products:
+            if product['complete'] == "0":
+                self.create_product_frame(product, alternate_color)
+                alternate_color = not alternate_color
+
+        # Включаем сортировку по аббау
         for product in abbau_products:
-            self.create_product_frame(product, alternate_color)
-            alternate_color = not alternate_color
+            if product['complete'] == "0":
+                self.create_product_frame(product, alternate_color)
+                alternate_color = not alternate_color
 
+        # Включаем сортировку  для строек у которых дата аббау уже прошла и оставляем еще на пару дней, после чего отправляем в абгешлесен
         for product in expired_two_days:
-            self.create_product_frame(product, alternate_color)
-            alternate_color = not alternate_color
+            if product['complete'] == "0":
+                self.create_product_frame(product, alternate_color)
+                alternate_color = not alternate_color
+            
+        # Включаем сортировку для строек у котроых скоро будет умбау
+        for product in umbau_past_due_products:
+            if product['complete'] == "0":
+                self.create_product_frame(product, alternate_color)
+                alternate_color = not alternate_color
 
-        # Создаем фреймы для товаров, у которых дата уже прошла
+        # Создаем фреймы для товаров, у которых дата уже прошла(зеленые, Wird uberwacht)
         for product in past_due_products:
-            self.create_product_frame(product, alternate_color)
+            if product['complete'] in ("0", "1", None):
+                self.create_product_frame(product, alternate_color)
+                alternate_color = not alternate_color
+
+        for product in products:
+            if product['complete'] == "1":
+                self.create_product_frame(product, alternate_color)
+                alternate_color = not alternate_color
+
+        # Берем из бд стройки которые уже закрытые и выводим во вкладке Abgeschlosen
+        abgeschlossen_products = self.get_abgeschlossen_from_database()
+        for abgeschlossen_product in abgeschlossen_products:
+            self.create_abgeschlossen_frame(abgeschlossen_product, alternate_color)
             alternate_color = not alternate_color
 
+        # Берем данные из бд о неактивных стройках и создаем их во вкладке инактив
         inaktiv_products = self.get_inaktiv_from_database()
         for inaktiv_product in inaktiv_products:
-            self.create_inaktiv_frame(inaktiv_product)     
+            self.create_inaktiv_frame(inaktiv_product, alternate_color)
+            alternate_color = not alternate_color     
+
+    def get_abgeschlossen_from_database(self, status = 'Abgeschlossen'):
+        # Открываете курсор для выполнения SQL-запроса
+        self.check_connection_with_thread()
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung FROM bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        products = cursor.fetchall()
+        product_dicts = []
+        for product_tuple in products:
+            product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
+                            'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'ansprechpartner': product_tuple[8],
+                            'status': product_tuple[9], 'kostenstelle_plannung': product_tuple[10]}
+            product_dicts.append(product_dict)
+        return product_dicts
 
     def get_inaktiv_from_database(self, status = 'Inaktiv'):
         # Открываете курсор для выполнения SQL-запроса
@@ -624,105 +746,42 @@ class BestandLager(CTk.CTk):
     def get_products_from_database(self, status = 'Aktiv'):
         # Открываете курсор для выполнения SQL-запроса
         self.check_connection_with_thread()
+        sort_field = self.sort.get()
+        check = self.on_sort.get()
+        if sort_field == "Bauvorhaben":
+            sort_field = "bauvorhaben"
+        if sort_field == "Kostenstelle":
+            sort_field = "kostenstelle"
+        if sort_field == "Ausführung von":
+            sort_field = "ausfurung_von"
+        if sort_field == "Ausführung bis": 
+            sort_field = "ausfurung_bis"
         cursor = self.conn.cursor()
-        cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+        if check == "on":
+            print("включено")
+            if sort_field == "bauvorhaben":
+                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung, umbau_datum, check_umbau, complete FROM Bau WHERE status = %s ORDER BY bauvorhaben", (status,))
+            if sort_field == "kostenstelle":
+                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung, umbau_datum, check_umbau, complete FROM Bau WHERE status = %s ORDER BY kostenstelle_vvo", (status,))    
+            if sort_field == "ausfurung_von":
+                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung, umbau_datum, check_umbau, complete FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+            if sort_field == "ausfurung_bis": 
+                cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung, umbau_datum, check_umbau, complete FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_bis, 'DD.MM.YYYY')", (status,))
+        else:
+            cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, set_capo, kostenstelle_plannung, umbau_datum, check_umbau, complete FROM Bau WHERE status = %s ORDER BY TO_DATE(ausfurung_von, 'DD.MM.YYYY')", (status,))
+
         products = cursor.fetchall()
         product_dicts = []
         for product_tuple in products:
             product_dict = {'id': product_tuple[0], 'name': product_tuple[1], 'kostenstelle': product_tuple[2], 'bauvorhaben': product_tuple[3], 
                             'ort': product_tuple[4], 'strasse': product_tuple[5], 'ausfurung_von': product_tuple[6], 'ausfurung_bis': product_tuple[7], 'ansprechpartner': product_tuple[8],
-                            'status': product_tuple[9], 'set_capo': product_tuple[10],'kostenstelle_plannung': product_tuple[11] }
+                            'status': product_tuple[9], 'set_capo': product_tuple[10],'kostenstelle_plannung': product_tuple[11], 'umbau_datum': product_tuple[12], 'check_umbau': product_tuple[13], 'complete': product_tuple[14]  }
             product_dicts.append(product_dict)
 
         return product_dicts
     
-    def create_inaktiv_frame(self, inaktiv_product):
-        self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3_2, fg_color="transparent")
-        self.inaktiv_frame.pack(fill='x', pady=2, anchor="nw")
-        # Создаем поле с данными о товаре
-        
-        # label1 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 150)
-        # label1.pack(side='left', padx=5, anchor="nw")
-       
-        label1_text = inaktiv_product['bauvorhaben'][:38] + "..." if len(inaktiv_product['bauvorhaben']) > 38 else inaktiv_product['bauvorhaben']
-        label2 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 330, anchor="w")
-        label2.pack(side='left',pady=5, padx=5, anchor="nw")
-        CTkToolTip(label2, message=f"{inaktiv_product['bauvorhaben']}")
-        kostenstelle_btn = customtkinter.CTkButton(self.inaktiv_frame, text=f"{inaktiv_product['kostenstelle']}", command=lambda p=inaktiv_product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=2, height=28, width=150, 
-                                                fg_color=("#2d2e2e"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        kostenstelle_btn.pack(side='left',pady=5, padx=5, anchor="nw")
-        label4 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ansprechpartner']}",width= 180)
-        label4.pack(side='left',pady=5, padx=5, anchor="nw")
-        vzp_btn = customtkinter.CTkButton(self.inaktiv_frame, text="VZP", command=lambda p=inaktiv_product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=80, 
-                                                fg_color=("#2d2e2e"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        vzp_btn.pack(side='left',pady=5, padx=5, anchor="nw")
-        label5 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_von']}",width= 150)
-        label5.pack(side='left',pady=5, padx=5, anchor="nw")
-        label6 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_bis']}",width= 180)
-        label6.pack(side='left',pady=5, padx=5, anchor="nw")
-
-
-        image_reduction = customtkinter.CTkImage(light_image=Image.open("images/reduction.png"),
-                                  dark_image=Image.open("images/reduction.png"),
-                                  size=(20, 20))
-        reduction_btn = customtkinter.CTkButton(self.inaktiv_frame,image=image_reduction, text="", command=lambda p=inaktiv_product['id']: self.open_reduction_menu(p),corner_radius=2, height=15, width=50, 
-                                                fg_color=("#2d2e2e"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        reduction_btn.pack(side='left',pady=5, padx=5, anchor="nw")
-
-        photo_image = customtkinter.CTkImage(light_image=Image.open("images/photo.png"),
-                                  dark_image=Image.open("images/photo.png"),
-                                  size=(20, 20))
-        photo_button = customtkinter.CTkButton(self.inaktiv_frame,image=photo_image, text="", command=lambda p=inaktiv_product['kostenstelle']: self.open_photo_menu(p),corner_radius=2, height=20, width=50,
-                                                fg_color=("#2d2e2e"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        photo_button.pack(side='left',pady=5, padx=5, anchor="nw")
-
-        image_set_capo = customtkinter.CTkImage(light_image=Image.open("images/capo.png"),
-                                  dark_image=Image.open("images/capo.png"),
-                                  size=(20, 20))
-        set_capo = customtkinter.CTkButton(self.inaktiv_frame, image=image_set_capo, text="", command=lambda p=inaktiv_product['id']: self.set_capo_top_level(p),corner_radius=2, height=20, width=50, 
-                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red") )
-        set_capo.pack(side='left',pady=5, padx=5, anchor="nw")
-        
-        image_stunden = customtkinter.CTkImage(light_image=Image.open("images/clock.png"),
-                                  dark_image=Image.open("images/clock.png"),
-                                  size=(20, 20))
-        stunden = customtkinter.CTkButton(self.inaktiv_frame, image=image_stunden, text="", command=lambda p=inaktiv_product['kostenstelle']: self.stunden_bau(p),corner_radius=2, height=20, width=50, 
-                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
-        stunden.pack(side='left',pady=5, padx=5, anchor="nw")
-
-        image_material = customtkinter.CTkImage(light_image=Image.open("images/material.png"),
-                                  dark_image=Image.open("images/material.png"),
-                                  size=(20, 20))
-        material = customtkinter.CTkButton(self.inaktiv_frame, image=image_material, text="", command=lambda p=inaktiv_product['kostenstelle']: self.material_bau(p),corner_radius=2, height=20, width=50, 
-                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
-        material.pack(side='left',pady=5, padx=5, anchor="nw")
-
-        image_return = customtkinter.CTkImage(light_image=Image.open("images/return.png"),
-                                  dark_image=Image.open("images/return.png"),
-                                  size=(20, 20))
-        activate_button = customtkinter.CTkButton(self.inaktiv_frame, image=image_return, text="", command=lambda p=inaktiv_product['id']: self.activate_bau(p),corner_radius=2, height=20, width=50,
-                                                fg_color=("#2d2e2e"), text_color=("gray90"),
-                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center" )
-        activate_button.pack(side='left',pady=5, padx=5, anchor="nw")
-        
-        label2.configure(fg_color="grey")
-        kostenstelle_btn.configure(fg_color="grey")
-        label4.configure(fg_color="grey")
-        label5.configure(fg_color="grey")
-        label6.configure(fg_color="grey")
-        vzp_btn.configure(fg_color="grey")
-
-    def create_product_frame(self, product, alternate_color=False):
-        self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2, fg_color="transparent")
+    def create_abgeschlossen_frame(self, product, alternate_color=False):
+        self.product_frame = customtkinter.CTkFrame(self.bau_frame4_2, fg_color="transparent")
         self.product_frame.pack(fill='x', pady=0, anchor="nw")
 
         current_date = datetime.now().date()
@@ -731,7 +790,7 @@ class BestandLager(CTk.CTk):
         days_until_due = (product_date - current_date).days
 
         new_date = product_date - timedelta(days=6) #12.12.2023
-        h_verbot=new_date.strftime('%d.%m.%Y')      #12.12.2023
+
 
             # Создаем поле с данными о товаре
         label1_text = product['bauvorhaben'][:38] + "..." if len(product['bauvorhaben']) > 38 else product['bauvorhaben']     
@@ -750,8 +809,6 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
         vzp_btn.pack(side='left',pady=0, padx=(0,1), anchor="nw")
-        label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold"), text=h_verbot, width=150)
-        label4.pack(side='left',pady=0, padx=0, anchor="nw")
         label5 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_von']}",width= 150)
         label5.pack(side='left',pady=0, padx=0, anchor="nw")
         label6 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_bis']}",width= 180)
@@ -763,43 +820,248 @@ class BestandLager(CTk.CTk):
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        reduction_btn.pack(side='left',pady=1, padx=1, anchor="nw")
+        reduction_btn.pack(side='left',pady=0, padx=(1,1), anchor="nw")
 
          
         photo_button = customtkinter.CTkButton(self.product_frame,image=self.image_photo, text="", command=lambda p=product['kostenstelle']: self.open_photo_menu(p),corner_radius=0, height=20, width=50,
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        photo_button.pack(side='left',pady=1, padx=1, anchor="nw")
+        photo_button.pack(side='left',pady=0, padx=1, anchor="nw")
 
         
         set_capo = customtkinter.CTkButton(self.product_frame, image=self.image_capo, text="", command=lambda p=product['id']: self.set_capo_top_level(p),corner_radius=0, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red") )
-        set_capo.pack(side='left',pady=1, padx=1, anchor="nw")
+        set_capo.pack(side='left',pady=0, padx=1, anchor="nw")
         
         
         stunden = customtkinter.CTkButton(self.product_frame, image=self.image_clock, text="", command=lambda p=product['kostenstelle']: self.stunden_bau(p),corner_radius=0, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
-        stunden.pack(side='left',pady=1, padx=1, anchor="nw")
+        stunden.pack(side='left',pady=0, padx=1, anchor="nw")
 
         
         material = customtkinter.CTkButton(self.product_frame, image=self.image_material, text="", command=lambda p=product['kostenstelle']: self.material_bau(p),corner_radius=0, height=20, width=50, 
                                                  font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
-        material.pack(side='left',pady=1, padx=1, anchor="nw")
+        material.pack(side='left',pady=0, padx=1, anchor="nw")
 
-        
-        deactive_button = customtkinter.CTkButton(self.product_frame, image=self.image_delete, text="", command=lambda p=product['id']: self.deactive_bau(p),corner_radius=0, height=20, width=50, 
+        label.configure(fg_color="grey")
+        kostenstelle_btn.configure(fg_color="grey")
+        label3.configure(fg_color="grey")
+        label5.configure(fg_color="grey")
+        label6.configure(fg_color="grey")
+        vzp_btn.configure(fg_color="grey")
+        reduction_btn.configure(fg_color="grey")
+        photo_button.configure(fg_color="grey")
+        set_capo.configure(fg_color="grey")
+        stunden.configure(fg_color="grey")
+        material.configure(fg_color="grey")
+
+        if alternate_color:
+                # Если условие выполнено, меняем цвет на альтернативный
+                label.configure(fg_color="#A7C393", text_color="black")
+                kostenstelle_btn.configure(fg_color="#A7C393", text_color="black")
+                label3.configure(fg_color="#A7C393", text_color="black")
+                label5.configure(fg_color="#A7C393", text_color="black")
+                label6.configure(fg_color="#A7C393", text_color="black")
+                vzp_btn.configure(fg_color="#A7C393", text_color="black")
+                reduction_btn.configure(fg_color="#A7C393",text_color = "black")
+                photo_button.configure(fg_color="#A7C393",text_color = "black")
+                set_capo.configure(fg_color="#A7C393",text_color = "black")
+                stunden.configure(fg_color="#A7C393",text_color = "black")
+                material.configure(fg_color="#A7C393",text_color = "black")
+
+    def create_inaktiv_frame(self, inaktiv_product, alternate_color=False):
+        self.inaktiv_frame = customtkinter.CTkFrame(self.bau_frame3_2, fg_color="transparent")
+        self.inaktiv_frame.pack(fill='x', anchor="nw")
+       
+        label1_text = inaktiv_product['bauvorhaben'][:38] + "..." if len(inaktiv_product['bauvorhaben']) > 38 else inaktiv_product['bauvorhaben']
+        label2 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 330, anchor="w")
+        label2.pack(side='left', anchor="nw")
+        CTkToolTip(label2, message=f"{inaktiv_product['bauvorhaben']}")
+        kostenstelle_btn = customtkinter.CTkButton(self.inaktiv_frame, text=f"{inaktiv_product['kostenstelle']}", command=lambda p=inaktiv_product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=2, height=28, width=150, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
                                                 anchor="center" )
-        deactive_button.pack(side='left',pady=1, padx=1, anchor="nw")
+        kostenstelle_btn.pack(side='left',pady=0, padx=0, anchor="nw")
+        label4 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ansprechpartner']}",width= 180)
+        label4.pack(side='left',pady=0, padx=0, anchor="nw")
+        vzp_btn = customtkinter.CTkButton(self.inaktiv_frame, text="VZP", command=lambda p=inaktiv_product['kostenstelle_plannung']: self.open_vzp_folder(p),corner_radius=2, height=28, width=80, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        vzp_btn.pack(side='left', anchor="nw")
+        label5 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_von']}",width= 150)
+        label5.pack(side='left', anchor="nw")
+        label6 = customtkinter.CTkLabel(self.inaktiv_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{inaktiv_product['ausfurung_bis']}",width= 180)
+        label6.pack(side='left', anchor="nw")
+
+
+        image_reduction = customtkinter.CTkImage(light_image=Image.open("images/reduction.png"),
+                                  dark_image=Image.open("images/reduction.png"),
+                                  size=(20, 20))
+        reduction_btn = customtkinter.CTkButton(self.inaktiv_frame,image=image_reduction, text="", command=lambda p=inaktiv_product['id']: self.open_reduction_menu(p),corner_radius=2, height=15, width=50, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        reduction_btn.pack(side='left', anchor="nw")
+
+        photo_image = customtkinter.CTkImage(light_image=Image.open("images/photo.png"),
+                                  dark_image=Image.open("images/photo.png"),
+                                  size=(20, 20))
+        photo_button = customtkinter.CTkButton(self.inaktiv_frame,image=photo_image, text="", command=lambda p=inaktiv_product['kostenstelle']: self.open_photo_menu(p),corner_radius=2, height=20, width=50,
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        photo_button.pack(side='left', anchor="nw")
+
+        image_set_capo = customtkinter.CTkImage(light_image=Image.open("images/capo.png"),
+                                  dark_image=Image.open("images/capo.png"),
+                                  size=(20, 20))
+        set_capo = customtkinter.CTkButton(self.inaktiv_frame, image=image_set_capo, text="", command=lambda p=inaktiv_product['id']: self.set_capo_top_level(p),corner_radius=2, height=20, width=50, 
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red") )
+        set_capo.pack(side='left', anchor="nw")
+        
+        image_stunden = customtkinter.CTkImage(light_image=Image.open("images/clock.png"),
+                                  dark_image=Image.open("images/clock.png"),
+                                  size=(20, 20))
+        stunden = customtkinter.CTkButton(self.inaktiv_frame, image=image_stunden, text="", command=lambda p=inaktiv_product['kostenstelle']: self.stunden_bau(p),corner_radius=2, height=20, width=50, 
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        stunden.pack(side='left', anchor="nw")
+
+        image_material = customtkinter.CTkImage(light_image=Image.open("images/material.png"),
+                                  dark_image=Image.open("images/material.png"),
+                                  size=(20, 20))
+        material = customtkinter.CTkButton(self.inaktiv_frame, image=image_material, text="", command=lambda p=inaktiv_product['kostenstelle']: self.material_bau(p),corner_radius=2, height=20, width=50, 
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        material.pack(side='left', anchor="nw")
+
+        image_return = customtkinter.CTkImage(light_image=Image.open("images/return.png"),
+                                  dark_image=Image.open("images/return.png"),
+                                  size=(20, 20))
+        activate_button = customtkinter.CTkButton(self.inaktiv_frame, image=image_return, text="", command=lambda p=inaktiv_product['id']: self.activate_bau(p),corner_radius=2, height=20, width=50,
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        activate_button.pack(side='left', anchor="nw")
+        
+        label2.configure(fg_color="grey")
+        kostenstelle_btn.configure(fg_color="grey")
+        label4.configure(fg_color="grey")
+        label5.configure(fg_color="grey")
+        label6.configure(fg_color="grey")
+        vzp_btn.configure(fg_color="grey")
+        reduction_btn.configure(fg_color="grey")
+        photo_button.configure(fg_color="grey")
+        set_capo.configure(fg_color="grey")
+        stunden.configure(fg_color="grey")
+        material.configure(fg_color="grey")
+        if alternate_color:
+                # Если условие выполнено, меняем цвет на альтернативный
+
+                kostenstelle_btn.configure(fg_color="#A7C393", text_color="black")
+                label2.configure(fg_color="#A7C393", text_color="black")
+                label4.configure(fg_color="#A7C393", text_color="black")
+                label5.configure(fg_color="#A7C393", text_color="black")
+                label6.configure(fg_color="#A7C393", text_color="black")
+                vzp_btn.configure(fg_color="#A7C393", text_color="black")
+                reduction_btn.configure(fg_color="#A7C393",text_color = "black")
+                photo_button.configure(fg_color="#A7C393",text_color = "black")
+                set_capo.configure(fg_color="#A7C393",text_color = "black")
+                stunden.configure(fg_color="#A7C393",text_color = "black")
+                material.configure(fg_color="#A7C393",text_color = "black")
+
+    def create_product_frame(self, product, alternate_color=False):
+        self.product_frame = customtkinter.CTkFrame(self.bau_frame2_2, fg_color="transparent")
+        self.product_frame.pack(fill='x', pady=0, anchor="nw")
+        umbau_day = None
+        umbau_datum = None
+        if product['check_umbau'] == "1":
+            umbau_datum = product['umbau_datum']
+            umbau_day = datetime.strptime(umbau_datum, '%d.%m.%Y').date()
+        else:
+            umbau_datum = ""
+
+        current_date = datetime.now().date()
+        product_date = datetime.strptime(product['ausfurung_von'], '%d.%m.%Y').date()
+        ausfurung_bis_date = datetime.strptime(product['ausfurung_bis'], '%d.%m.%Y').date()
+        days_until_due = (product_date - current_date).days
+
+
+        new_date = product_date - timedelta(days=6) #12.12.2023
+        h_verbot=new_date.strftime('%d.%m.%Y')      #12.12.2023
+
+            # Создаем поле с данными о товаре
+        label1_text = product['bauvorhaben'][:38] + "..." if len(product['bauvorhaben']) > 38 else product['bauvorhaben']     
+        label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 330, anchor="w")
+        label.pack(side='left',pady=0, padx=0, anchor="nw")
+        CTkToolTip(label, message=f"{product['bauvorhaben']}")
+        kostenstelle_btn = customtkinter.CTkButton(self.product_frame, text=f"{product['kostenstelle']}", command=lambda p=product['kostenstelle']: self.open_kostenstelle_folder(p),corner_radius=0, height=28, width=150, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        kostenstelle_btn.pack(side='left',pady=0, padx=0, anchor="nw")
+        label3 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ansprechpartner']}",width= 180)
+        label3.pack(side='left',pady=0, padx=0, anchor="nw")
+        vzp_btn = customtkinter.CTkButton(self.product_frame, text="VZP", command=lambda p=product['id']: self.open_vzp_folder(p),corner_radius=0, height=28, width=80, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        vzp_btn.pack(side='left',pady=0, padx=(0,1), anchor="nw")
+        label4 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold"), text=h_verbot, width=150)
+        label4.pack(side='left',pady=0, padx=0, anchor="nw")
+        label5 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_von']}",width= 150)
+        label5.pack(side='left',pady=0, padx=0, anchor="nw")
+        umbau_datum_label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=umbau_datum,width= 100)
+        umbau_datum_label.pack(side='left',pady=0, padx=0, anchor="nw")
+        label6 = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=f"{product['ausfurung_bis']}",width= 180)
+        label6.pack(side='left',pady=0, padx=0, anchor="nw")
+
+
+        
+        reduction_btn = customtkinter.CTkButton(self.product_frame,image=self.image_reduction, text="", command=lambda p=product['id']: self.open_reduction_menu(p),corner_radius=0, height=15, width=50, 
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        reduction_btn.pack(side='left',pady=0, padx=(1,1), anchor="nw")
+
+         
+        photo_button = customtkinter.CTkButton(self.product_frame,image=self.image_photo, text="", command=lambda p=product['kostenstelle']: self.open_photo_menu(p),corner_radius=0, height=20, width=50,
+                                                fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                hover_color=("red"), font=customtkinter.CTkFont(size=15, weight="bold"),
+                                                anchor="center" )
+        photo_button.pack(side='left',pady=0, padx=1, anchor="nw")
+
+        
+        set_capo = customtkinter.CTkButton(self.product_frame, image=self.image_capo, text="", command=lambda p=product['id']: self.set_capo_top_level(p),corner_radius=0, height=20, width=50, 
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red") )
+        set_capo.pack(side='left',pady=0, padx=1, anchor="nw")
+        
+        
+        stunden = customtkinter.CTkButton(self.product_frame, image=self.image_clock, text="", command=lambda p=product['kostenstelle']: self.stunden_bau(p),corner_radius=0, height=20, width=50, 
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        stunden.pack(side='left',pady=0, padx=1, anchor="nw")
+
+        
+        material = customtkinter.CTkButton(self.product_frame, image=self.image_material, text="", command=lambda p=product['kostenstelle']: self.material_bau(p),corner_radius=0, height=20, width=50, 
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"), anchor="center",fg_color="#2d2e2e",hover_color=("red"))
+        material.pack(side='left',pady=0, padx=1, anchor="nw")
+
+        
+
         label.configure(fg_color="grey")
         kostenstelle_btn.configure(fg_color="grey")
         label3.configure(fg_color="grey")
         label4.configure(fg_color="grey")
         label5.configure(fg_color="grey")
+        umbau_datum_label.configure(fg_color="grey")        
         label6.configure(fg_color="grey")
         vzp_btn.configure(fg_color="grey")
+        reduction_btn.configure(fg_color="grey")
+        photo_button.configure(fg_color="grey")
+        set_capo.configure(fg_color="grey")
+        stunden.configure(fg_color="grey")
+        material.configure(fg_color="grey")
+
         if product_date < current_date:
             # Если время прошло, устанавливаем зеленый цвет цвет
             label.configure(fg_color="#66B032",text_color = "black")
@@ -807,8 +1069,14 @@ class BestandLager(CTk.CTk):
             label3.configure(fg_color="#66B032",text_color = "black")
             label4.configure(fg_color="#66B032",text_color = "black")
             label5.configure(fg_color="#66B032",text_color = "black")
+            umbau_datum_label.configure(fg_color="#66B032",text_color = "black") 
             label6.configure(fg_color="#66B032",text_color = "black")
             vzp_btn.configure(fg_color="#66B032",text_color = "black")
+            reduction_btn.configure(fg_color="#66B032",text_color = "black")
+            photo_button.configure(fg_color="#66B032",text_color = "black")
+            set_capo.configure(fg_color="#66B032",text_color = "black")
+            stunden.configure(fg_color="#66B032",text_color = "black")
+            material.configure(fg_color="#66B032",text_color = "black")
             if alternate_color:
                 # Если условие выполнено, меняем цвет на альтернативный
                 label.configure(fg_color="#A7C393", text_color="black")
@@ -816,8 +1084,14 @@ class BestandLager(CTk.CTk):
                 label3.configure(fg_color="#A7C393", text_color="black")
                 label4.configure(fg_color="#A7C393", text_color="black")
                 label5.configure(fg_color="#A7C393", text_color="black")
+                umbau_datum_label.configure(fg_color="#A7C393",text_color = "black") 
                 label6.configure(fg_color="#A7C393", text_color="black")
                 vzp_btn.configure(fg_color="#A7C393", text_color="black")
+                reduction_btn.configure(fg_color="#A7C393",text_color = "black")
+                photo_button.configure(fg_color="#A7C393",text_color = "black")
+                set_capo.configure(fg_color="#A7C393",text_color = "black")
+                stunden.configure(fg_color="#A7C393",text_color = "black")
+                material.configure(fg_color="#A7C393",text_color = "black")
 
 
         #Если остается 7 дней или менее до даты, устанавливаем красный цвет
@@ -827,8 +1101,14 @@ class BestandLager(CTk.CTk):
             label3.configure(fg_color="#CE5145",text_color = "black")
             label4.configure(fg_color="#CE5145",text_color = "black")
             label5.configure(fg_color="#CE5145",text_color = "black")
+            umbau_datum_label.configure(fg_color="#CE5145",text_color = "black") 
             label6.configure(fg_color="#CE5145",text_color = "black")
             vzp_btn.configure(fg_color="#CE5145",text_color = "black")
+            reduction_btn.configure(fg_color="#CE5145",text_color = "black")
+            photo_button.configure(fg_color="#CE5145",text_color = "black")
+            set_capo.configure(fg_color="#CE5145",text_color = "black")
+            stunden.configure(fg_color="#CE5145",text_color = "black")
+            material.configure(fg_color="#CE5145",text_color = "black")
 
         # ставим ярко красный для стройки которая должна быть сегодня
         elif days_until_due == 0:
@@ -837,23 +1117,14 @@ class BestandLager(CTk.CTk):
             label3.configure(fg_color="#8c0303")
             label4.configure(fg_color="#8c0303")
             label5.configure(fg_color="#8c0303")
+            umbau_datum_label.configure(fg_color="#8c0303") 
             label6.configure(fg_color="#8c0303")
             vzp_btn.configure(fg_color="#8c0303")
-            
-        # Ищем следующие недели и устанавливаем для них цвет
-        # if product_date > current_date:
-        #     current_week = current_date.isocalendar()[1]
-        #     # current_year = current_date.isocalendar()[0]
-        #     due_week = product_date.isocalendar()[1]
-        #     # due_year = product_date.isocalendar()[0]
-        #     if due_week > current_week:
-        #         label.configure(fg_color="#F89820", text_color="black")
-        #         kostenstelle_btn.configure(fg_color="#F89820", text_color="black")
-        #         label3.configure(fg_color="#F89820", text_color="black")
-        #         label4.configure(fg_color="#F89820", text_color="black")
-        #         label5.configure(fg_color="#F89820", text_color="black")
-        #         label6.configure(fg_color="#F89820", text_color="black")
-        #         vzp_btn.configure(fg_color="#F89820", text_color="black")
+            reduction_btn.configure(fg_color="#8c0303")
+            photo_button.configure(fg_color="#8c0303")
+            set_capo.configure(fg_color="#8c0303")
+            stunden.configure(fg_color="#8c0303")
+            material.configure(fg_color="#8c0303")
             
         if product_date > current_date:
             current_week, _ = current_date.isocalendar()[1:]
@@ -872,8 +1143,14 @@ class BestandLager(CTk.CTk):
                 label3.configure(fg_color="#F89820", text_color="black")
                 label4.configure(fg_color="#F89820", text_color="black")
                 label5.configure(fg_color="#F89820", text_color="black")
+                umbau_datum_label.configure(fg_color="#F89820",text_color = "black") 
                 label6.configure(fg_color="#F89820", text_color="black")
                 vzp_btn.configure(fg_color="#F89820", text_color="black")
+                reduction_btn.configure(fg_color="#F89820",text_color = "black")
+                photo_button.configure(fg_color="#F89820",text_color = "black")
+                set_capo.configure(fg_color="#F89820",text_color = "black")
+                stunden.configure(fg_color="#F89820",text_color = "black")
+                material.configure(fg_color="#F89820",text_color = "black")
 
 
         # Красим красныфм цветом дату установки H verbot если до даты постройки остается от 6 до 7 дней
@@ -882,6 +1159,11 @@ class BestandLager(CTk.CTk):
         # Красим красныфм цветом дату постройки если до даты постройки остается от 1 до 2 дней
         if 1 <= (product_date - current_date).days <= 2:
             label5.configure(fg_color = "#8c0303", text_color = "white")
+        if umbau_day is not None:
+            if 3 <= (umbau_day - current_date).days <=7:
+                umbau_datum_label.configure(fg_color = "#F89820", text_color = "black")
+            if 0 <= (umbau_day - current_date).days <=2:
+                umbau_datum_label.configure(fg_color = "#8c0303", text_color = "white")
 
         # Красим значок для капо серым, если для этой стройки назначен капо
         if not product['set_capo'] =="":
@@ -891,6 +1173,39 @@ class BestandLager(CTk.CTk):
             label6.configure(fg_color="#8c0303", text_color="white")
         if (current_date - ausfurung_bis_date).days >= 1 and (current_date - ausfurung_bis_date).days <= 2:
             label6.configure(fg_color="#CE5145", text_color="white")
+        
+        if product['complete'] == "1":
+
+            # Если время прошло, устанавливаем зеленый цвет цвет
+            label.configure(fg_color="#66B032",text_color = "black")
+            kostenstelle_btn.configure(fg_color="#66B032",text_color = "black")
+            label3.configure(fg_color="#66B032",text_color = "black")
+            label4.configure(fg_color="#66B032",text_color = "black")
+            label5.configure(fg_color="#66B032",text_color = "black")
+            umbau_datum_label.configure(fg_color="#66B032",text_color = "black") 
+            label6.configure(fg_color="#66B032",text_color = "black")
+            vzp_btn.configure(fg_color="#66B032",text_color = "black")
+            reduction_btn.configure(fg_color="#66B032",text_color = "black")
+            photo_button.configure(fg_color="#66B032",text_color = "black")
+            set_capo.configure(fg_color="#66B032",text_color = "black")
+            stunden.configure(fg_color="#66B032",text_color = "black")
+            material.configure(fg_color="#66B032",text_color = "black")
+            if alternate_color:
+                # Если условие выполнено, меняем цвет на альтернативный
+                label.configure(fg_color="#A7C393", text_color="black")
+                kostenstelle_btn.configure(fg_color="#A7C393", text_color="black")
+                label3.configure(fg_color="#A7C393", text_color="black")
+                label4.configure(fg_color="#A7C393", text_color="black")
+                label5.configure(fg_color="#A7C393", text_color="black")
+                umbau_datum_label.configure(fg_color="#A7C393",text_color = "black") 
+                label6.configure(fg_color="#A7C393", text_color="black")
+                vzp_btn.configure(fg_color="#A7C393", text_color="black")
+                reduction_btn.configure(fg_color="#A7C393",text_color = "black")
+                photo_button.configure(fg_color="#A7C393",text_color = "black")
+                set_capo.configure(fg_color="#A7C393",text_color = "black")
+                stunden.configure(fg_color="#A7C393",text_color = "black")
+                material.configure(fg_color="#A7C393",text_color = "black")
+
 
     def search_bau(self):
         search= self.search.get()
@@ -993,15 +1308,51 @@ class BestandLager(CTk.CTk):
             os.startfile(target_folder)
    
     def open_vzp_folder(self, product_id):
-        if product_id:
-            product_id = os.path.normpath(product_id)
-            os.startfile(product_id)
+        self.check_connection_with_thread()
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT kostenstelle_plannung_nr, kostenstelle_plannung FROM bau WHERE id = %s ",(product_id,))
+        data = cursor.fetchone()
+        if data[1] != "" and data[0] is None:
+            print(data[1])
+            folder_vzp = os.path.normpath(data[1])
+            os.startfile(folder_vzp)
+        elif data[0] is not None and data[1] == "":
+            print(data[0])
+            vzp_nr = data[0]
+            parts = vzp_nr.split("-")
+            # Проверяем, есть ли в тексте после знака "-" значение "24"
+            if len(parts) > 1 and "24" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2024\01 Verkehrsplannung"
+            elif len(parts) > 1 and "23" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2023\01 Verkehrsplannung"
+            elif len(parts) > 1 and "22" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2022\01 Verkehrsplannung"
+            elif len(parts) > 1 and "21" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2021\01 Verkehrsplannung"
+            elif len(parts) > 1 and "20" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2020\01 Verkehrsplannung"
+            elif len(parts) > 1 and "25" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2025\01 Verkehrsplannung"
+            elif len(parts) > 1 and "26" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2026\01 Verkehrsplannung"
+            elif len(parts) > 1 and "27" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2027\01 Verkehrsplannung"
+            elif len(parts) > 1 and "28" in parts[1]:
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2028\01 Verkehrsplannung"
+            else:
+                # По умолчанию
+                base_path = r"\\FILESRV1\Abteilungen\VVO\2024\01 Verkehrsplannung"
+            items = os.listdir(os.path.normpath(base_path))
+            matching_folders = [folder for folder in items if vzp_nr.lower() in folder.lower()]
+            if matching_folders:
+                target_folder = os.path.join(base_path, matching_folders[0], "09 Verkehrszeichenpläne")
+                os.startfile(target_folder)
         else:
             print(f"No folders matching the keyword '{product_id}' found.")
 
     def open_reduction_menu(self,product_id):
         import reduction_bau_menu
-        reduction_menu = reduction_bau_menu.App(self, product_id)  # создаем окно, если его нет или оно уничтожено
+        reduction_menu = reduction_bau_menu.App(self, product_id, self.conn)  # создаем окно, если его нет или оно уничтожено
         reduction_menu.grab_set()  # захватываем фокус
         reduction_menu.wait_window()  # ждем закрытия дочернего окна
         reduction_menu.grab_release()  # освобождаем фокус после его закрытия
@@ -1141,7 +1492,7 @@ class BestandLager(CTk.CTk):
     
     def open_add_bau_menu_toplevel(self):
         from add_bau_menu import Bau
-        self.toplevel_window = Bau()  # создаем окно, если его нет или оно уничтожено
+        self.toplevel_window = Bau(self, self.conn)  # создаем окно, если его нет или оно уничтожено
         self.toplevel_window.grab_set()  # захватываем фокус
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
@@ -1168,19 +1519,20 @@ class BestandLager(CTk.CTk):
         cursor.execute("UPDATE bau SET status = 'Aktiv', ausfurung_bis = %s WHERE id = %s", (today, product_id))
         self.update_product_list()
 
-    def update_product_list(self):
+    def update_product_list(self, selected_option=None):
         # Очистите фреймы для активных и неактивных продуктов
 
-        def update():
-            for widget in self.bau_frame2_2.winfo_children():
-                widget.destroy()
+        for widget in self.bau_frame2_2.winfo_children():
+            widget.destroy()
 
-            for widget in self.bau_frame3_2.winfo_children():
-                widget.destroy()
+        for widget in self.bau_frame3_2.winfo_children():
+            widget.destroy()
 
-            self.display_existing_products()
-        self.after(1000, update)
-    
+        for widget in self.bau_frame4_2.winfo_children():
+            widget.destroy()
+
+        self.display_existing_products()
+
     def open_photo_menu(self,product_kostenstelle):
         from photo_top_level import Photo_menu
         photo_menu = Photo_menu(self, product_kostenstelle)  # создаем окно, если его нет или оно уничтожено
@@ -1316,8 +1668,6 @@ class BestandLager(CTk.CTk):
         font = ("Arial", int(14 * new_scaling_float))
         style = ttk.Style()
         style.configure("Treeview", font=font)
-
-        print("сработало")
 
     def update_ui_language(self, language):      
         # Получите словарь с текстами для выбранного языка
