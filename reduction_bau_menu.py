@@ -195,8 +195,12 @@ class App(customtkinter.CTkToplevel):
         uberwacht = self.uber.get()
         ansprechpartner = self.ansprechpartner.get()
         kostenstelle_plannung = self.kostenstelle_plannung_var.get()
+        if not kostenstelle_plannung:
+            kostenstelle_plannung = None
         check = self.check_umbau.get()
         kostenstelle_plannung_nr = self.kostenstelle_plannung_nr.get()
+        if not kostenstelle_plannung_nr:
+            kostenstelle_plannung_nr = None
         umbau = self.umbau_datum.get()
 
         if not strasse or not kostenstelle_vvo or not bauvorhaben or not ort or not ansprechpartner:
