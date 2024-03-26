@@ -1180,7 +1180,7 @@ class BestandLager(CTk.CTk):
         h_verbot=new_date.strftime('%d.%m.%Y')      #12.12.2023
 
             # Создаем поле с данными о товаре
-        label1_text = product['bauvorhaben'][:38] + "..." if len(product['bauvorhaben']) > 38 else product['bauvorhaben']     
+        label1_text = product['bauvorhaben'][:35] + "..." if len(product['bauvorhaben']) > 35 else product['bauvorhaben']     
         label = customtkinter.CTkLabel(self.product_frame, font=customtkinter.CTkFont(size=15, weight="bold") , text=label1_text, width= 330, anchor="w")
         label.pack(side='left',pady=0, padx=0, anchor="nw")
         CTkToolTip(label, message=f"{product['bauvorhaben']}")
@@ -2189,6 +2189,7 @@ class BestandLager(CTk.CTk):
         self.strasse_do.configure(placeholder_text = "Strasse")
         self.ausfurung_von_do.delete(0,'end')
         self.ausfurung_bis_do.delete(0,'end')
+        self.umbau_datum_do.delete(0,'end')
         self.check_umbau_do.deselect()
         self.uber_do.deselect()
 
@@ -2207,6 +2208,7 @@ class BestandLager(CTk.CTk):
         self.strasse_posle.configure(placeholder_text = "Strasse")
         self.ausfurung_von_posle.delete(0,'end')
         self.ausfurung_bis_posle.delete(0,'end')
+        self.umbau_datum_posle.delete(0,'end')
         self.check_umbau_posle.deselect()
         self.uber_posle.deselect()
         
@@ -2394,7 +2396,7 @@ class BestandLager(CTk.CTk):
         self.umbau_datum_label_posle.grid(column=0, row=11, padx=10, pady=(0,10), sticky = "nw")
 
         check_var_posle = customtkinter.StringVar(value="off")
-        self.check_umbau_posle = customtkinter.CTkCheckBox(self.log_right, variable=check_var_do, text="",width = 0, checkbox_height = 20, checkbox_width = 20, corner_radius=1, border_width = 2, hover_color = "red", fg_color = "red", onvalue="1", offvalue="0")
+        self.check_umbau_posle = customtkinter.CTkCheckBox(self.log_right, variable=check_var_posle, text="",width = 0, checkbox_height = 20, checkbox_width = 20, corner_radius=1, border_width = 2, hover_color = "red", fg_color = "red", onvalue="1", offvalue="0")
         self.check_umbau_posle.grid(column=0, row=11, padx=(10, 100), pady=(0,10), sticky = "ne")
 
         self.umbau_datum_posle = DateEntry(self.log_right, width=12, background='grey',

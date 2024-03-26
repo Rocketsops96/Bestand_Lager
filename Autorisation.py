@@ -160,6 +160,7 @@ class App(CTk.CTk): # Окно авторизации
         data = cursor.fetchone()
         if data is not None and len(data) >= 2:
             self.role = str(data[2])
+            self.admin = str(data[3]) 
             if self.remember_me.get():  # Проверка, отмечен ли флажок "Запомнить меня"
                 self.save_login_and_password(self.login, self.password)
         else:
@@ -173,7 +174,7 @@ class App(CTk.CTk): # Окно авторизации
             self.display_error("Есть такая учетная запись")
             #self.withdraw()  # Сворачиваем окно
             self.destroy()
-            new_window = main.BestandLager(self.login,self.role, self.conn)
+            new_window = main.BestandLager(self.login,self.role, self.conn, self.admin)
             new_window.mainloop()  # Запускаем главный цикл нового окна
             
         else:
