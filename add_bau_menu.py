@@ -20,9 +20,10 @@ class Bau(customtkinter.CTkToplevel):
     WIDTH = 300   
     HEIGHT = 700
     
-    def __init__(self,parent, conn, *args, **kwargs):
+    def __init__(self,parent, conn, login, *args, **kwargs):
         super().__init__(parent , *args, **kwargs)
         self.conn = conn
+        self.login = login
         self.title(Bau.APP_NAME)
         self.geometry(str(Bau.WIDTH) + "x" + str(Bau.HEIGHT))
         self.minsize(Bau.WIDTH, Bau.HEIGHT)
@@ -176,8 +177,9 @@ class Bau(customtkinter.CTkToplevel):
         ]
         set_capo = ", ".join(filter(None, checkbox_values))  # Собираем текст через запятую, удаляя пустые значения
         complete = "0"
-        cursor.execute(f"INSERT INTO Bau (kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, uberwachung, set_capo, kostenstelle_plannung, kostenstelle_plannung_nr, umbau_datum, check_umbau, complete) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s)",(kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status,  uberwacht, set_capo, kostenstelle_plannung, kostenstelle_plannung_nr, umbau,check,complete ))
-
+        action = "Neubau"
+        cursor.execute("INSERT INTO Bau (kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, uberwachung, set_capo, kostenstelle_plannung, kostenstelle_plannung_nr, umbau_datum, check_umbau, complete) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s)",(kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status,  uberwacht, set_capo, kostenstelle_plannung, kostenstelle_plannung_nr, umbau,check,complete ))
+        cursor.execute("INSERT INTO app_logs (log_time, status_posle, kostenstelle_vvo_posle, kostenstelle_plannung_nr_posle, bauvorhaben_posle, ansprechpartner_posle, ort_posle, strasse_posle, ausfurung_von_posle, ausfurung_bis_posle, check_umbau_posle, umbau_datum_posle, uber_posle, log_user, kostenstelle, bauvorhaben, log_action) VALUES (NOW(),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", (status,kostenstelle_vvo, kostenstelle_plannung_nr, bauvorhaben, ansprechpartner, ort, strasse, ausfurung_von, ausfurung_bis, check, umbau,uberwacht, self.login, kostenstelle_vvo, bauvorhaben, action ))
         threading.Thread(target=self.show_notification, args=("Уведомление", "Стройка создана!")).start()
         self.on_closing()
     

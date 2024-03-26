@@ -21,11 +21,11 @@ class App(customtkinter.CTkToplevel):
     WIDTH = 300   
     HEIGHT = 700
     
-    def __init__(self,parent,product_id,conn, *args, **kwargs):
+    def __init__(self,parent,product_id,conn, last_insert_id, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.product_id = product_id
         self.conn = conn
-
+        self.last_insert_id = last_insert_id
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
         self.minsize(App.WIDTH, App.HEIGHT)
@@ -147,6 +147,7 @@ class App(customtkinter.CTkToplevel):
         self.check_connection_with_thread()
         cursor = self.conn.cursor()
         cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (self.product_id,))
+        cursor.execute("UPDATE app_logs SET status_posle = 'Inaktiv', log_action = 'Deaktivierung' WHERE log_id = %s", (self.last_insert_id,))
         self.on_closing()
 
 
@@ -180,6 +181,7 @@ class App(customtkinter.CTkToplevel):
             self.check_umbau.select()
         else:
             self.check_umbau.deselect()
+        
 
     def chanhe_bau(self):
         self.check_connection_with_thread()
@@ -229,6 +231,7 @@ class App(customtkinter.CTkToplevel):
             return  # Прерываем выполнение функции, так как не все обязательные поля заполнены
 
         cursor.execute("UPDATE bau SET kostenstelle_vvo = %s, bauvorhaben = %s, ort = %s, strasse = %s, ausfurung_von = %s, ausfurung_bis = %s, ansprechpartner = %s, status = %s, kostenstelle_plannung = %s, uberwachung = %s, check_umbau = %s, kostenstelle_plannung_nr = %s, umbau_datum = %s WHERE id = %s", (kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, kostenstelle_plannung, uberwacht,check, kostenstelle_plannung_nr, umbau, self.product_id))
+        cursor.execute("UPDATE app_logs SET status_posle = %s, kostenstelle_vvo_posle = %s, kostenstelle_plannung_nr_posle = %s, bauvorhaben_posle = %s, ansprechpartner_posle = %s, ort_posle = %s, strasse_posle = %s, ausfurung_von_posle = %s, ausfurung_bis_posle = %s, check_umbau_posle = %s, umbau_datum_posle = %s, uber_posle = %s  WHERE log_id = %s", (status,kostenstelle_vvo, kostenstelle_plannung_nr, bauvorhaben, ansprechpartner, ort, strasse, ausfurung_von, ausfurung_bis, check, umbau,uberwacht, self.last_insert_id))
         self.on_closing()
 
     def choose_folder(self):

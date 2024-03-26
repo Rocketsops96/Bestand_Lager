@@ -29,6 +29,7 @@ from tkintermapview import TkinterMapView
 from CTkToolTip import *
 from export_to_word_stunden import insert_data_into_excel
 from export_to_word_material import insert_data_into_tables
+from tkinter import messagebox
 
 
 
@@ -39,7 +40,7 @@ from export_to_word_material import insert_data_into_tables
 customtkinter.set_appearance_mode("dark")
 
 class BestandLager(CTk.CTk):
-    def __init__(self,login, role, conn): # После теста добавить аргумент login и role  не забыть убрать комментарий ниже!!!!
+    def __init__(self,login, role, conn, admin): # После теста добавить аргумент login и role  не забыть убрать комментарий ниже!!!!
         super().__init__()
         threading.Thread(target=self.load_image).start()
          # Настройки логирования
@@ -47,6 +48,7 @@ class BestandLager(CTk.CTk):
         # Создайте объект логгера для вашего класса или модуля
         self.logger = logging.getLogger(__name__)
         self.role = role # Для полного функционала изменить 1 на role
+        self.admin = admin
         self.language = self.load_language_from_file()  # Загружаем язык из файла
         # Установите геометрию окна
         self.geometry("1280x720")
@@ -72,25 +74,23 @@ class BestandLager(CTk.CTk):
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                     anchor="w", command=self.home_button_event)
         self.sign.grid(row=1, column=0, sticky="ew")
-        if self.role == "1":
-            self.material_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Traffic safety", font=("Arial", 14, "bold"),
-                                                        fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                        anchor="w", command=self.material_button_event)
-            self.material_frame.grid(row=2, column=0, sticky="ew")
-            
-
-            self.bau_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Traffic monitoring", font=("Arial", 14, "bold"),
-                                                        fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                        anchor="w", command=self.bau_button_event)
-            self.bau_frame.grid(row=3, column=0, sticky="ew")
-
-            self.log_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Logs", font=("Arial", 14, "bold"),
-                                                        fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                        anchor="w", command=self.log_button_event)
-            self.log_frame.grid(row=4, column=0, sticky="ew")
-        else:
-            pass
         
+        self.material_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Traffic safety", font=("Arial", 14, "bold"),
+                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                    anchor="w", command=self.material_button_event)
+        self.material_frame.grid(row=2, column=0, sticky="ew")
+        
+
+        self.bau_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Traffic monitoring", font=("Arial", 14, "bold"),
+                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                    anchor="w", command=self.bau_button_event)
+        self.bau_frame.grid(row=3, column=0, sticky="ew")
+
+        self.log_frame = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Logs", font=("Arial", 14, "bold"),
+                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                    anchor="w", command=self.log_button_event)
+        self.log_frame.grid(row=4, column=0, sticky="ew")
+      
         
         self.language_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Russian","English","Deutsch"],
                                                                fg_color="gray10", button_color="red",
@@ -105,7 +105,7 @@ class BestandLager(CTk.CTk):
                                                                command=self.change_scaling_event)
         self.scaling_optionemenu.grid(row=11, column=0, padx=20, pady=(10, 20), sticky= "s")
         self.scaling_optionemenu.set("100%")
-        if self.role == "1":
+        if self.admin == "1":
             image_map = customtkinter.CTkImage(light_image=Image.open("images/map.png"),
                                     dark_image=Image.open("images/map.png"),
                                     size=(30, 30))
@@ -279,7 +279,7 @@ class BestandLager(CTk.CTk):
                                                 fg_color=("#343638"), hover_color=("red"),
                                                     anchor="center", command=self.show_all_data)
         self.show_all.grid(column = 1,row=0, padx=(0,5), pady=(0, 10), sticky="nw")
-        if self.role == "1":
+        if self.admin == "1":
             image_excel = customtkinter.CTkImage(light_image=Image.open("images/excel.png"),
                                     dark_image=Image.open("images/excel.png"),
                                     size=(30, 30))
@@ -429,13 +429,58 @@ class BestandLager(CTk.CTk):
         
         
 ############## ############## ############## ############## #Настройка фрейма №4 ############## ############## ############## ############## ############## 
-        self.log_view = customtkinter.CTkTextbox(master=self.f4, width=400, corner_radius=3)
-        self.log_view.grid(row=0, column=0, padx=(5,5), pady=(5,0), sticky="nsew")
-        self.clear_log_button = customtkinter.CTkButton(self.f4,  corner_radius=2, height=30, width=250, border_spacing=5,
-                                                fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
-                                                font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                anchor="center", text="Clear logs", command=self.clear_logs)
-        self.clear_log_button.grid(row=1, column=0, pady=5, sticky="nsew")
+        # self.log_view = customtkinter.CTkTextbox(master=self.f4, width=400, corner_radius=3)
+        # self.log_view.grid(row=0, column=0, padx=(5,5), pady=(5,0), sticky="nsew")
+        # self.clear_log_button = customtkinter.CTkButton(self.f4,  corner_radius=2, height=30, width=250, border_spacing=5,
+        #                                         fg_color=("gray30"), text_color=("gray90"),hover_color=("red"), 
+        #                                         font=customtkinter.CTkFont(size=15, weight="bold"),
+        #                                         anchor="center", text="Clear logs", command=self.clear_logs)
+        # self.clear_log_button.grid(row=1, column=0, pady=5, sticky="nsew")
+        
+
+        self.log_table_frame = customtkinter.CTkFrame(self.f4,fg_color="transparent")
+        self.log_table_frame.grid(row=0, column=0, columnspan = 3, padx=(0,10), sticky="nsew")
+        self.log_table_frame.grid_columnconfigure(0, weight=1)
+
+        self.log_left = customtkinter.CTkFrame(self.f4)
+        self.log_left.grid(row=1, column=0, padx=(0,10), pady=(5,10), sticky="ne")
+
+        self.log_center = customtkinter.CTkFrame(self.f4)
+        self.log_center.grid(row=1, column=1, padx=(0,10), pady=(5,10), sticky="nsew")
+        self.log_center.configure(width=100)
+
+        self.log_right = customtkinter.CTkFrame(self.f4)
+        self.log_right.grid(row=1, column=2, padx=(0,10), pady=(5,10), sticky="nw")
+
+        self.f4.grid_columnconfigure(0, weight=1)
+        self.f4.grid_rowconfigure(0, weight=1)
+        # self.f4.grid_columnconfigure(1, weight=1)
+        self.f4.grid_columnconfigure(2, weight=1)
+    
+        self.log_table =  ttk.Treeview(self.log_table_frame, columns=("", "id", "Zeit", "Benutzer", "Aktion", "Kostenstelle", "Bauvorhaben"), style="Treeview", height=24)
+        self.log_table.grid(row=0, column=0, padx=(10,10), pady=(10,10), sticky="nsew")
+    
+        self.log_table.column("#0", width=0, stretch=False)
+        self.log_table.column("#1", width=80,minwidth = 50, anchor="center", stretch=False)
+        self.log_table.column("#2", minwidth=200, anchor="center", stretch=False)
+        self.log_table.column("#3", minwidth=100, anchor="center")
+        self.log_table.column("#4", minwidth=70, anchor="center")
+        self.log_table.column("#5", minwidth=150, anchor="center")
+        self.log_table.column("#6", width=150, anchor="center")
+        self.log_table.column("#7", width=0, stretch=False)
+      
+        
+        # Добавляем заголовки столбцов
+        self.log_table.heading("#1", text="id")
+        self.log_table.heading("#2", text="Zeit")
+        self.log_table.heading("#3", text="Benutzer")
+        self.log_table.heading("#4", text="Aktion")
+        self.log_table.heading("#5", text="Kostenstelle")
+        self.log_table.heading("#6", text="Bauvorhaben")
+
+        
+        
+
 
 
 
@@ -460,6 +505,7 @@ class BestandLager(CTk.CTk):
         self.bar_code.bind('<Return>', lambda event=None: self.kol2())
         self.vz_nr.bind('<Return>', lambda event=None: self.kol2())
         self.bedeutung.bind('<Return>', lambda event=None: self.kol2())
+        self.log_table.bind("<<TreeviewSelect>>", self.on_log_select)
         # self.bar_code_f2.bind('<Return>', lambda event=None: self.add_button_bau())
         # self.sum.bind('<Return>', lambda event=None: self.add_button_bau())
         self.sum_home_frame3.bind('<Return>', lambda event=None: self.reduction_main_table())
@@ -479,6 +525,7 @@ class BestandLager(CTk.CTk):
         self.show_werkzeug_table()
         self.create_labels()
         self.display_existing_products()
+        self.create_log_frames()
         
 
     def load_image(self):
@@ -488,7 +535,12 @@ class BestandLager(CTk.CTk):
         self.image_clock = customtkinter.CTkImage(light_image=Image.open("images/clock.png"), dark_image=Image.open("images/clock.png"), size=(20, 20))
         self.image_material = customtkinter.CTkImage(light_image=Image.open("images/material.png"), dark_image=Image.open("images/material.png"), size=(20, 20))
         self.image_delete = customtkinter.CTkImage(light_image=Image.open("images/delete.png"), dark_image=Image.open("images/delete.png"), size=(20, 20))
-        
+        self.image_search = customtkinter.CTkImage(light_image=Image.open("images/search.png"), dark_image=Image.open("images/search.png"), size=(20, 20))
+        self.image_show_all = customtkinter.CTkImage(light_image=Image.open("images/show_all.png"),dark_image=Image.open("images/show_all.png"),size=(20, 20))
+        self.image_add = customtkinter.CTkImage(light_image=Image.open("images/add_btn.png"),dark_image=Image.open("images/add_btn.png"),size=(20, 20))
+        self.image_admin = customtkinter.CTkImage(light_image=Image.open("images/admin.png"),dark_image=Image.open("images/admin.png"),size=(20, 20))
+        self.image_next = customtkinter.CTkImage(light_image=Image.open("images/next.png"),dark_image=Image.open("images/next.png"),size=(100, 100))
+
     def create_labels(self):
         heute = customtkinter.CTkLabel(self.bau_frame1, font=customtkinter.CTkFont(size=15, weight="bold") , text="Heute",width= 150, fg_color="#8c0303")
         heute.pack(side='left', padx=5, anchor="nw")
@@ -500,32 +552,37 @@ class BestandLager(CTk.CTk):
         bei_der_arbeit.pack(side='left', padx=5, anchor="nw")
         self.search = customtkinter.CTkEntry(self.bau_frame1, placeholder_text="Suchen:", width= 250, height=28, corner_radius = 3)
         self.search.pack(side='left', padx=5, anchor="nw")
-        image_search = customtkinter.CTkImage(light_image=Image.open("images/search.png"),
-                                  dark_image=Image.open("images/search.png"),
-                                  size=(20, 20))
-        search_btn = customtkinter.CTkButton(self.bau_frame1, image = image_search,text="", command=self.search_bau, corner_radius=2, height=28, width=50, 
+        
+        search_btn = customtkinter.CTkButton(self.bau_frame1, image = self.image_search,text="", command=self.search_bau, corner_radius=2, height=28, width=50, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"),
                                                 anchor="center" )
         search_btn.pack(side='left', padx=5, anchor="center")
-        image_show_all = customtkinter.CTkImage(light_image=Image.open("images/show_all.png"),
-                                  dark_image=Image.open("images/show_all.png"),
-                                  size=(20, 20))
-        show_all_items = customtkinter.CTkButton(self.bau_frame1, image= image_show_all, text="", command=self.update_product_list, corner_radius=2, height=28, width=50, 
+
+        
+        show_all_items = customtkinter.CTkButton(self.bau_frame1, image= self.image_show_all, text="", command=self.update_product_list, corner_radius=2, height=28, width=50, 
                                                 fg_color=("#2d2e2e"), text_color=("gray90"),
                                                 hover_color=("red"),
                                                 anchor="center" )
         show_all_items.pack(side='left', padx=5, anchor="nw")
 
-        
-        image_add = customtkinter.CTkImage(light_image=Image.open("images/add_btn.png"),
-                                  dark_image=Image.open("images/add_btn.png"),
-                                  size=(20, 20))
-        add_btn = customtkinter.CTkButton(self.bau_frame1,image=image_add, text="", command=self.open_add_bau_menu_toplevel, corner_radius=2, height=28, width=50, 
-                                                fg_color=("#2d2e2e"), text_color=("gray90"),
-                                                hover_color=("red"),
-                                                anchor="center" )
-        add_btn.pack(side='left', padx=5, anchor="nw")
+        if self.role == "1":
+            add_btn = customtkinter.CTkButton(self.bau_frame1,image=self.image_add, text="", command=self.open_add_bau_menu_toplevel, corner_radius=2, height=28, width=50, 
+                                                    fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                    hover_color=("red"),
+                                                    anchor="center" )
+            add_btn.pack(side='left', padx=5, anchor="nw")
+        else:
+            pass
+
+        if self.admin == "1":
+            self.adminpanel = customtkinter.CTkButton(self.bau_frame1,image = self.image_admin, text="", command=self.open_admin_panel, corner_radius=2, height=28, width=50, 
+                                                    fg_color=("#2d2e2e"), text_color=("gray90"),
+                                                    hover_color=("red"),
+                                                    anchor="center" )
+            self.adminpanel.pack(side='left', padx=5, anchor="nw")
+        else:
+            pass
 
         self.sort = customtkinter.CTkOptionMenu(self.bau_frame1, values=("Bauvorhaben", "Kostenstelle", "Ausführung von", "Ausführung bis"),
                                                                fg_color="gray10", button_color="red", corner_radius = 1,
@@ -541,9 +598,7 @@ class BestandLager(CTk.CTk):
                                                 hover_color=("red"),
                                                 anchor="center" )
         self.show_hide_product.pack(side='left', padx=5, anchor="nw")
-        
-        
-        
+ 
 
         label = customtkinter.CTkLabel(self.bau_frame2, font=customtkinter.CTkFont(size=15, weight="bold") , text="BAUVORHABEN", width= 330, fg_color="#0f5925")
         label.pack(side='left', padx=(5,1), anchor="nw")
@@ -593,6 +648,13 @@ class BestandLager(CTk.CTk):
         abgeschlossen_label8.pack(side='left', padx=0, anchor="nw")
         self.search.bind('<Return>', lambda event=None: self.search_bau())
     
+    def open_admin_panel(self):
+        import privacy
+        privacy_menu = privacy.Privacy(self, self.conn)  # создаем окно, если его нет или оно уничтожено
+        privacy_menu.grab_set()  # захватываем фокус
+        privacy_menu.wait_window()  # ждем закрытия дочернего окна
+        privacy_menu.grab_release()  # освобождаем фокус после его закрытия
+
     def show_hide_porduct_fun(self):
         print(self.show_past_due_products)
         if self.show_past_due_products is False:
@@ -1455,19 +1517,33 @@ class BestandLager(CTk.CTk):
             print(f"No folders matching the keyword '{product_id}' found.")
 
     def open_reduction_menu(self,product_id):
-        import reduction_bau_menu
-        reduction_menu = reduction_bau_menu.App(self, product_id, self.conn)  # создаем окно, если его нет или оно уничтожено
-        reduction_menu.grab_set()  # захватываем фокус
-        reduction_menu.wait_window()  # ждем закрытия дочернего окна
-        reduction_menu.grab_release()  # освобождаем фокус после его закрытия
-        user = self.login # имя кто сделал действие для лога
-        self.check_connection_with_thread()
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT kostenstelle_vvo FROM bau WHERE id = %s ",(product_id,))
-        name = cursor.fetchone()
-        action = f"Изменил стройку под названием: {name}" # перменная для создания названия действия лога
-        self.user_action(user, action)
-        self.update_product_list()
+        if self.role == "1":
+            import reduction_bau_menu
+            action = "Änderung"
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status, uberwachung, umbau_datum, check_umbau, kostenstelle_plannung_nr FROM bau WHERE id = %s ",(product_id,))
+            data = cursor.fetchone()
+            kostenstelle = data[0]
+            bauvorhaben = data[1]
+            ort = data[2]
+            strasse = data[3]
+            ausfurung_von = data[4]
+            ausfurung_bis = data[5]
+            ansprechpartner = data[6]
+            status = data[7]
+            uberwachung = data[8]
+            umbau_datum = data[9]
+            check_umbau = data[10]
+            kostestelle_plannung_nr = data[11]
+
+            cursor.execute("INSERT INTO app_logs (log_time, log_user, log_action,kostenstelle, bauvorhaben, status_do, kostenstelle_vvo_do, kostenstelle_plannung_nr_do, bauvorhaben_do, ansprechpartner_do, ort_do, strasse_do, ausfurung_von_do, ausfurung_bis_do, check_umbau_do, umbau_datum_do, uber_do ) VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING log_id",(self.login,action, kostenstelle,bauvorhaben, status, kostenstelle, kostestelle_plannung_nr, bauvorhaben, ansprechpartner, ort, strasse, ausfurung_von, ausfurung_bis, check_umbau, umbau_datum, uberwachung ))
+            last_insert_id = cursor.fetchone()[0]
+            print(last_insert_id)
+            reduction_menu = reduction_bau_menu.App(self, product_id, self.conn, last_insert_id)  # создаем окно, если его нет или оно уничтожено
+            reduction_menu.grab_set()  # захватываем фокус
+            reduction_menu.wait_window()  # ждем закрытия дочернего окна
+            reduction_menu.grab_release()  # освобождаем фокус после его закрытия
+            self.update_product_list()
 
     def stunden_bau(self, product_kostenstelle):
             # Разбиваем текст по знаку "-"
@@ -1581,47 +1657,40 @@ class BestandLager(CTk.CTk):
                 print(f"No folders matching the keyword '{product_kostenstelle}' found.")
 
     def set_capo_top_level(self,product_id):
-        self.toplevel_window = Set_Capo(self, product_id)  # создаем окно, если его нет или оно уничтожено
-        self.toplevel_window.grab_set()  # захватываем фокус
-        self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
-        self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
-        user = self.login # имя кто сделал действие для лога
-        self.check_connection_with_thread()
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT set_capo FROM bau WHERE id = %s ",(product_id,))
-        name = cursor.fetchone()
-        action = f"Beauftragte Personen für die Baustelle: {name}" # перменная для создания названия действия лога
-        self.user_action(user, action)
-        self.update_product_list()
+        if self.role == "1":
+            self.toplevel_window = Set_Capo(self, product_id)  # создаем окно, если его нет или оно уничтожено
+            self.toplevel_window.grab_set()  # захватываем фокус
+            self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
+            self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
     
     def open_add_bau_menu_toplevel(self):
         from add_bau_menu import Bau
-        self.toplevel_window = Bau(self, self.conn)  # создаем окно, если его нет или оно уничтожено
+        self.toplevel_window = Bau(self, self.conn, self.login)  # создаем окно, если его нет или оно уничтожено
         self.toplevel_window.grab_set()  # захватываем фокус
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
         self.update_product_list()
-        self.check_connection_with_thread()
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT name_bau FROM Bau ORDER BY id DESC LIMIT 1;")
-        name = cursor.fetchone()
-        user = self.login # имя кто сделал действие для лога
-        action = f"Erstellt eine bedrohte Baustelle:: {name}" # перменная для создания названия действия лога
-        self.user_action(user, action)
+
         
     def deactive_bau(self, product_id):
-        self.check_connection_with_thread()
-        cursor = self.conn.cursor()
-        cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (product_id,))
-        self.update_product_list()
+        if self.role == "1":
+            self.check_connection_with_thread()
+            cursor = self.conn.cursor()
+            cursor.execute("UPDATE bau SET status = 'Inaktiv' WHERE id = %s", (product_id,))
+            self.update_product_list()
+        else:
+            messagebox.showinfo("Keine Zugriffsrechte", "Sie verfügen nicht über die erforderlichen Rechte, um diese Aktion auszuführen.")
 
     def activate_bau(self, product_id):
-        current_date = datetime.now().date()
-        today=current_date.strftime('%d.%m.%Y')  
-        self.check_connection_with_thread()
-        cursor = self.conn.cursor()
-        cursor.execute("UPDATE bau SET status = 'Aktiv', ausfurung_bis = %s WHERE id = %s", (today, product_id))
-        self.update_product_list()
+        if self.role == "1":
+            current_date = datetime.now().date()
+            today=current_date.strftime('%d.%m.%Y')  
+            self.check_connection_with_thread()
+            cursor = self.conn.cursor()
+            cursor.execute("UPDATE bau SET status = 'Aktiv', ausfurung_bis = %s WHERE id = %s", (today, product_id))
+            self.update_product_list()
+        else:
+            messagebox.showinfo("Keine Zugriffsrechte", "Sie verfügen nicht über die erforderlichen Rechte, um diese Aktion auszuführen.")
 
     def update_product_list(self, selected_option=None):
         # Очистите фреймы для активных и неактивных продуктов
@@ -1779,10 +1848,10 @@ class BestandLager(CTk.CTk):
         
         # Обновите тексты для виджетов, кнопок, лейблов и других элементов
         self.sign.configure(text=texts.get("Road signs", "Road signs"))
-        if self.role == "1":
-            self.bau_frame.configure(text=texts.get("Traffic monitoring", "Traffic monitoring"))
-            self.material_frame.configure(text=texts.get("Traffic safety", "Traffic safety"))
-            self.log_frame.configure(text=texts.get("Logs", "Logs"))
+        
+        self.bau_frame.configure(text=texts.get("Traffic monitoring", "Traffic monitoring"))
+        self.material_frame.configure(text=texts.get("Traffic safety", "Traffic safety"))
+        self.log_frame.configure(text=texts.get("Logs", "Logs"))
         #     self.create_button.configure(text=texts.get("Create a construction site", "Create a construction site"))
         #     self.delete_button.configure(text=texts.get("Delete a construction site", "Delete a construction site"))
         # self.select_button.configure(text=texts.get("Choose", "Choose"))
@@ -2015,10 +2084,10 @@ class BestandLager(CTk.CTk):
     def select_frame_by_name(self, name):
         # Ставим цвет для активной кнопки
         self.sign.configure(fg_color=("red") if name == "home" else "transparent")
-        if self.role == "1":
-            self.material_frame.configure(fg_color=("red") if name == "Traffic safety" else "transparent")
-            self.bau_frame.configure(fg_color=("red") if name == "Traffic monitoring" else "transparent")
-            self.log_frame.configure(fg_color=("red") if name == "Logs" else "transparent")
+        
+        self.material_frame.configure(fg_color=("red") if name == "Traffic safety" else "transparent")
+        self.bau_frame.configure(fg_color=("red") if name == "Traffic monitoring" else "transparent")
+        self.log_frame.configure(fg_color=("red") if name == "Logs" else "transparent")
 
         # Показываем включенный фрейм
         if name == "home":
@@ -2035,6 +2104,7 @@ class BestandLager(CTk.CTk):
             self.f3.grid_forget()
         if name == "Logs":
             self.f4.grid(row=0, column=1, sticky="nsew")
+            self.show_logs()
         else:
             self.f4.grid_forget()
 
@@ -2088,26 +2158,6 @@ class BestandLager(CTk.CTk):
         new_window = Autorisation.App()
         new_window.mainloop()  # Запускаем главный цикл нового окна
    
-    def show_logs(self):
-        self.check_connection_with_thread()
-        cursor = self.conn.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS app_logs (log_id SERIAL PRIMARY KEY,log_time TIMESTAMP,log_user VARCHAR(255),log_action VARCHAR(255));")
-    
-        self.log_view.configure(state="normal")
-        try:
-            cursor.execute("SELECT log_time, log_user,log_action FROM app_logs ORDER BY log_time DESC")
-            log_entries = cursor.fetchall()
-
-            self.log_view.delete("1.0", "end")  # Очистить содержимое
-
-            for entry in log_entries:
-                log_time, log_user, log_action = entry
-                log_text = f"{log_time} - Пользователь {log_user} выполнил действие: {log_action}\n"
-                self.log_view.insert("end", log_text)
-
-        except Exception as e:
-            print(f"Ошибка при чтении логов из базы данных: {e}")
-
     def save_language_to_file(self, language):
         with open("language.txt", "w") as file:
             file.write(language)
@@ -2120,15 +2170,265 @@ class BestandLager(CTk.CTk):
         except FileNotFoundError:
             # Если файл не найден, вернуть значение по умолчанию (например, "English")
             return "English"
+    
+    def on_log_select(self, event):
+        # Получаем выделенную запись
+        selected_item = self.log_table.selection()
+        self.status_bau_do.set("")
+        self.kostenstelle_vvo_do.delete(0,'end')
+        self.kostenstelle_vvo_do.configure(placeholder_text = "Kostenstelle VVO")
+        self.kostenstelle_plannung_nr_do.delete(0,'end')
+        self.kostenstelle_plannung_nr_do.configure(placeholder_text = "Kostenstelle planung")
+        self.bauvorhaben_do.delete(0,'end')
+        self.bauvorhaben_do.configure(placeholder_text = "Bauvorhaben")
+        self.ansprechpartner_do.delete(0,'end')
+        self.ansprechpartner_do.configure(placeholder_text = "Ansprechpartner")
+        self.ort_do.delete(0,'end')
+        self.ort_do.configure(placeholder_text = "Ort")
+        self.strasse_do.delete(0,'end')
+        self.strasse_do.configure(placeholder_text = "Strasse")
+        self.ausfurung_von_do.delete(0,'end')
+        self.ausfurung_bis_do.delete(0,'end')
+        self.check_umbau_do.deselect()
+        self.uber_do.deselect()
 
-    def user_action(self, user, action):
-        # Запись действия пользователя в лог
+        self.status_bau_posle.set("")
+        self.kostenstelle_vvo_posle.delete(0,'end')
+        self.kostenstelle_vvo_posle.configure(placeholder_text = "Kostenstelle VVO")
+        self.kostenstelle_plannung_nr_posle.delete(0,'end')
+        self.kostenstelle_plannung_nr_posle.configure(placeholder_text = "Kostenstelle planung")
+        self.bauvorhaben_posle.delete(0,'end')
+        self.bauvorhaben_posle.configure(placeholder_text = "Bauvorhaben")
+        self.ansprechpartner_posle.delete(0,'end')
+        self.ansprechpartner_posle.configure(placeholder_text = "Ansprechpartner")
+        self.ort_posle.delete(0,'end')
+        self.ort_posle.configure(placeholder_text = "Ort")
+        self.strasse_posle.delete(0,'end')
+        self.strasse_posle.configure(placeholder_text = "Strasse")
+        self.ausfurung_von_posle.delete(0,'end')
+        self.ausfurung_bis_posle.delete(0,'end')
+        self.check_umbau_posle.deselect()
+        self.uber_posle.deselect()
+        
+        if selected_item:
+            item_values = self.log_table.item(selected_item, "values")[0]
+            print(item_values)
+            self.check_connection_with_thread()
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT * FROM app_logs WHERE log_id = %s", (item_values,))
+            data = cursor.fetchone()
+            print(data)
+            if data[6] != None:
+                self.status_bau_do.set(data[6])
+            if data[8] != None:
+                self.kostenstelle_vvo_do.insert(0, data[8])
+            if data[10] != None:
+                self.kostenstelle_plannung_nr_do.insert(0, data[10])
+            if data[12] != None:
+                self.bauvorhaben_do.insert(0, data[12])
+            if data[14] != None:
+                self.ansprechpartner_do.insert(0, data[14])
+            if data[16] != None:
+                self.ort_do.insert(0, data[16])
+            if data[18] != None:
+                self.strasse_do.insert(0, data[18])
+            if data[20] != None:
+                self.ausfurung_von_do.set_date(data[20])
+            if data[22] != None:
+                self.ausfurung_bis_do.set_date(data[22])
+            if data[24] != None:
+                if data[24] == "1":
+                    self.check_umbau_do.select()
+                else:
+                    self.check_umbau_do.deselect()
+            if data[26] != None:
+                self.umbau_datum_do.set_date(data[26])
+            if data[28] != None:
+                if data[28] == "1":
+                    self.uber_do.select()
+                else:
+                    self.uber_do.deselect()
+            
+            if data[7] != None:
+                self.status_bau_posle.set(data[7])
+            if data[9] != None:
+                self.kostenstelle_vvo_posle.insert(0, data[9])
+            if data[11] != None:
+                self.kostenstelle_plannung_nr_posle.insert(0, data[11])
+            if data[13] != None:
+                self.bauvorhaben_posle.insert(0, data[13])
+            if data[15] != None:
+                self.ansprechpartner_posle.insert(0, data[15])
+            if data[17] != None:
+                self.ort_posle.insert(0, data[17])
+            if data[19] != None:
+                self.strasse_posle.insert(0, data[19])
+            if data[21] != None:
+                self.ausfurung_von_posle.set_date(data[21])
+            if data[23] != None:
+                self.ausfurung_bis_posle.set_date(data[23])
+            if data[25] != None:
+                if data[25] == "1":
+                    self.check_umbau_posle.select()
+                else:
+                    self.check_umbau_posle.deselect()
+            if data[27] != None:
+                self.umbau_datum_posle.set_date(data[27])
+            if data[29] != None:
+                if data[29] == "1":
+                    self.uber_posle.select()
+                else:
+                    self.uber_posle.deselect()
+  
+
+    def create_log_frames(self):
+        self.status_bau_do = customtkinter.CTkOptionMenu(self.log_left, values=["Aktiv","Inaktiv", "Abgeschlossen"],
+                                                               fg_color="gray10", button_color="red",width= 220)
+        self.status_bau_do.grid(row=0, column=0, padx=20, pady=(20, 0), sticky= "nw")
+        
+        self.kostenstelle_vvo_do = customtkinter.CTkEntry(self.log_left, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
+        self.kostenstelle_vvo_do.grid(column= 0, row=2, padx=(10, 10), pady=(10, 10), sticky="nw")
+
+        self.kostenstelle_plannung_nr_do = customtkinter.CTkEntry(self.log_left, placeholder_text="Kostenstelle planung:", width= 250, corner_radius = 3)
+        self.kostenstelle_plannung_nr_do.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.bauvorhaben_do = customtkinter.CTkEntry(self.log_left, placeholder_text="Bauvorhaben:", width= 250, corner_radius = 3)
+        self.bauvorhaben_do.grid(column= 0, row=5, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ansprechpartner_do = customtkinter.CTkEntry(self.log_left, placeholder_text="Ansprechpartner:", width= 250, corner_radius = 3)
+        self.ansprechpartner_do.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ort_do = customtkinter.CTkEntry(self.log_left, placeholder_text="Ort:", width= 250, corner_radius = 3)
+        self.ort_do.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.strasse_do = customtkinter.CTkEntry(self.log_left, placeholder_text="Strasse:", width= 250, corner_radius = 3)
+        self.strasse_do.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ausfurung_von_label_do = customtkinter.CTkLabel(self.log_left, text="Ausfurung von:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.ausfurung_von_label_do.grid(row=9, column=0, padx=10, pady=(0,10), sticky = "nw")
+
+        self.ausfurung_von_do = DateEntry(self.log_left, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.ausfurung_von_do.grid(column= 0, row=9, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.ausfurung_bis_label_do = customtkinter.CTkLabel(self.log_left, text="Ausfurung bis:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.ausfurung_bis_label_do.grid(row=10, column=0, padx=10, pady=(0,10), sticky = "nw")
+  
+        self.ausfurung_bis_do = DateEntry(self.log_left, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.ausfurung_bis_do.grid(column= 0, row=10, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.umbau_datum_label_do = customtkinter.CTkLabel(self.log_left, text="Umbau:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.umbau_datum_label_do.grid(column=0, row=11, padx=10, pady=(0,10), sticky = "nw")
+
+        check_var_do = customtkinter.StringVar(value="off")
+        self.check_umbau_do = customtkinter.CTkCheckBox(self.log_left,variable=check_var_do, text="",width = 0, checkbox_height = 20, checkbox_width = 20, corner_radius=1, border_width = 2, hover_color = "red", fg_color = "red", onvalue="1", offvalue="0")
+        self.check_umbau_do.grid(column=0, row=11, padx=(10, 100), pady=(0,10), sticky = "ne")
+
+        self.umbau_datum_do = DateEntry(self.log_left, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.umbau_datum_do.grid(column= 0, row=11, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.uber_do = customtkinter.CTkSwitch(self.log_left, text="Uberwachung", font=customtkinter.CTkFont(size=14, weight="bold"), button_color= ("white"), progress_color = ("red"), button_hover_color = ("red"))
+        self.uber_do.grid(column = 0, row = 12, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+
+        next_image = customtkinter.CTkLabel(self.log_center, image=self.image_next, text="")
+        next_image.pack(padx=10, pady=10, expand=True)
+
+        self.status_bau_posle = customtkinter.CTkOptionMenu(self.log_right, values=["Aktiv","Inaktiv", "Abgeschlossen"],
+                                                               fg_color="gray10", button_color="red",width= 220)
+        self.status_bau_posle.grid(row=0, column=0, padx=20, pady=(20, 0), sticky= "nw")
+        
+        self.kostenstelle_vvo_posle = customtkinter.CTkEntry(self.log_right, placeholder_text="Kostenstelle VVO:", width= 250, corner_radius = 3)
+        self.kostenstelle_vvo_posle.grid(column= 0, row=2, padx=(10, 10), pady=(10, 10), sticky="nw")
+
+        
+
+        # self.kostenstelle_plannung_var = StringVar()
+
+        # self.kostenstelle_plannung_button = customtkinter.CTkButton(self.log_left, text="VZP ordner auswählen", 
+        #                                                             command=self.choose_folder, width=250,
+        #                                                             fg_color=("gray70", "gray30"), corner_radius=2, 
+        #                                                             text_color=("gray10", "gray90"), hover_color=("red"),
+        #                                                             font=customtkinter.CTkFont(size=14, weight="bold"),
+        #                                                             anchor="center")
+        # self.kostenstelle_plannung_button.grid(column=0, row=3, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.kostenstelle_plannung_nr_posle = customtkinter.CTkEntry(self.log_right, placeholder_text="Kostenstelle planung:", width= 250, corner_radius = 3)
+        self.kostenstelle_plannung_nr_posle.grid(column= 0, row=4, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.bauvorhaben_posle = customtkinter.CTkEntry(self.log_right, placeholder_text="Bauvorhaben:", width= 250, corner_radius = 3)
+        self.bauvorhaben_posle.grid(column= 0, row=5, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ansprechpartner_posle = customtkinter.CTkEntry(self.log_right, placeholder_text="Ansprechpartner:", width= 250, corner_radius = 3)
+        self.ansprechpartner_posle.grid(column= 0, row=6, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ort_posle = customtkinter.CTkEntry(self.log_right, placeholder_text="Ort:", width= 250, corner_radius = 3)
+        self.ort_posle.grid(column= 0, row=7, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.strasse_posle = customtkinter.CTkEntry(self.log_right, placeholder_text="Strasse:", width= 250, corner_radius = 3)
+        self.strasse_posle.grid(column= 0, row=8, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+        self.ausfurung_von_label_posle = customtkinter.CTkLabel(self.log_right, text="Ausfurung von:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.ausfurung_von_label_posle.grid(row=9, column=0, padx=10, pady=(0,10), sticky = "nw")
+
+        self.ausfurung_von_posle = DateEntry(self.log_right, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.ausfurung_von_posle.grid(column= 0, row=9, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.ausfurung_bis_label_posle = customtkinter.CTkLabel(self.log_right, text="Ausfurung bis:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.ausfurung_bis_label_posle.grid(row=10, column=0, padx=10, pady=(0,10), sticky = "nw")
+  
+        self.ausfurung_bis_posle = DateEntry(self.log_right, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.ausfurung_bis_posle.grid(column= 0, row=10, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.umbau_datum_label_posle = customtkinter.CTkLabel(self.log_right, text="Umbau:", 
+                                                            font=customtkinter.CTkFont(size=14, weight="bold"), text_color=("white"))
+        self.umbau_datum_label_posle.grid(column=0, row=11, padx=10, pady=(0,10), sticky = "nw")
+
+        check_var_posle = customtkinter.StringVar(value="off")
+        self.check_umbau_posle = customtkinter.CTkCheckBox(self.log_right, variable=check_var_do, text="",width = 0, checkbox_height = 20, checkbox_width = 20, corner_radius=1, border_width = 2, hover_color = "red", fg_color = "red", onvalue="1", offvalue="0")
+        self.check_umbau_posle.grid(column=0, row=11, padx=(10, 100), pady=(0,10), sticky = "ne")
+
+        self.umbau_datum_posle = DateEntry(self.log_right, width=12, background='grey',
+                           foreground='white', borderwidth=2,date_pattern='dd.MM.yyyy')
+        self.umbau_datum_posle.grid(column= 0, row=11, padx=(10, 10), pady=(0, 10), sticky="ne")
+
+        self.uber_posle = customtkinter.CTkSwitch(self.log_right, text="Uberwachung", font=customtkinter.CTkFont(size=14, weight="bold"), button_color= ("white"), progress_color = ("red"), button_hover_color = ("red"))
+        self.uber_posle.grid(column = 0, row = 12, padx=(10, 10), pady=(0, 10), sticky="nw")
+
+
+    def show_logs(self):
         self.check_connection_with_thread()
         cursor = self.conn.cursor()
-        cursor.execute("INSERT INTO app_logs (log_time, log_user, log_action) VALUES (NOW(), %s, %s);",(user,action))
-        self.logger.info(f"Пользователь {user} выполнил действие: {action}")
-        self.show_logs()
+        cursor.execute("CREATE TABLE IF NOT EXISTS app_logs (log_id SERIAL PRIMARY KEY, log_time TIMESTAMP, log_user VARCHAR(255), log_action VARCHAR(255));")
+        
+        try:
+            cursor.execute("SELECT log_id, log_time, log_user, log_action, kostenstelle, bauvorhaben FROM app_logs ORDER BY log_time DESC")
+            log_entries = cursor.fetchall()
 
+            # Очищаем таблицу перед заполнением новыми данными
+            self.clear_log_table()
+
+            for entry in log_entries:
+                log_id, log_time, log_user, log_action, log_kostenstelle, log_bauvorhaben = entry
+                log_time_str = log_time.strftime("%H:%M %d.%m.%Y")
+                self.log_table.insert("", "end", values=(log_id, log_time_str, log_user, log_action, log_kostenstelle, log_bauvorhaben))
+
+        except Exception as e:
+            print(f"Ошибка при чтении логов из базы данных: {e}")
+
+    def clear_log_table(self):
+        # Очищаем таблицу перед заполнением новыми данными
+        for row in self.log_table.get_children():
+            self.log_table.delete(row)
     def clear_logs(self):
         self.log_view.configure(state="normal")
         
