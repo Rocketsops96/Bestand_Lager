@@ -1602,59 +1602,65 @@ class BestandLager(CTk.CTk):
             print(f"No folders matching the keyword '{product_kostenstelle}' found.")
 
     def material_bau(self, product_kostenstelle):
-        parts = product_kostenstelle.split("-")
+        from material_window import Material
 
-        # Проверяем, есть ли в тексте после знака "-" значение "24"
-        if len(parts) > 1 and "24" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
-        elif len(parts) > 1 and "23" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
-        elif len(parts) > 1 and "22" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2022\02 Verkehrssicherung"
-        elif len(parts) > 1 and "21" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2021\02 Verkehrssicherung"
-        elif len(parts) > 1 and "20" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2020\02 Verkehrssicherung"
-        elif len(parts) > 1 and "25" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2025\02 Verkehrssicherung"
-        elif len(parts) > 1 and "26" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2026\02 Verkehrssicherung"
-        elif len(parts) > 1 and "27" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2027\02 Verkehrssicherung"
-        elif len(parts) > 1 and "28" in parts[1]:
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2028\02 Verkehrssicherung"
-        else:
-            # По умолчанию
-            base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
-        prefix_to_match = "11"
-        items = os.listdir(os.path.normpath(base_path))
-        matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
-        if matching_folders:
-            target_folder = os.path.join(base_path, matching_folders[0])
-            # Ищем подпапку внутри найденной папки, начинающуюся с префикса "11"
-            nested_folder_match = [nested_folder for nested_folder in os.listdir(target_folder) if nested_folder.startswith(prefix_to_match)]
+        material_window = Material(self, self.conn, product_kostenstelle)  # создаем окно, если его нет или оно уничтожено
+        material_window.grab_set()  # захватываем фокус
+        material_window.wait_window()  # ждем закрытия дочернего окна
+        material_window.grab_release()  # освобождаем фокус после его закрытия   
+        # parts = product_kostenstelle.split("-")
+
+        # # Проверяем, есть ли в тексте после знака "-" значение "24"
+        # if len(parts) > 1 and "24" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "23" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2023\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "22" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2022\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "21" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2021\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "20" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2020\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "25" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2025\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "26" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2026\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "27" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2027\02 Verkehrssicherung"
+        # elif len(parts) > 1 and "28" in parts[1]:
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2028\02 Verkehrssicherung"
+        # else:
+        #     # По умолчанию
+        #     base_path = r"\\FILESRV1\Abteilungen\VVO\2024\02 Verkehrssicherung"
+        # prefix_to_match = "11"
+        # items = os.listdir(os.path.normpath(base_path))
+        # matching_folders = [folder for folder in items if product_kostenstelle.lower() in folder.lower()]
+        # if matching_folders:
+        #     target_folder = os.path.join(base_path, matching_folders[0])
+        #     # Ищем подпапку внутри найденной папки, начинающуюся с префикса "11"
+        #     nested_folder_match = [nested_folder for nested_folder in os.listdir(target_folder) if nested_folder.startswith(prefix_to_match)]
             
-            if nested_folder_match:
-                nested_folder = nested_folder_match[0]
-                document_path = os.path.join(target_folder, nested_folder, "Materialliste.xlsx")
-                # self.check_connection()
-                # cursor = self.conn.cursor()
-                # cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
-                # data = cursor.fetchone()
-                # data_table1 = [
-                #     ["", data[2], "", "", f"{data[6]} - {data[7]}"],
-                #     ["", "", "", "", ""],
-                #     ["", data[3], "","",f"{data[6]} - {data[7]}"],
-                #     ["", f"{data[5]}, {data[4]}","","", data[8]],
-                # ]
+        #     if nested_folder_match:
+        #         nested_folder = nested_folder_match[0]
+        #         document_path = os.path.join(target_folder, nested_folder, "Materialliste.xlsx")
+        #         # self.check_connection()
+        #         # cursor = self.conn.cursor()
+        #         # cursor.execute("SELECT id, name_bau, kostenstelle_vvo, bauvorhaben, ort, strasse, ausfurung_von, ausfurung_bis, ansprechpartner, status FROM bau WHERE kostenstelle_vvo = %s",(product_kostenstelle, ))
+        #         # data = cursor.fetchone()
+        #         # data_table1 = [
+        #         #     ["", data[2], "", "", f"{data[6]} - {data[7]}"],
+        #         #     ["", "", "", "", ""],
+        #         #     ["", data[3], "","",f"{data[6]} - {data[7]}"],
+        #         #     ["", f"{data[5]}, {data[4]}","","", data[8]],
+        #         # ]
 
-                # # Вставляем данные в файл Excel
-                # insert_data_into_tables(document_path,document_path, data_table1)
+        #         # # Вставляем данные в файл Excel
+        #         # insert_data_into_tables(document_path,document_path, data_table1)
 
-                # # Открываем файл
-                os.startfile(document_path)
-            else:
-                print(f"No folders matching the keyword '{product_kostenstelle}' found.")
+        #         # # Открываем файл
+        #         os.startfile(document_path)
+        #     else:
+        #         print(f"No folders matching the keyword '{product_kostenstelle}' found.")
 
     def set_capo_top_level(self,product_id):
         if self.role == "1":
@@ -1665,7 +1671,7 @@ class BestandLager(CTk.CTk):
     
     def open_add_bau_menu_toplevel(self):
         from add_bau_menu import Bau
-        self.toplevel_window = Bau(self, self.conn, self.login)  # создаем окно, если его нет или оно уничтожено
+        self.toplevel_window = Bau()  # создаем окно, если его нет или оно уничтожено
         self.toplevel_window.grab_set()  # захватываем фокус
         self.toplevel_window.wait_window()  # ждем закрытия дочернего окна
         self.toplevel_window.grab_release()  # освобождаем фокус после его закрытия
