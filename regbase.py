@@ -1,8 +1,8 @@
 import psycopg2
 
-host = '212.86.115.157'
+host = '45.82.70.15'
 user = "postgres"
-password = 'DD1710dd'
+password = '72219703'
 db_name = 'VVO_DB'
 
 conn = None

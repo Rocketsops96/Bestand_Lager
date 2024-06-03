@@ -518,7 +518,7 @@ class BestandLager(CTk.CTk):
         self.barcode = None
         self.error_label= None
         self.show_past_due_products = False
-
+        
         self.show_logs()
         self.show_all_data()
         self.show_material_table()
